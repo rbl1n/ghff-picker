@@ -2,6 +2,7 @@ import type { Catalog, DuoItineraryEntry, ItineraryParticipant, PartnerData, Per
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { compareSessionsPreferred, isGuestSession } from "./schedule";
+import { groupSessionsByFilm, makeMarkView, type MarkView } from "./session-marks";
 
 const TIER_RANK: Record<Tier, number> = { must: 0, want: 1, maybe: 2 };
 
@@ -53,6 +54,8 @@ interface PersonView {
   prefs: Map<string, { tier: Tier; hot: boolean }>;
   avail: ReturnType<typeof availabilityOf>;
   limit: number | null;
+  /** 場次偏好（005） */
+  marks: MarkView;
 }
 
 /** 與「誰是本裝置使用者」「搶票標記」「手動順序」無關的設定指紋；名字相同時用來決定誰先 */
@@ -97,6 +100,7 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
       prefs: new Map(src.film_preferences.map((p) => [p.film_id, { tier: p.tier, hot: p.is_hot }])),
       avail,
       limit: src.daily_limit,
+      marks: makeMarkView(src, groupSessionsByFilm(catalog.sessions)),
     };
   };
   const people: Record<PersonSide, PersonView> = { self: view("self"), partner: view("partner") };
@@ -195,7 +199,10 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
       .filter((x): x is { o: Item; g: Session } => !!x.g && x.o.session.film_id !== filmId && x.o.involved.some((p) => it.involved.includes(p)))
       .map((x) => x.g);
     const usable = (s: Session) => !missed.has(s.session_id) && otherGot.every((g) => compat(s, g));
-    const watchable = mine.filter((s) => feasible(it, s));
+    // 005：每位參與者的「只看」限制都要滿足；優先場（任一參與者標優先，多者在前）排在備案最前
+    const watchable = mine.filter((s) => feasible(it, s) && it.involved.every((p) => people[p].marks.allowed(s)));
+    const prefScore = (s: Session) => it.involved.filter((p) => people[p].marks.pref(s.session_id)).length;
+    const comparePreferred = (a: Session, b: Session) => prefScore(b) - prefScore(a) || compareSessionsPreferred(a, b);
     const backups = watchable
       .filter((s) => s.session_id !== it.session.session_id && usable(s))
       .filter((s) =>
@@ -205,11 +212,11 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
             (people[p].limit === null || others[p].filter((o) => o.date === s.date).length + 1 <= people[p].limit!),
         ),
       )
-      .sort(compareSessionsPreferred);
+      .sort(comparePreferred);
 
     let current: Session | undefined = gotOf[i];
     if (!current && usable(it.session)) current = it.session;
-    if (!current) current = backups[0] ?? watchable.filter(usable).sort(compareSessionsPreferred)[0];
+    if (!current) current = backups[0] ?? watchable.filter(usable).sort(comparePreferred)[0];
 
     const participant: ItineraryParticipant = it.entry.participant;
     const row: DuoTicketRow = {

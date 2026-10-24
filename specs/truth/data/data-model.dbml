@@ -94,6 +94,8 @@ Table user_state {
   manual_order "film_id[]" [null, note: '使用者手動調整的搶票順序；重新排程前保留（FR-015）；003 起作用在「自己的搶票清單」（只含自己行程中的場次，FR-312）']
   self_name varchar [null, note: '自己的顯示名稱；null = 個人模式且從未設定。進入兩人模式時必填（預設「我」，FR-209）；移除同伴時與 partner 一併清除']
   film_notes "map<film_id, text>" [null, note: '影片備註（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → 自己寫的備註文字，空字串等於刪除（不保存空值）；只屬於自己，包含在分享連結裡（取代我的設定時帶過去），但當作同伴加入時同伴連結裡的 film_notes 一律丟棄，不寫入 partner 也不顯示']
+  session_marks "map<session_id, prefer|only>" [null, note: '場次偏好（005，選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：prefer = 優先（軟偏好）、only = 只看這場（硬限制）；沒有標記的場次不保存、沒有任何標記時不寫欄位；包含在分享連結，當作同伴加入時帶入 partner.session_marks（同伴的標記用於排程，不是私人資料）']
+  pinned_choices "map<film_id, prefer_session>" [null, note: '取捨決定（005，選填）：film_id → prefer_session = 該人的這部片限定在自己的「優先」場次（效果等同只看這場）；由行程頁取捨卡片寫入、「改回一起看」移除；沒有優先標記的片，決定不生效；移除同伴時一併清除；包含在分享連結']
   updated_at timestamp
 
   Note: '''
@@ -111,6 +113,8 @@ Table user_state {
 
 Table partner {
   display_name varchar [note: '同伴顯示名稱（預設「同伴」；FR-209）']
+  session_marks "map<session_id, prefer|only>" [null, note: '同伴的場次偏好（005，選填）：來自同伴個人分享連結的 session_marks，規則同 user_state.session_marks，用於排程']
+  pinned_choices "map<film_id, prefer_session>" [null, note: '同伴的取捨決定（005，選填）：在行程頁替同伴按下「看優先場」時寫入，規則同 user_state.pinned_choices']
   daily_limit int [null, note: 'null = 同伴不設上限；只約束同伴自己的行程（FR-306）']
   updated_at timestamp
 
@@ -310,3 +314,7 @@ Table ticket_division_items {
 Ref: itinerary_entries.session_id > sessions.session_id
 Ref: ticket_list_items.film_id > films.film_id
 Ref: ticket_division_items.film_id > films.film_id
+
+// 005 衍生實體（不保存）：取捨（tradeoff）
+// 欄位：owner（self／partner）、film_id、選項 A（一起看或目前場次、是否一起看）、選項 B（優先場、是否一起看）、目前選擇（a／b）、放棄的優先場、B 相對 A 的差異清單。
+// 條件與公式見 specs/plans/005-ghff-session-preference/spec.md「狀態與公式」；由 src/domain/tradeoff.ts 以實際重跑兩人排程計算。

@@ -15,6 +15,12 @@ export interface PendingMark {
   result: "got" | "missed";
 }
 
+export interface PendingSessionMark {
+  title: string;
+  sessionText: string;
+  mark: "prefer" | "only";
+}
+
 export interface WebWorld {
   /** Given 場次快照；null 代表空快照 */
   catalog: Catalog | null;
@@ -27,6 +33,10 @@ export interface WebWorld {
   /** 影片備註（片名 → 備註） */
   notes: { title: string; note: string }[];
   marks: PendingMark[];
+  /** 場次偏好標記（005）：優先／只看這場 */
+  sessionMarks: PendingSessionMark[];
+  /** 取捨決定（005）：選擇看優先場的片名 */
+  pins: string[];
   /** 是否已經開啟過網站（之後 Given 要直接寫 localStorage 並重新載入） */
   opened: boolean;
   routesReady: boolean;
@@ -44,6 +54,8 @@ export function createWebWorld(): WebWorld {
     skipped: [],
     notes: [],
     marks: [],
+    sessionMarks: [],
+    pins: [],
     opened: false,
     routesReady: false,
     legacyFormat: null,
@@ -184,6 +196,10 @@ export function buildState(world: WebWorld): UserState {
   s.availability = availFromSlots(world.slots);
   if (world.skipped.length) s.skipped_film_ids = world.skipped.map((t) => filmIdOf(world, t));
   if (world.notes.length) s.film_notes = Object.fromEntries(world.notes.map((n) => [filmIdOf(world, n.title), n.note]));
+  if (world.sessionMarks.length) {
+    s.session_marks = Object.fromEntries(world.sessionMarks.map((m) => [sessionOf(world, m.title, m.sessionText).session_id, m.mark]));
+  }
+  if (world.pins.length) s.pinned_choices = Object.fromEntries(world.pins.map((t) => [filmIdOf(world, t), "prefer_session"]));
   s.ticket_marks = world.marks.map((m) => ({
     session_id: sessionOf(world, m.title, m.sessionText).session_id,
     result: m.result,
@@ -236,7 +252,7 @@ async function prepare(page: Page, world: WebWorld): Promise<void> {
         }),
   );
   const hasState =
-    world.prefs.length > 0 || world.skipped.length > 0 || world.notes.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
+    world.prefs.length > 0 || world.skipped.length > 0 || world.notes.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0 || world.sessionMarks.length > 0 || world.pins.length > 0;
   if (hasState) {
     const json = JSON.stringify(storageStateOf(world));
     await page.addInitScript(

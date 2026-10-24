@@ -9,7 +9,11 @@ export type SessionMark =
   | "priority_screening";
 export type Tier = "must" | "want" | "maybe";
 export type TicketResult = "pending" | "got" | "missed";
-export type UnscheduledReason = "no_available_session" | "conflicts_with_must" | "daily_limit";
+export type UnscheduledReason = "no_available_session" | "conflicts_with_must" | "daily_limit" | "only_session_unfit";
+/** 場次偏好標記（005）：優先 = 軟偏好；只看這場 = 硬限制 */
+export type SessionPref = "prefer" | "only";
+/** 取捨決定（005）：該片鎖定在自己的優先場，效果等同「只看這場」 */
+export type PinnedChoice = "prefer_session";
 
 export interface Film {
   film_id: string;
@@ -106,6 +110,10 @@ export interface PartnerData {
   availability?: DayAvailability[];
   /** 不看（004）：選填；同伴不看 = 同伴不看這部片（沒有層級） */
   skipped_film_ids?: string[];
+  /** 場次偏好（005）：session_id → 優先／只看這場；同伴的標記也用於排程 */
+  session_marks?: Record<string, SessionPref>;
+  /** 取捨決定（005）：film_id → 看自己的優先場 */
+  pinned_choices?: Record<string, PinnedChoice>;
 }
 
 export interface UserState {
@@ -126,6 +134,10 @@ export interface UserState {
   skipped_film_ids?: string[];
   /** 影片備註：film_id → 自己寫的文字；選填、空字串不保存。只屬於自己：分享連結帶著，但當作同伴加入時一律丟棄 */
   film_notes?: Record<string, string>;
+  /** 場次偏好（005）：session_id → 優先／只看這場；選填、沒有標記時不寫欄位。分享連結帶著，當作同伴加入時一起帶入 */
+  session_marks?: Record<string, SessionPref>;
+  /** 取捨決定（005）：film_id → 看自己的優先場；等同該片「只看這場」限定在優先場。選填 */
+  pinned_choices?: Record<string, PinnedChoice>;
   ticket_marks: TicketMark[];
 }
 

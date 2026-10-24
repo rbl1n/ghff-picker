@@ -4,7 +4,7 @@ import LZString from "lz-string";
 import type { FilmPreference, PartnerData, Tier, UserState } from "../../src/domain/types";
 import { SHARE_HASH_PREFIX } from "../../src/state/share";
 import { STORAGE_KEY } from "../../src/state/storage";
-import { buildState, norm, parseSlotText, slotText, type WebWorld } from "./web-a-helpers";
+import { buildState, norm, parseSlotText, sessionOf, slotText, type WebWorld } from "./web-a-helpers";
 import { TIER_ENUM_TO_LABEL } from "./tables";
 import { availFromSlots, availOf, complementLines, prefsOf, ranked, type DayAvail, type PrefV3 } from "./web-003-helpers";
 
@@ -20,6 +20,8 @@ export interface PendingPartner {
   prefs: { title: string; tier: Tier; is_hot: boolean }[];
   slots: { date: string; start_min: number | null; end_min: number | null }[];
   dailyLimit: number | null;
+  /** 同伴的場次偏好標記（005） */
+  marks?: { title: string; sessionText: string; mark: "prefer" | "only" }[];
 }
 
 export interface SelfSnapshot {
@@ -85,6 +87,7 @@ export function pendingToPartner(world: WebWorld, name: string): PartnerData {
     // 003：層內名次依 Given 列順序；不可看時段從有空時段扣除
     film_preferences: ranked(p.prefs.map((x) => ({ film_id: partnerFilmId(world, x.title), tier: x.tier, is_hot: x.is_hot }))),
     availability: availFromSlots(p.slots),
+    ...(p.marks?.length ? { session_marks: Object.fromEntries(p.marks.map((m) => [sessionOf(world, m.title, m.sessionText).session_id, m.mark])) } : {}),
   } as unknown as PartnerData;
 }
 

@@ -3,11 +3,13 @@ import type { Catalog, DuoItineraryEntry, ItineraryParticipant, Session, Tier, U
 import { CatalogGate } from "./CatalogGate";
 import { CatNo, labelWithNo } from "./CatNo";
 import { TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
-import { ensureSchedule, runSchedule, scheduleSignature, useItineraryFilter, useStore, type ItineraryFilter } from "./store";
+import { diffLines, giveUpText, optionAText, optionBText, type TextContext, type Tradeoff } from "../domain/tradeoff";
+import { ensureSchedule, runSchedule, scheduleSignature, setPinnedChoice, useItineraryFilter, useStore, type ItineraryFilter } from "./store";
 
 const REASON_TEXT = {
   no_available_session: () => "沒有可看場次",
   daily_limit: () => "受每日上限限制",
+  only_session_unfit: () => "指定場次都排不進去",
   conflicts_with_must: (titles: string[]) => `與${titles.map((t) => `「${t}」`).join("、")}衝堂`,
 } as const;
 
@@ -32,6 +34,8 @@ interface Row {
   tier: Tier;
   isNonTicketed: boolean;
   participant?: ItineraryParticipant;
+  /** 排在優先場（005）：自己看的看自己的標記、同伴自己看的看同伴的標記、一起看任一人標優先即是 */
+  preferred: boolean;
 }
 
 function ItineraryContent({ catalog }: { catalog: Catalog }) {
@@ -83,12 +87,15 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
       if (!session) continue;
       const asPartner = filter === "partner" || (filter === "all" && e.participant === "partner");
       const tier = (asPartner ? e.partner_tier ?? e.tier : e.tier) as Tier;
-      rows.push({ session, tier, isNonTicketed: e.is_non_ticketed, participant: e.participant });
+      const mine = user.session_marks?.[session.session_id] === "prefer";
+      const theirs = partner?.session_marks?.[session.session_id] === "prefer";
+      const preferred = e.participant === "self" ? mine : e.participant === "partner" ? theirs : mine || theirs;
+      rows.push({ session, tier, isNonTicketed: e.is_non_ticketed, participant: e.participant, preferred });
     }
   } else {
     for (const e of schedule.itinerary) {
       const session = sessionById.get(e.session_id);
-      if (session) rows.push({ session, tier: e.tier, isNonTicketed: e.is_non_ticketed });
+      if (session) rows.push({ session, tier: e.tier, isNonTicketed: e.is_non_ticketed, preferred: user.session_marks?.[session.session_id] === "prefer" });
     }
   }
   const days = new Map<string, Row[]>();
@@ -149,11 +156,24 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           </ul>
         </section>
       )}
+      {schedule.tradeoffs.length > 0 && partner && (
+        <section className="tradeoffs" aria-label="取捨" data-testid="tradeoffs">
+          {schedule.tradeoffs.map((t) => (
+            <TradeoffCard
+              key={`${t.owner}-${t.film_id}`}
+              t={t}
+              title={labelOf(t.film_id)}
+              ctx={{ titleOf, sessionOf: (id) => sessionById.get(id)!, nameOf }}
+              ownerLabel={t.owner === "self" ? "你" : partner.display_name}
+            />
+          ))}
+        </section>
+      )}
       {[...days.entries()].map(([date, items]) => (
         <section className="daygroup" key={date}>
           <h2>{dateLabel(date)}</h2>
           <ol className="tl">
-            {items.map(({ session, tier, isNonTicketed, participant }) => (
+            {items.map(({ session, tier, isNonTicketed, participant, preferred }) => (
               <li
                 key={session.session_id}
                 className={isNonTicketed ? "it nosale" : "it"}
@@ -176,6 +196,11 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
                       </span>
                     )}
                     {isGuest(session) && <span className="tag tag-star">★</span>}
+                    {preferred && (
+                      <span className="tag tag-pref" data-testid="preferred-tag">
+                        優先場
+                      </span>
+                    )}
                     {isNonTicketed && <span className="tag tag-nosale">非售票</span>}
                   </div>
                   <div className="hint">{session.venue_name}</div>
@@ -192,3 +217,38 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
     </>
   );
 }
+
+/** 取捨卡片（005，CL-504）：兩個選項各自的代價；按鈕在「看優先場」與「改回一起看」之間切換並立即重新排程 */
+function TradeoffCard({ t, title, ctx, ownerLabel }: { t: Tradeoff; title: string; ctx: TextContext; ownerLabel: string }) {
+  const lines = diffLines(t, ctx);
+  const filmTitle = ctx.titleOf(t.film_id);
+  const act = () => {
+    setPinnedChoice(t.owner, t.film_id, t.chosen === "a");
+    runSchedule();
+  };
+  return (
+    <article className="tradeoff" data-testid="tradeoff-card" data-film={filmTitle} data-owner={t.owner} data-choice={t.chosen}>
+      <h3>取捨：{title}</h3>
+      <div className="opt" data-testid="tradeoff-option-a" data-selected={t.chosen === "a"}>
+        <span className="tag">A</span> <b data-testid="tradeoff-head">{optionAText(t, ctx)}</b>
+        <span className="giveup" data-testid="tradeoff-giveup">
+          {giveUpText(t, ctx)}
+        </span>
+      </div>
+      <div className="opt" data-testid="tradeoff-option-b" data-selected={t.chosen === "b"}>
+        <span className="tag">B</span> <b data-testid="tradeoff-head">{optionBText(t, ctx, ownerLabel)}</b>
+        <ul>
+          {lines.map((line, i) => (
+            <li key={i} data-testid="tradeoff-diff-line">
+              {line}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <button type="button" className={t.chosen === "a" ? "btn btn-primary" : "btn"} data-testid="tradeoff-action" onClick={act}>
+        {t.chosen === "a" ? "看優先場" : "改回一起看"}
+      </button>
+    </article>
+  );
+}
+

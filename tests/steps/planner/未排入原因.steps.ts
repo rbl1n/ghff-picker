@@ -17,6 +17,8 @@ function reasonText(u: UnscheduledMustFilm): string {
       return "沒有可看場次";
     case "daily_limit":
       return "受每日上限限制";
+    case "only_session_unfit":
+      return "指定場次都排不進去";
     case "conflicts_with_must": {
       if (!u.conflict_film_ids || u.conflict_film_ids.length === 0) return "與（缺少衝堂對象）衝堂";
       return `與${u.conflict_film_ids.map((id) => `「${titleOf(id)}」`).join("、")}衝堂`;

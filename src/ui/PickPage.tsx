@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Catalog, DayAvailability, Film, FilmPreference, Session, Tier, UserState } from "../domain/types";
+import type { Catalog, DayAvailability, Film, FilmPreference, Session, SessionPref, Tier, UserState } from "../domain/types";
 import { isSessionAvailable } from "../domain/availability";
 import {
   closestCorners,
@@ -25,10 +25,11 @@ import { CatalogGate } from "./CatalogGate";
 import { CatNo } from "./CatNo";
 import { filmDetailUrl } from "./links";
 import { LEGEND, MARK_LABEL, TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime } from "./format";
-import { runSchedule, updateUser, useStore } from "./store";
+import { runSchedule, setSessionMark, updateUser, useStore } from "./store";
 
 const NO_NOTES: Record<string, string> = {};
 const NO_AVAILABILITY: DayAvailability[] = [];
+const NO_MARKS: Record<string, SessionPref> = {};
 
 type Filter = "all" | "marked" | "none" | "skipped";
 const FILTERS: { key: Filter; label: string }[] = [
@@ -383,6 +384,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           skipped={skipped.has(f.film_id)}
           note={notes[f.film_id]}
           availability={user.availability ?? NO_AVAILABILITY}
+          marks={user.session_marks ?? NO_MARKS}
         />
       ))}
       {shown.length === 0 && <p className="empty">沒有符合的影片</p>}
@@ -400,8 +402,10 @@ const FilmCard = memo(function FilmCard(props: {
   skipped: boolean;
   note: string | undefined;
   availability: DayAvailability[];
+  marks: Record<string, SessionPref>;
 }) {
-  const { film, sessions, pref, skipped, note, availability } = props;
+  const { film, sessions, pref, skipped, note, availability, marks } = props;
+  const hint = markHint(sessions, marks);
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
       <div className="row">
@@ -421,6 +425,11 @@ const FilmCard = memo(function FilmCard(props: {
         )}
         <span className="hint">{sessions.length} 場</span>
       </div>
+      {hint && (
+        <p className="prefhint" data-testid="session-pref-hint">
+          {hint}
+        </p>
+      )}
       {film.shorts && film.shorts.length > 0 && (
         <p className="shorts hint" data-testid="film-shorts">
           {film.shorts.map((s, i) => (
@@ -459,7 +468,7 @@ const FilmCard = memo(function FilmCard(props: {
         <summary>展開全部場次</summary>
         <ul className="sessions">
           {sessions.map((s) => (
-            <SessionRow key={s.session_id} session={s} runtime={film.runtime_min} watchable={isSessionAvailable(s, availability)} />
+            <SessionRow key={s.session_id} session={s} runtime={film.runtime_min} watchable={isSessionAvailable(s, availability)} mark={marks[s.session_id]} />
           ))}
         </ul>
       </details>
@@ -514,9 +523,43 @@ function NoteBlock({ filmId, note }: { filmId: string; note: string | undefined 
   );
 }
 
-function SessionRow({ session, runtime, watchable }: { session: Session; runtime: number; watchable: boolean }) {
+/** 收合時的短提示：優先 11/15、11/20・只看 11/20 10:50 */
+function markHint(sessions: Session[], marks: Record<string, SessionPref>): string {
+  const md = (s: Session) => s.date.slice(5).replace("-", "/");
+  const prefer = sessions.filter((s) => marks[s.session_id] === "prefer").map(md);
+  const only = sessions.filter((s) => marks[s.session_id] === "only").map((s) => `${md(s)} ${formatTime(s.start_min)}`);
+  return [prefer.length ? `優先 ${prefer.join("、")}` : "", only.length ? `只看 ${only.join("、")}` : ""].filter(Boolean).join("・");
+}
+
+const PREF_OPTIONS: { value: SessionPref | null; label: string }[] = [
+  { value: null, label: "一般" },
+  { value: "prefer", label: "優先" },
+  { value: "only", label: "只看這場" },
+];
+
+/** 三態控制（005，FR-501）：一般｜優先｜只看這場 */
+function SessionPrefControl({ session, mark }: { session: Session; mark: SessionPref | undefined }) {
   return (
-    <li className={watchable ? "sess" : "sess dim"} data-testid="session-row">
+    <div className="seg prefseg" role="radiogroup" aria-label={`${dateLabel(session.date)} ${formatTime(session.start_min)} 場次偏好`} data-testid="session-pref">
+      {PREF_OPTIONS.map((o) => (
+        <button
+          key={o.label}
+          type="button"
+          role="radio"
+          aria-checked={(mark ?? null) === o.value}
+          className="segbtn"
+          onClick={() => setSessionMark(session.session_id, o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SessionRow({ session, runtime, watchable, mark }: { session: Session; runtime: number; watchable: boolean; mark: SessionPref | undefined }) {
+  return (
+    <li className={watchable ? "sess" : "sess dim"} data-testid="session-row" data-date={session.date} data-time={formatTime(session.start_min)}>
       <span className="mono d">{dateLabel(session.date)}</span>
       <b className="mono">{formatTime(session.start_min)}</b>
       <span className="hint">{runtime} 分鐘</span>
@@ -529,6 +572,7 @@ function SessionRow({ session, runtime, watchable }: { session: Session; runtime
           </span>
         ))}
       </span>
+      <SessionPrefControl session={session} mark={mark} />
     </li>
   );
 }

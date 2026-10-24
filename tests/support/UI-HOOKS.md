@@ -232,3 +232,18 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 | `ticket-row` 的 `data-participant` | `together`／`self`／`partner` | 方便除錯，非必要 | — |
 | 分頁清單為空 | 文字 `沒有要搶的場次` | | 搶票 steps |
 | 兩人模式的列 | 不渲染 `ticket-drag-handle`、`上移`、`下移` | 手動順序僅個人模式 | 搶票 steps |
+
+## 006 場次偏好與取捨（005 plan；選片頁、行程頁）
+
+唯一來源：`tests/steps/web/場次偏好.steps.ts`。
+
+| 定位點 | 屬性 | 說明 | 使用檔 |
+| --- | --- | --- | --- |
+| `data-testid=session-row`（選片頁展開的場次列） | `data-date`（`YYYY-MM-DD`）、`data-time`（`HH:MM`） | 以日期與開演定位場次 | 場次偏好 steps |
+| `data-testid=session-pref`（`role=radiogroup`，位於 session-row 內） | 內含三個 `role=radio`：`一般`、`優先`、`只看這場`；`aria-checked`；每個 ≥ 44×44px | 三態控制；點選即保存到 `session_marks` | 場次偏好 steps |
+| `data-testid=session-pref-hint`（位於 film-card 內） | 文字 `優先 11/20`、`只看 11/20 10:50`，多場以「、」連接，兩種並存以「・」連接 | 收合時可見；沒有標記不渲染 | 場次偏好 steps |
+| `data-testid=preferred-tag`（位於 itinerary-entry 內） | 文字 `優先場` | 排在優先場的列 | 場次偏好 steps |
+| `data-testid=tradeoff-card` | `data-film`（片名）、`data-owner`（`self`／`partner`）、`data-choice`（`a`／`b`） | 兩人模式行程頁的取捨卡片 | 場次偏好 steps |
+| `tradeoff-card` 內 `data-testid=tradeoff-option-a`／`tradeoff-option-b` | `data-selected`；內含 `tradeoff-head`（選項一行文字）；A 另有 `tradeoff-giveup`（`放棄：…`） | 選項 A、B | 場次偏好 steps |
+| `data-testid=tradeoff-diff-line`（位於 option-b 內） | 每行一項差異 | 最多 6 行 | 場次偏好 steps |
+| `data-testid=tradeoff-action` | 文字 `看優先場`（目前 A）或 `改回一起看`（目前 B）；高度 ≥ 44px | 按下寫入／移除 `pinned_choices` 並重新排程 | 場次偏好 steps |

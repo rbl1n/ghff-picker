@@ -39,6 +39,20 @@ function isNotes(value: unknown): boolean {
   );
 }
 
+function isRecordOf(value: unknown, ok: (v: unknown) => boolean): boolean {
+  return value === undefined || (typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every(ok));
+}
+
+/** 場次標記（005）：session_id → prefer／only */
+function isSessionMarks(value: unknown): boolean {
+  return isRecordOf(value, (x) => x === "prefer" || x === "only");
+}
+
+/** 取捨決定（005）：film_id → prefer_session */
+function isPinnedChoices(value: unknown): boolean {
+  return isRecordOf(value, (x) => x === "prefer_session");
+}
+
 function isPartnerData(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const p = value as Record<string, unknown>;
@@ -47,7 +61,9 @@ function isPartnerData(value: unknown): boolean {
     (p.daily_limit === null || (typeof p.daily_limit === "number" && Number.isInteger(p.daily_limit) && p.daily_limit >= 0)) &&
     Array.isArray(p.film_preferences) &&
     hasTimeSettings(p) &&
-    isSkipped(p.skipped_film_ids)
+    isSkipped(p.skipped_film_ids) &&
+    isSessionMarks(p.session_marks) &&
+    isPinnedChoices(p.pinned_choices)
   );
 }
 
@@ -66,6 +82,8 @@ export function isUserState(value: unknown): value is UserState {
     hasTimeSettings(v) &&
     isSkipped(v.skipped_film_ids) &&
     isNotes(v.film_notes) &&
+    isSessionMarks(v.session_marks) &&
+    isPinnedChoices(v.pinned_choices) &&
     Array.isArray(v.ticket_marks)
   );
 }

@@ -2,6 +2,7 @@ import type { Catalog, ItineraryEntry, Session, TicketListItem, TicketResult, Us
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { compareSessionsPreferred, isGuestSession } from "./schedule";
+import { groupSessionsByFilm, makeMarkView } from "./session-marks";
 
 const TIER_RANK = { must: 0, want: 1, maybe: 2 } as const;
 
@@ -29,6 +30,9 @@ export function buildTicketList(
     .filter((s): s is Session => !!s);
   const hot = new Map(state.film_preferences.map((p) => [p.film_id, p.is_hot]));
   const myAvail = availabilityOf(state);
+  // 005：有「只看」（或已選看優先場）的片，備案只含限定的場次；其餘優先場排在最前
+  const marks = makeMarkView(state, groupSessionsByFilm(catalog.sessions));
+  const comparePreferred = (a: Session, b: Session) => Number(marks.pref(b.session_id)) - Number(marks.pref(a.session_id)) || compareSessionsPreferred(a, b);
 
   const planned = itinerary
     .map((e) => ({ entry: e, session: sessionById.get(e.session_id) }))
@@ -42,17 +46,17 @@ export function buildTicketList(
       const otherGot = gotSessions.filter((s) => s.film_id !== filmId);
       const mine = catalog.sessions.filter((s) => s.film_id === filmId);
       const usable = (s: Session) => !missed.has(s.session_id) && otherGot.every((g) => compat(s, g));
-      const watchableMine = mine.filter((s) => isSessionAvailable(s, myAvail));
+      const watchableMine = mine.filter((s) => isSessionAvailable(s, myAvail) && marks.allowed(s));
 
       const backups = watchableMine
         .filter((s) => s.session_id !== session.session_id && usable(s))
         .filter((s) => others.every((o) => compat(s, o)))
         .filter((s) => limit === null || others.filter((o) => o.date === s.date).length + 1 <= limit)
-        .sort(compareSessionsPreferred);
+        .sort(comparePreferred);
 
       let current: Session | undefined = gotSessions.find((g) => g.film_id === filmId);
       if (!current && usable(session)) current = session;
-      if (!current) current = backups[0] ?? watchableMine.filter(usable).sort(compareSessionsPreferred)[0];
+      if (!current) current = backups[0] ?? watchableMine.filter(usable).sort(comparePreferred)[0];
 
       const item: TicketListItem = {
         film_id: filmId,

@@ -4,7 +4,9 @@ import type {
   DayAvailability,
   FilmPreference,
   ItineraryEntry,
+  PinnedChoice,
   Session,
+  SessionPref,
   TicketMark,
   Tier,
   UnavailableSlot,
@@ -14,6 +16,7 @@ import type {
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { sessionStartAbs } from "./time";
+import { makeMarkView, type MarkView } from "./session-marks";
 
 export interface ScheduleResult {
   itinerary: ItineraryEntry[];
@@ -43,6 +46,10 @@ export interface PersonInput {
   availability: DayAvailability[];
   daily_limit: number | null;
   ticket_marks: TicketMark[];
+  /** 場次偏好（005）：優先／只看這場 */
+  session_marks?: Record<string, SessionPref>;
+  /** 取捨決定（005）：該片限定在優先場 */
+  pinned_choices?: Record<string, PinnedChoice>;
 }
 
 /** 由使用者狀態或同伴資料取出排程輸入（有空時段缺省時由舊不可看時段即時相減） */
@@ -52,12 +59,16 @@ export function personInputOf(p: {
   unavailable_slots?: UnavailableSlot[];
   daily_limit: number | null;
   ticket_marks?: TicketMark[];
+  session_marks?: Record<string, SessionPref>;
+  pinned_choices?: Record<string, PinnedChoice>;
 }): PersonInput {
   return {
     film_preferences: p.film_preferences,
     availability: availabilityOf(p),
     daily_limit: p.daily_limit,
     ticket_marks: p.ticket_marks ?? [],
+    session_marks: p.session_marks,
+    pinned_choices: p.pinned_choices,
   };
 }
 
@@ -90,6 +101,8 @@ export interface Cand {
   session: Session;
   filmId: string;
   star: boolean;
+  /** 標為優先的場次（005） */
+  pref: boolean;
   fixed: boolean;
   /** 與此候選不相容的候選索引（同一個人的候選之間） */
   conflicts: number[];
@@ -120,6 +133,9 @@ export interface PersonPlan {
   /** 該片可看（有空且未標沒搶到）的場次，依偏好順序 */
   watchable: (filmId: string) => Session[];
   tierOf: Map<string, Tier>;
+  /** 候選場次受限的影片（有只看場次，或已選看優先場；005） */
+  restricted: Set<string>;
+  marks: MarkView;
 }
 
 export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPlan {
@@ -127,6 +143,9 @@ export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPla
   const limit = input.daily_limit;
   const missed = new Set(input.ticket_marks.filter((m) => m.result === "missed").map((m) => m.session_id));
   const sessionById = new Map(catalog.sessions.map((s) => [s.session_id, s]));
+  const marks = makeMarkView(input, sessionsOf);
+  const restricted = new Set<string>();
+  if (!marks.empty) for (const filmId of sessionsOf.keys()) if (marks.restricted(filmId)) restricted.add(filmId);
   const gotByFilm = new Map<string, Session>();
   for (const m of input.ticket_marks) {
     if (m.result !== "got") continue;
@@ -156,7 +175,7 @@ export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPla
 
   const watchable = (filmId: string): Session[] =>
     (sessionsOf.get(filmId) ?? [])
-      .filter((s) => !missed.has(s.session_id) && isSessionAvailable(s, input.availability))
+      .filter((s) => !missed.has(s.session_id) && isSessionAvailable(s, input.availability) && marks.allowed(s))
       .sort(compareSessionsPreferred);
 
   const cands: Cand[] = [];
@@ -167,7 +186,7 @@ export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPla
     const g = gotByFilm.get(p.filmId);
     if (!g) continue;
     fixed.push({ filmId: p.filmId, tier: p.tier, pos: pos.get(p.filmId)!, order: filmOrder.get(p.filmId)!, cands: [cands.length] });
-    cands.push({ session: g, filmId: p.filmId, star: isGuestSession(g), fixed: true, conflicts: [] });
+    cands.push({ session: g, filmId: p.filmId, star: isGuestSession(g), pref: marks.pref(g.session_id), fixed: true, conflicts: [] });
     base[TIER_RANK[p.tier]]++;
     fixedDay.set(g.date, (fixedDay.get(g.date) ?? 0) + 1);
   }
@@ -181,7 +200,7 @@ export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPla
       if (limit !== null && (fixedDay.get(s.date) ?? 0) >= limit) continue;
       if (!fixedSessions.every((f) => compat(s, f))) continue;
       idxs.push(cands.length);
-      cands.push({ session: s, filmId: p.filmId, star: isGuestSession(s), fixed: false, conflicts: [] });
+      cands.push({ session: s, filmId: p.filmId, star: isGuestSession(s), pref: marks.pref(s.session_id), fixed: false, conflicts: [] });
     }
     if (idxs.length > 0) free.push({ filmId: p.filmId, tier: p.tier, pos: pos.get(p.filmId)!, order: filmOrder.get(p.filmId)!, cands: idxs });
   }
@@ -194,7 +213,7 @@ export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPla
       }
     }
   }
-  return { limit, cands, fixed, free, prefs, fixedDay, base, gotFilms: new Set(gotByFilm.keys()), watchable, tierOf };
+  return { limit, cands, fixed, free, prefs, fixedDay, base, gotFilms: new Set(gotByFilm.keys()), watchable, tierOf, restricted, marks };
 }
 
 /** 一個人的搜尋狀態：被選中候選造成的封鎖與每日場次數 */
@@ -375,22 +394,27 @@ interface JointFilm {
 
 /** 場次指派的搜尋節點預算（找到第一個可行解之後才生效） */
 export const ASSIGN_NODE_BUDGET = 1_500_000;
+/** 有優先場候選時的預算（005）：優先場影片數的上界很鬆，證明最佳要窮舉，改用較小的決定性預算以守住 NFR-501（取捨還要重跑排程） */
+export const ASSIGN_NODE_BUDGET_WITH_PREFS = 300_000;
 
 export interface Assignment {
   /** 各人排入的場次 */
   sessions: Session[][];
   /** 兩人排入同一場次的數量（單人 = 0） */
   together: number;
+  /** 排在優先場的影片數（各人加總；005） */
+  prefs: number;
   stars: number;
 }
 
 /**
  * 每人已決定要排的影片（sets，不含固定影片，固定影片一律排入）：
- * 單人 -> 最大化 ★ 場次數；兩人 -> 先最大化一起看的場次數，再最大化兩人 ★ 合計。
+ * 單人 -> 先最大化優先場影片數（005），再最大化 ★ 場次數；兩人 -> 先最大化一起看的場次數，再最大化優先場影片數合計（005），最後最大化兩人 ★ 合計。
  * 同分時先找到者勝（候選依 ★、時間排序），所以固定為場次較早者。
  */
 export function assignSessions(plans: PersonPlan[], sets: Set<string>[]): Assignment {
   const states = plans.map((p) => new PersonState(p));
+  const budget = plans.some((p) => p.cands.some((c) => c.pref)) ? ASSIGN_NODE_BUDGET_WITH_PREFS : ASSIGN_NODE_BUDGET;
   const filmMap = new Map<string, JointFilm>();
   plans.forEach((plan, p) => {
     const add = (f: PFilm) => {
@@ -419,41 +443,50 @@ export function assignSessions(plans: PersonPlan[], sets: Set<string>[]): Assign
 
   const chosen: number[][] = plans.map(() => []);
   let together = 0;
+  let prefs = 0;
   let stars = 0;
-  let best: { together: number; stars: number; chosen: number[][] } | null = null;
+  let best: { together: number; prefs: number; stars: number; chosen: number[][] } | null = null;
 
-  const bound = (from: number): { t: number; s: number } | null => {
+  /** 字典序比較 (一起看, 優先場, ★)；> 0 表示 a 較佳 */
+  const cmp = (a: { t: number; p: number; s: number }, b: { t: number; p: number; s: number }): number => a.t - b.t || a.p - b.p || a.s - b.s;
+
+  const bound = (from: number): { t: number; p: number; s: number } | null => {
     let t = together;
+    let p = prefs;
     let s = stars;
     for (let i = from; i < films.length; i++) {
       const jf = films[i];
-      for (let p = 0; p < plans.length; p++) {
-        const list = jf.per[p];
+      for (let q = 0; q < plans.length; q++) {
+        const list = jf.per[q];
         if (!list) continue;
         let any = false;
         let anyStar = false;
+        let anyPref = false;
         for (const c of list) {
-          if (!states[p].feasible(c)) continue;
+          if (!states[q].feasible(c)) continue;
           any = true;
-          if (plans[p].cands[c].star) {
-            anyStar = true;
-            break;
-          }
+          const cand = plans[q].cands[c];
+          if (cand.star) anyStar = true;
+          if (cand.pref) anyPref = true;
+          if (anyStar && anyPref) break;
         }
         if (!any) return null; // 這部必排的片已無可行場次
         if (anyStar) s++;
+        if (anyPref) p++;
       }
       if (jf.pairs.some(([a, b]) => states[0].feasible(a) && states[1].feasible(b))) t++;
     }
-    return { t, s };
+    return { t, p, s };
   };
 
   const place = (p: number, c: number) => {
     states[p].take(c);
     chosen[p].push(c);
     if (plans[p].cands[c].star) stars++;
+    if (plans[p].cands[c].pref) prefs++;
   };
   const unplace = (p: number, c: number) => {
+    if (plans[p].cands[c].pref) prefs--;
     if (plans[p].cands[c].star) stars--;
     chosen[p].pop();
     states[p].undo(c);
@@ -462,16 +495,16 @@ export function assignSessions(plans: PersonPlan[], sets: Set<string>[]): Assign
   // 決定性的節點預算：極端難的資料（大量互相衝堂的候選）不證明最佳，改回傳目前最佳解，確保回應時間；一般資料遠低於此預算
   let nodes = 0;
   const dfs = (i: number): void => {
-    if (best !== null && ++nodes > ASSIGN_NODE_BUDGET) return;
+    if (best !== null && ++nodes > budget) return;
     if (i === films.length) {
-      if (best === null || together > best.together || (together === best.together && stars > best.stars)) {
-        best = { together, stars, chosen: chosen.map((c) => [...c]) };
+      if (best === null || cmp({ t: together, p: prefs, s: stars }, { t: best.together, p: best.prefs, s: best.stars }) > 0) {
+        best = { together, prefs, stars, chosen: chosen.map((c) => [...c]) };
       }
       return;
     }
     const ub = bound(i);
     if (ub === null) return;
-    if (best !== null && (ub.t < best.together || (ub.t === best.together && ub.s <= best.stars))) return;
+    if (best !== null && cmp(ub, { t: best.together, p: best.prefs, s: best.stars }) <= 0) return;
     const jf = films[i];
     if (plans.length === 1 || !jf.per[0] || !jf.per[1]) {
       const p = jf.per[0] ? 0 : 1;
@@ -509,11 +542,12 @@ export function assignSessions(plans: PersonPlan[], sets: Set<string>[]): Assign
   };
   dfs(0);
 
-  const result = best as { together: number; stars: number; chosen: number[][] } | null;
+  const result = best as { together: number; prefs: number; stars: number; chosen: number[][] } | null;
   const sel = result ? result.chosen : plans.map(() => [] as number[]);
   return {
     sessions: sel.map((list, p) => list.map((c) => plans[p].cands[c].session)),
     together: result?.together ?? 0,
+    prefs: result?.prefs ?? 0,
     stars: result?.stars ?? 0,
   };
 }
@@ -533,6 +567,11 @@ export function explainUnscheduled(
   const own = owner ? { owner } : {};
   for (const p of plan.prefs) {
     if (p.tier !== "must" || scheduledFilms.has(p.filmId)) continue;
+    // 005：候選場次受限（只看這場／已選看優先場）的片，排不進去一律是「指定場次都排不進去」
+    if (plan.restricted.has(p.filmId)) {
+      out.push({ ...own, film_id: p.filmId, reason: "only_session_unfit", conflict_film_ids: null });
+      continue;
+    }
     const options = plan.watchable(p.filmId);
     if (options.length === 0) {
       out.push({ ...own, film_id: p.filmId, reason: "no_available_session", conflict_film_ids: null });

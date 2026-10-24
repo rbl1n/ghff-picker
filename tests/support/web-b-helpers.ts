@@ -285,5 +285,6 @@ export function sessionSpecOf(s: { date: string; start_min: number; marks: strin
 export function reasonFragments(reason: string, conflictTitles: string[]): string[] {
   if (reason === "no_available_session") return ["沒有可看場次"];
   if (reason === "daily_limit") return ["受每日上限限制"];
+  if (reason === "only_session_unfit") return ["指定場次都排不進去"];
   return ["衝堂", ...conflictTitles];
 }

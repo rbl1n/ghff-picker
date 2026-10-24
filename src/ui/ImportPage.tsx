@@ -75,6 +75,9 @@ function PersonalDialog({ decoded }: { decoded: DecodedShare }) {
     film_preferences: state.film_preferences,
     availability: state.availability ?? [],
     ...(state.skipped_film_ids?.length ? { skipped_film_ids: state.skipped_film_ids } : {}),
+    // 005：同伴的場次標記與取捨決定用於排程（不是私人資料），一併帶入
+    ...(state.session_marks && Object.keys(state.session_marks).length ? { session_marks: state.session_marks } : {}),
+    ...(state.pinned_choices && Object.keys(state.pinned_choices).length ? { pinned_choices: state.pinned_choices } : {}),
   });
   const finish = () => window.location.replace("#/itinerary");
 
