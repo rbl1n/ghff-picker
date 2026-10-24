@@ -89,6 +89,7 @@ export async function waitItineraryReady(page: Page): Promise<void> {
     .first()
     .or(page.getByTestId("itinerary-empty"))
     .or(unscheduledBox(page))
+    .or(page.getByTestId("calendar-view"))
     .first()
     .waitFor({ state: "visible", timeout: 10_000 });
 }

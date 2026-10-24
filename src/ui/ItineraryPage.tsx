@@ -1,4 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ItineraryCalendar, type CalEntry } from "./ItineraryCalendar";
+import { downloadIcs } from "./ics";
 import type { Catalog, DuoItineraryEntry, ItineraryParticipant, Session, Tier, UnscheduledMustFilm } from "../domain/types";
 import { CatalogGate } from "./CatalogGate";
 import { CatNo, labelWithNo } from "./CatNo";
@@ -38,10 +40,29 @@ interface Row {
   preferred: boolean;
 }
 
+type ViewMode = "list" | "calendar";
+const VIEW_KEY = "ghff.itinerary.view";
+function readView(): ViewMode {
+  try {
+    return localStorage.getItem(VIEW_KEY) === "calendar" ? "calendar" : "list";
+  } catch {
+    return "list";
+  }
+}
+
 function ItineraryContent({ catalog }: { catalog: Catalog }) {
   const { user, schedule, scheduling } = useStore();
   const [filter, setFilter] = useItineraryFilter();
   useEffect(ensureSchedule, [schedule, scheduling]);
+  const [view, setViewState] = useState<ViewMode>(readView);
+  const setView = (v: ViewMode) => {
+    setViewState(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* 無法保存時只在本次有效 */
+    }
+  };
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
@@ -101,8 +122,36 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
   const days = new Map<string, Row[]>();
   for (const r of rows) days.set(r.session.date, [...(days.get(r.session.date) ?? []), r]);
 
+  const toCal = (r: Row): CalEntry => ({
+    id: r.session.session_id,
+    date: r.session.date,
+    startMin: r.session.start_min,
+    endMin: r.session.end_min,
+    no: noOf(r.session.film_id),
+    title: titleOf(r.session.film_id),
+    venue: r.session.venue_name,
+    tier: r.tier,
+    who: r.participant ? (r.participant === "together" ? "together" : "solo") : undefined,
+    whoLabel: r.participant ? (r.participant === "together" ? "一起" : `${nameOf(r.participant)} 自己`) : undefined,
+  });
+  const calEntries = rows.map(toCal);
+  // 匯出：自己的行程（兩人模式含一起、不含同伴自己看的），不受畫面篩選影響
+  const exportEntries = (schedule.duo
+    ? (schedule.duo as DuoItineraryEntry[]).filter((e) => e.participant !== "partner").map((e) => ({ session: sessionById.get(e.session_id), tier: e.tier as Tier }))
+    : schedule.itinerary.map((e) => ({ session: sessionById.get(e.session_id), tier: e.tier }))
+  )
+    .filter((x): x is { session: Session; tier: Tier } => !!x.session)
+    .map((x) => toCal({ session: x.session, tier: x.tier, isNonTicketed: false, preferred: false }));
+
   return (
     <>
+      <div className="seg two" role="radiogroup" aria-label="行程檢視" data-testid="itinerary-view" data-view={view}>
+        {(["list", "calendar"] as const).map((v) => (
+          <button key={v} role="radio" aria-checked={view === v} className="segbtn" onClick={() => setView(v)}>
+            {v === "list" ? "清單" : "月曆"}
+          </button>
+        ))}
+      </div>
       {stale && (
         <div className="banner">
           <div className="row">
@@ -169,7 +218,8 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           ))}
         </section>
       )}
-      {[...days.entries()].map(([date, items]) => (
+      {view === "calendar" && <ItineraryCalendar entries={calEntries} festivalDates={[...new Set(catalog.sessions.map((s) => s.date))]} />}
+      {view === "list" && [...days.entries()].map(([date, items]) => (
         <section className="daygroup" key={date}>
           <h2>{dateLabel(date)}</h2>
           <ol className="tl">
@@ -210,7 +260,10 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           </ol>
         </section>
       ))}
-      {rows.length === 0 && <p className="empty">目前沒有可排入的場次</p>}
+      {view === "list" && rows.length === 0 && <p className="empty">目前沒有可排入的場次</p>}
+      <button type="button" className="btn btn-block" data-testid="export-ics" style={{ marginTop: 16 }} disabled={exportEntries.length === 0} onClick={() => downloadIcs(exportEntries)}>
+        匯出行事曆（.ics）
+      </button>
       <a className="btn btn-primary btn-block" href="#/tickets" style={{ marginTop: 16 }}>
         看搶票清單
       </a>
