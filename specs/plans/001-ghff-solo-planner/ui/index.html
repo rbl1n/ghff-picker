@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>選片</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.film h2{margin:0;font-size:18px}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.tier{min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.tier[data-t=must][aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold);font-weight:700}
+.tier[data-t=want][aria-pressed=true]{border:2px solid var(--gold);color:var(--gold);font-weight:700}
+.tier[data-t=free][aria-pressed=true]{border:2px solid var(--grey);color:var(--text);font-weight:700}
+.film[data-tier=must]{border-left:4px solid var(--gold)}
+.film[data-tier=want]{border-left:4px solid var(--gold);border-left-style:double}
+.film[data-tier=free]{border-left:4px solid var(--grey)}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--muted)}
+.sessions{list-style:none;margin:0;padding:0}
+.sess{display:grid;grid-template-columns:auto auto 1fr;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line);align-items:center}
+.sess .v{grid-column:1/-1}.sess .row{grid-column:1/-1}
+.sess.dim{opacity:.6}.sess b{font-size:17px}
+.hotrow{display:flex;align-items:center;gap:10px;min-height:44px}
+.hotrow input{width:22px;height:22px;accent-color:var(--gold)}
+.cta{position:sticky;bottom:72px;margin:8px 0}
+.empty{text-align:center;color:var(--muted);padding:24px 0}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><h1>選片</h1><a class="share-link" href="share.html">分享</a></header>
+<p class="sub">2026/11/06 – 11/22　點選層級，未標記的片不會排入行程</p>
+<main>
+<div class="banner banner-error" id="loaderr" hidden><h2>場次資料載入失敗，請重新整理</h2><button class="btn" id="retry">重試</button></div>
+<div class="counts" aria-label="標記統計"><div><b id="cm">0</b>必看</div><div><b id="cw">0</b>想看</div><div><b id="cf">0</b>有空再看</div></div>
+<details class="legend"><summary>標記說明</summary><ul><li>★ 影人出席</li><li>◆ 華語無中英字幕</li><li>▲ 非英語無英文字幕</li><li>⊚ 非售票活動</li></ul></details>
+<input id="q" class="input" type="search" placeholder="搜尋片名" aria-label="搜尋片名" style="margin-bottom:12px">
+<div class="chips"><button class="chip" data-f="all" aria-pressed="true">全部</button><button class="chip" data-f="marked" aria-pressed="false">已標記</button><button class="chip" data-f="none" aria-pressed="false">未標記</button></div>
+<article class="card film" data-tier="must" data-name="夜行列車">
+<div class="row"><h2>夜行列車</h2><span class="tag">12+</span><span class="sp"></span><span class="hint">2 場</span></div>
+<div class="tiers" role="group" aria-label="夜行列車 的層級"><button class="tier" data-t="must" aria-pressed="true">必看</button><button class="tier" data-t="want" aria-pressed="false">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/15（日）</span><b class="mono">13:00</b><span class="hint">120 分鐘</span><span class="v">台北信義威秀 10廳</span><span class="row"></span></li><li class="sess"><span class="mono d">11/18（三）</span><b class="mono">19:30</b><span class="hint">120 分鐘</span><span class="v">TITAN</span><span class="row"><span class="tag tag-star">★ 影人出席</span></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="want" data-name="春之祭">
+<div class="row"><h2>春之祭</h2><span class="tag">普</span><span class="sp"></span><span class="hint">1 場</span></div>
+<div class="tiers" role="group" aria-label="春之祭 的層級"><button class="tier" data-t="must" aria-pressed="false">必看</button><button class="tier" data-t="want" aria-pressed="true">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/15（日）</span><b class="mono">15:05</b><span class="hint">100 分鐘</span><span class="v">台北信義威秀 13廳</span><span class="row"><span class="tag">▲ 非英語無英文字幕</span></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="" data-name="海邊的房間">
+<div class="row"><h2>海邊的房間</h2><span class="tag">15+</span><span class="sp"></span><span class="hint">2 場</span></div>
+<div class="tiers" role="group" aria-label="海邊的房間 的層級"><button class="tier" data-t="must" aria-pressed="false">必看</button><button class="tier" data-t="want" aria-pressed="false">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/15（日）</span><b class="mono">16:55</b><span class="hint">90 分鐘</span><span class="v">TITAN</span><span class="row"><span class="tag">◆ 華語無中英字幕</span></span></li><li class="sess"><span class="mono d">11/16（一）</span><b class="mono">19:00</b><span class="hint">90 分鐘</span><span class="v">TITAN</span><span class="row"><span class="tag">◆ 華語無中英字幕</span></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="must" data-name="紅色沙漠">
+<div class="row"><h2>紅色沙漠</h2><span class="tag">普</span><span class="sp"></span><span class="hint">2 場</span></div>
+<div class="tiers" role="group" aria-label="紅色沙漠 的層級"><button class="tier" data-t="must" aria-pressed="true">必看</button><button class="tier" data-t="want" aria-pressed="false">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess dim"><span class="mono d">11/12（四）</span><b class="mono">17:00</b><span class="hint">120 分鐘</span><span class="v">台北信義威秀 10廳</span><span class="row"><span class="tag tag-no">不可看</span></span></li><li class="sess"><span class="mono d">11/16（一）</span><b class="mono">19:00</b><span class="hint">120 分鐘</span><span class="v">台北信義威秀 10廳</span><span class="row"></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="must" data-name="北方">
+<div class="row"><h2>北方</h2><span class="tag">普</span><span class="sp"></span><span class="hint">3 場</span></div>
+<div class="tiers" role="group" aria-label="北方 的層級"><button class="tier" data-t="must" aria-pressed="true">必看</button><button class="tier" data-t="want" aria-pressed="false">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/15（日）</span><b class="mono">14:00</b><span class="hint">100 分鐘</span><span class="v">TITAN</span><span class="row"><span class="tag tag-star">★ 影人出席</span></span></li><li class="sess"><span class="mono d">11/17（二）</span><b class="mono">19:00</b><span class="hint">100 分鐘</span><span class="v">台北信義威秀 12廳</span><span class="row"></span></li><li class="sess"><span class="mono d">11/19（四）</span><b class="mono">19:00</b><span class="hint">100 分鐘</span><span class="v">台北信義威秀 12廳</span><span class="row"></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="want" data-name="小城之春">
+<div class="row"><h2>小城之春</h2><span class="tag">普</span><span class="sp"></span><span class="hint">1 場</span></div>
+<div class="tiers" role="group" aria-label="小城之春 的層級"><button class="tier" data-t="must" aria-pressed="false">必看</button><button class="tier" data-t="want" aria-pressed="true">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/19（四）</span><b class="mono">19:30</b><span class="hint">90 分鐘</span><span class="v">TITAN</span><span class="row"></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="want" data-name="家族之味">
+<div class="row"><h2>家族之味</h2><span class="tag">普</span><span class="tag tag-star">熱門</span><span class="sp"></span><span class="hint">2 場</span></div>
+<div class="tiers" role="group" aria-label="家族之味 的層級"><button class="tier" data-t="must" aria-pressed="false">必看</button><button class="tier" data-t="want" aria-pressed="true">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/20（五）</span><b class="mono">13:00</b><span class="hint">110 分鐘</span><span class="v">TITAN</span><span class="row"><span class="tag tag-star">★ 影人出席</span></span></li><li class="sess"><span class="mono d">11/21（六）</span><b class="mono">13:00</b><span class="hint">110 分鐘</span><span class="v">TITAN</span><span class="row"></span></li></ul>
+<label class="hotrow"><input type="checkbox" checked> 標為熱門（搶票時優先）</label></details>
+</article>
+<article class="card film" data-tier="" data-name="映後座談">
+<div class="row"><h2>映後座談</h2><span class="tag">普</span><span class="sp"></span><span class="hint">1 場</span></div>
+<div class="tiers" role="group" aria-label="映後座談 的層級"><button class="tier" data-t="must" aria-pressed="false">必看</button><button class="tier" data-t="want" aria-pressed="false">想看</button><button class="tier" data-t="free" aria-pressed="false">有空再看</button></div>
+<details><summary>展開全部場次</summary><ul class="sessions"><li class="sess"><span class="mono d">11/17（二）</span><b class="mono">14:00</b><span class="hint">60 分鐘</span><span class="v">台北信義威秀 11廳</span><span class="row"><span class="tag tag-nosale">⊚ 非售票活動</span></span></li></ul>
+<label class="hotrow"><input type="checkbox"> 標為熱門（搶票時優先）</label></details>
+</article>
+
+<p class="empty" id="empty" hidden>沒有符合的影片</p>
+<a class="btn btn-primary btn-block cta" href="itinerary.html">排行程</a>
+</main>
+</div>
+<nav class="tabs" aria-label="主要分頁"><ul><li><a href="index.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>選片</a></li><li><a href="availability.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>時段</a></li><li><a href="itinerary.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M6 6h10l-2 3 2 3H6"/></svg>行程</a></li><li><a href="tickets.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 1)"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg>搶票</a></li></ul></nav>
+<script>
+(function(){
+var cards=[].slice.call(document.querySelectorAll('.film'));
+var f='all',q='';
+function upd(){
+  var c={must:0,want:0,free:0};
+  cards.forEach(function(el){var t=el.dataset.tier;if(c[t]!==undefined)c[t]++;
+    var show=el.dataset.name.indexOf(q)>-1&&(f==='all'||(f==='marked'&&t)||(f==='none'&&!t));
+    el.hidden=!show;});
+  document.getElementById('cm').textContent=c.must;
+  document.getElementById('cw').textContent=c.want;
+  document.getElementById('cf').textContent=c.free;
+  document.getElementById('empty').hidden=cards.some(function(e){return !e.hidden});
+}
+cards.forEach(function(el){
+  [].forEach.call(el.querySelectorAll('.tier'),function(b){
+    b.addEventListener('click',function(){
+      var on=b.getAttribute('aria-pressed')==='true';
+      [].forEach.call(el.querySelectorAll('.tier'),function(x){x.setAttribute('aria-pressed','false')});
+      if(!on){b.setAttribute('aria-pressed','true');el.dataset.tier=b.dataset.t}else{el.dataset.tier=''}
+      upd();
+    });
+  });
+});
+[].forEach.call(document.querySelectorAll('[data-f]'),function(b){
+  b.addEventListener('click',function(){
+    f=b.dataset.f;
+    [].forEach.call(document.querySelectorAll('[data-f]'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    upd();
+  });
+});
+document.getElementById('q').addEventListener('input',function(e){q=e.target.value.trim();upd()});
+document.getElementById('retry').addEventListener('click',function(){location.reload()});
+upd();
+})();
+</script>
+</body>
+</html>

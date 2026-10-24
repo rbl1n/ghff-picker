@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>行程</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sum div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:12px;color:var(--muted)}
+.sum b{display:block;font-size:20px;color:var(--text)}
+.day h2{font-size:16px;margin:16px 0 6px;color:var(--gold)}
+.tl{list-style:none;margin:0;padding:0 0 0 0;border-left:2px solid var(--line)}
+.it{display:flex;gap:12px;padding:10px 0 10px 12px;position:relative;min-height:44px}
+.it::before{content:"";position:absolute;left:-6px;top:18px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.tm{display:flex;flex-direction:column;min-width:52px;font-size:13px;color:var(--muted)}.tm b{font-size:17px;color:var(--text)}
+.info{flex:1;min-width:0}.nm{font-size:16px}
+.it.nosale::before{background:transparent;border:2px dashed var(--muted)}
+.hide{display:none}
+.prog{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;width:60%;background:var(--gold)}
+.empty{text-align:center;color:var(--muted);padding:32px 0}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><h1>行程</h1><a class="share-link" href="share.html">分享</a></header>
+<p class="sub">依日期排好的最佳行程</p>
+<main>
+<div class="banner" id="stale"><div class="row"><span class="sp">條件已變更，重新排程</span><button class="btn btn-primary" id="re">重新排程</button></div>
+<div class="prog" id="prog" hidden><i></i></div></div>
+<div class="sum"><div><b class="mono">1/2</b>排入必看</div><div><b class="mono">1/1</b>排入想看</div><div><b class="mono">0/0</b>排入有空再看</div></div>
+<section class="banner banner-error" aria-label="未排入的必看片"><h2>有 1 部必看排不進去</h2><ul><li><b>紅色沙漠</b>：與「北方」衝堂</li></ul></section>
+<section class="day"><h2>11/14（六）</h2><ol class="tl"><li class="it"><div class="tm mono"><b>19:30</b><span>21:10</span></div><div class="info"><div class="row"><b class="nm">北方</b><span class="tag tag-must">必看</span><span class="tag tag-star">★</span></div><div class="hint">TITAN</div></div></li><li class="it"><div class="tm mono"><b>21:30</b><span>23:00</span></div><div class="info"><div class="row"><b class="nm">小城之春</b><span class="tag tag-want">想看</span></div><div class="hint">台北信義威秀 11廳</div></div></li></ol></section>
+<section class="day"><h2>11/17（二）</h2><ol class="tl"><li class="it nosale"><div class="tm mono"><b>14:00</b><span>15:00</span></div><div class="info"><div class="row"><b class="nm">映後座談</b><span class="tag tag-nosale">非售票</span></div><div class="hint">台北信義威秀 11廳</div></div></li></ol></section>
+<a class="btn btn-primary btn-block" href="tickets.html" style="margin-top:16px">看搶票清單</a>
+<p class="empty hide">先到選片頁標記想看的片</p>
+</main>
+</div>
+<nav class="tabs" aria-label="主要分頁"><ul><li><a href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>選片</a></li><li><a href="availability.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>時段</a></li><li><a href="itinerary.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M6 6h10l-2 3 2 3H6"/></svg>行程</a></li><li><a href="tickets.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 1)"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg>搶票</a></li></ul></nav>
+<script>
+document.getElementById('re').addEventListener('click',function(){
+  var b=document.getElementById('stale'),p=document.getElementById('prog');
+  p.hidden=false;this.disabled=true;
+  setTimeout(function(){p.hidden=true;b.hidden=true;document.getElementById('re').disabled=false},1200);
+});
+</script>
+</body>
+</html>

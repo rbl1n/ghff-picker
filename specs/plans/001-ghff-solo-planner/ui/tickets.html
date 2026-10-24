@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>搶票</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.sumbar{background:var(--panel-2);border:1px solid var(--gold);border-radius:12px;padding:12px;margin-bottom:12px}
+.sumbar[hidden]{display:none}
+.t{display:block;margin-bottom:10px}
+.t.pend{border-left:4px solid var(--gold)}
+.t.got{border-color:var(--ok);background:var(--ok-bg);border-left:4px solid var(--ok)}
+.t.dead{opacity:.65;background:var(--panel-2);border-left:4px solid var(--grey)}
+.t.flash{animation:fl 1.2s ease-out}
+@keyframes fl{0%{box-shadow:0 0 0 3px var(--gold);background:var(--panel-2)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.t.flash{animation:none;outline:2px solid var(--gold)}}
+.ord{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.t.got .ord{background:var(--ok);color:#fff}.t.dead .ord{background:var(--grey);color:#fff}
+.t h2{margin:0;font-size:18px}
+.cur{margin:10px 0;font-size:16px}.cur b{font-size:19px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts .btn{min-height:54px;font-size:17px}
+.btn-ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn-miss{background:transparent;border-color:var(--danger);color:var(--danger)}
+.mv{min-width:44px;min-height:44px;border:1px solid var(--line);background:transparent;border-radius:10px;cursor:pointer}
+.bk{list-style:none;margin:0;padding:0}.bk li{display:flex;gap:8px;padding:6px 0;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.bk .x{text-decoration:line-through;color:var(--muted)}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--muted)}
+h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
+.deadmsg{font-weight:700;font-size:16px;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><h1>搶票</h1><a class="share-link" href="share.html">分享</a></header>
+<p class="sub">開賣後照順序搶，沒搶到就換備案</p>
+<main>
+<div class="sumbar" id="sumbar" hidden><b id="sumtxt"></b><a class="btn btn-primary btn-block" href="itinerary.html" style="margin-top:10px">依搶到結果重新排程</a></div>
+<div id="list"></div>
+<h3 id="donehd" hidden>已完成</h3>
+<div id="done"></div>
+</main>
+</div>
+<nav class="tabs" aria-label="主要分頁"><ul><li><a href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>選片</a></li><li><a href="availability.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>時段</a></li><li><a href="itinerary.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M6 6h10l-2 3 2 3H6"/></svg>行程</a></li><li><a href="tickets.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 1)"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg>搶票</a></li></ul></nav>
+<script>
+(function(){
+var films=[
+ {n:'紅色沙漠',tier:'必看',ss:[{d:'11/16（一）',date:'11-16',s:'19:00',len:120,v:'台北信義威秀 10廳',c:'xy'}]},
+ {n:'北方',tier:'必看',ss:[{d:'11/15（日）',date:'11-15',s:'14:00',len:100,v:'TITAN',c:'ti',star:1},{d:'11/17（二）',date:'11-17',s:'19:00',len:100,v:'台北信義威秀 12廳',c:'xy'},{d:'11/19（四）',date:'11-19',s:'19:00',len:100,v:'台北信義威秀 12廳',c:'xy'}]},
+ {n:'家族之味',tier:'想看',hot:1,ss:[{d:'11/20（五）',date:'11-20',s:'13:00',len:110,v:'TITAN',c:'ti',star:1},{d:'11/21（六）',date:'11-21',s:'13:00',len:110,v:'TITAN',c:'ti'}]},
+ {n:'小城之春',tier:'想看',ss:[{d:'11/19（四）',date:'11-19',s:'19:30',len:90,v:'TITAN',c:'ti'}]}
+];
+films.forEach(function(f){f.st='pend';f.tried=[];f.got=null;});
+function mins(s){var p=s.s.split(':');return parseInt(p[0],10)*60+parseInt(p[1],10)}
+function ok(a,b){
+  if(a.date!==b.date)return true;
+  var gap=a.c===b.c?5:15,a0=mins(a),a1=a0+a.len,b0=mins(b),b1=b0+b.len;
+  return a1+gap<=b0||b1+gap<=a0;
+}
+function grabbed(){return films.filter(function(f){return f.st==='got'}).map(function(f){return f.got})}
+function cur(f){
+  var g=grabbed();
+  for(var i=0;i<f.ss.length;i++){
+    var s=f.ss[i];
+    if(f.tried.indexOf(i)>-1)continue;
+    if(g.every(function(x){return ok(s,x)}))return i;
+  }
+  return -1;
+}
+function esc(s){return s}
+function fmt(s){return '<span class="mono">'+s.d+'</span> <b class="mono">'+s.s+'</b> '+s.v+(s.star?' <span class="tag tag-star">★ 影人出席</span>':'')}
+function card(f,i,flash){
+  var c=f.st==='pend'?cur(f):-1,st=f.st;
+  if(st==='pend'&&c<0)st='dead';
+  var tg=f.tier==='必看'?'tag-must':'tag-want';
+  var h='<article class="card t '+(st==='got'?'got':st==='dead'?'dead':'pend')+(flash?' flash':'')+'" data-i="'+i+'">';
+  h+='<div class="row"><span class="ord mono">'+(i+1)+'</span><h2>'+f.n+'</h2><span class="tag '+tg+'">'+f.tier+'</span>'+(f.hot?'<span class="tag tag-star">熱門</span>':'')+'<span class="sp"></span>';
+  if(st==='pend'){h+='<button class="mv" data-a="up" aria-label="上移">↑</button><button class="mv" data-a="down" aria-label="下移">↓</button>'}
+  h+='</div>';
+  if(st==='got'){
+    h+='<p class="cur">已搶到　'+fmt(f.got)+'</p><button class="btn" data-a="undo">撤銷</button>';
+  }else if(st==='dead'){
+    h+='<p class="deadmsg">已無可用場次</p><button class="btn" data-a="undo">撤銷</button>';
+  }else{
+    h+='<p class="cur">'+fmt(f.ss[c])+'</p><div class="acts"><button class="btn btn-ok" data-a="got">搶到</button><button class="btn btn-miss" data-a="miss">沒搶到</button></div>';
+    var rest=f.ss.filter(function(s,k){return k!==c&&f.tried.indexOf(k)<0});
+    h+='<details><summary>全部備案（'+(f.ss.length-1)+'）</summary><ul class="bk">';
+    f.ss.forEach(function(s,k){
+      var t=f.tried.indexOf(k)>-1,cls=t?'x':'';
+      var note=k===c?'<span class="tag tag-want">目前</span>':t?'<span class="tag">沒搶到</span>':'';
+      h+='<li class="'+cls+'">'+fmt(s)+note+'</li>';
+    });
+    if(f.ss.length===1)h+='<li>無不衝堂備案</li>';
+    h+='</ul></details>';
+  }
+  return h+'</article>';
+}
+function render(fi){
+  var pend=[],done=[];
+  films.forEach(function(f,i){(f.st==='got'?done:pend).push(i)});
+  document.getElementById('list').innerHTML=pend.map(function(i){return card(films[i],i,i===fi)}).join('');
+  document.getElementById('done').innerHTML=done.map(function(i){return card(films[i],i,i===fi)}).join('');
+  document.getElementById('donehd').hidden=!done.length;
+  var got=films.filter(function(f){return f.st==='got'}).length;
+  var dead=films.filter(function(f){return f.st==='pend'&&cur(f)<0}).length;
+  var all=got+dead===films.length;
+  var sb=document.getElementById('sumbar');
+  sb.hidden=!all;
+  document.getElementById('sumtxt').textContent='搶到 '+got+' 部、未搶到 '+dead+' 部';
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button[data-a]');if(!b)return;
+  var el=b.closest('.t'),i=+el.dataset.i,f=films[i],a=b.dataset.a;
+  if(a==='got'){f.got=f.ss[cur(f)];f.st='got';render(i)}
+  else if(a==='miss'){f.tried.push(cur(f));render(i)}
+  else if(a==='undo'){
+    if(f.st==='got'){f.st='pend';f.got=null}else{f.tried.pop()}
+    render(i);
+  }else if(a==='up'||a==='down'){
+    var j=a==='up'?i-1:i+1;
+    while(j>=0&&j<films.length&&films[j].st==='got')j+=(a==='up'?-1:1);
+    if(j<0||j>=films.length)return;
+    var t=films[i];films[i]=films[j];films[j]=t;render(j);
+  }
+});
+render(-1);
+})();
+</script>
+</body>
+</html>

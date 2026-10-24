@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>時段</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0 12px}
+.day{min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:0}
+.day b{font-size:17px}.day i{position:absolute;bottom:5px;width:6px;height:6px;border-radius:50%;background:var(--danger)}
+.day[aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.day[aria-pressed=true] .hint{color:var(--gold-ink)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.fields label{display:block;font-size:13px;color:var(--muted)}
+.slot{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);min-height:52px}
+.slot .mono{font-size:16px}
+.del{min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--danger);cursor:pointer}
+h2{font-size:16px;margin:0 0 6px}
+.input.bad{border-color:var(--danger)}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><h1>時段</h1><a class="share-link" href="share.html">分享</a></header>
+<p class="sub">11/06 – 11/22　設定不能去看的時間</p>
+<main>
+<section class="card"><h2>選擇日期</h2><p class="hint" style="margin:0">11 月　可多選</p>
+<div class="grid" role="group" aria-label="影展日期"><button class="day" aria-pressed="false" data-d="6"><span class="hint">五</span><b class="mono">6</b></button><button class="day" aria-pressed="false" data-d="7"><span class="hint">六</span><b class="mono">7</b></button><button class="day" aria-pressed="false" data-d="8"><span class="hint">日</span><b class="mono">8</b></button><button class="day" aria-pressed="false" data-d="9"><span class="hint">一</span><b class="mono">9</b></button><button class="day" aria-pressed="true" data-d="10"><span class="hint">二</span><b class="mono">10</b><i></i></button><button class="day" aria-pressed="true" data-d="11"><span class="hint">三</span><b class="mono">11</b><i></i></button><button class="day" aria-pressed="true" data-d="12"><span class="hint">四</span><b class="mono">12</b><i></i></button><button class="day" aria-pressed="true" data-d="13"><span class="hint">五</span><b class="mono">13</b><i></i></button><button class="day" aria-pressed="false" data-d="14"><span class="hint">六</span><b class="mono">14</b></button><button class="day" aria-pressed="false" data-d="15"><span class="hint">日</span><b class="mono">15</b></button><button class="day" aria-pressed="false" data-d="16"><span class="hint">一</span><b class="mono">16</b></button><button class="day" aria-pressed="false" data-d="17"><span class="hint">二</span><b class="mono">17</b></button><button class="day" aria-pressed="false" data-d="18"><span class="hint">三</span><b class="mono">18</b></button><button class="day" aria-pressed="false" data-d="19"><span class="hint">四</span><b class="mono">19</b></button><button class="day" aria-pressed="false" data-d="20"><span class="hint">五</span><b class="mono">20</b></button><button class="day" aria-pressed="false" data-d="21"><span class="hint">六</span><b class="mono">21</b></button><button class="day" aria-pressed="false" data-d="22"><span class="hint">日</span><b class="mono">22</b></button></div>
+<div class="row"><button class="btn sp">整天不可看</button></div></section>
+<section class="card"><h2>加入不可看時段</h2><p class="hint" style="margin:0">套用到已選的 4 天</p>
+<div class="fields"><label>開始時間<input id="s" class="input mono" type="time" value="18:00"></label><label>結束時間<input id="e" class="input mono" type="time" value="09:00"></label></div>
+<p class="err" id="terr">結束時間需晚於開始時間</p>
+<button class="btn btn-primary btn-block" id="apply" disabled style="margin-top:10px">套用到已選日期</button></section>
+<section class="card"><h2>已設定的不可看時段</h2>
+<p class="hint" style="margin:0 0 4px">11/10（二）</p><div class="slot"><span class="mono sp">09:00–18:00</span><button class="del" aria-label="刪除 11/10 09:00–18:00">刪除</button></div>
+<p class="hint" style="margin:8px 0 4px">11/11（三）</p><div class="slot"><span class="mono sp">09:00–18:00</span><button class="del" aria-label="刪除 11/11 09:00–18:00">刪除</button></div>
+<p class="hint" style="margin:8px 0 4px">11/12（四）</p><div class="slot"><span class="mono sp">09:00–18:00</span><button class="del" aria-label="刪除 11/12 09:00–18:00">刪除</button></div>
+<p class="hint" style="margin:8px 0 4px">11/13（五）</p><div class="slot"><span class="sp">整天不可看</span><button class="del" aria-label="刪除 11/13 整天不可看">刪除</button></div></section>
+<section class="card"><h2>每日場數上限</h2>
+<label class="hint" for="lim">每天最多看幾場（空白＝不設上限）</label>
+<input id="lim" class="input mono" inputmode="numeric" placeholder="不設上限" style="margin-top:6px">
+<p class="err" id="lerr" hidden>每日上限只接受 0 以上的整數</p></section>
+<a class="btn btn-primary btn-block" href="itinerary.html">排行程</a>
+</main>
+</div>
+<nav class="tabs" aria-label="主要分頁"><ul><li><a href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>選片</a></li><li><a href="availability.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>時段</a></li><li><a href="itinerary.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M6 6h10l-2 3 2 3H6"/></svg>行程</a></li><li><a href="tickets.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 1)"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg>搶票</a></li></ul></nav>
+<script>
+(function(){
+var s=document.getElementById('s'),e=document.getElementById('e'),ap=document.getElementById('apply'),er=document.getElementById('terr');
+function chk(){var bad=e.value<=s.value;ap.disabled=bad;er.hidden=!bad;e.classList.toggle('bad',bad)}
+s.addEventListener('input',chk);e.addEventListener('input',chk);chk();
+[].forEach.call(document.querySelectorAll('.day'),function(b){b.addEventListener('click',function(){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true')})});
+[].forEach.call(document.querySelectorAll('.del'),function(b){b.addEventListener('click',function(){b.closest('.slot').remove()})});
+var l=document.getElementById('lim'),le=document.getElementById('lerr');
+l.addEventListener('input',function(){var ok=l.value===''||/^\d+$/.test(l.value);le.hidden=ok;l.classList.toggle('bad',!ok)});
+})();
+</script>
+</body>
+</html>

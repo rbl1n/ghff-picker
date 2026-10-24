@@ -1,0 +1,156 @@
+Project "ghff_picker" {
+  database_type: "JSON snapshot + browser localStorage"
+  Note: '''
+  金馬影展個人選片排程工具的資料邊界。無後端、無資料庫。
+  三類資料：
+  1. 場次快照（catalog）：抓資料腳本從官網產生的 sessions.json，唯讀、進版控（CL-008）。
+  2. 使用者狀態（user_state）：存在瀏覽器 localStorage，可經分享連結帶到另一台裝置（FR-018、FR-022）。
+  3. 衍生結果（derived）：排程引擎依 1 + 2 即時計算，不保存；重開工具時重算。
+  時間一律為 Asia/Taipei 牆上時間：date = YYYY-MM-DD，分鐘數 = 自當日 00:00 起算（NFR-005、research 決策 6）。
+  '''
+}
+
+// ───────── 場次快照（catalog，sessions.json） ─────────
+
+Enum cinema {
+  xinyi_vieshow   // 台北信義威秀
+  songren_muvie   // 松仁威秀（官網表頭「MUVIE」，含 TITAN 廳；CL-004）
+  unknown         // 無法對應時，轉場緩衝以 15 分鐘計（FR-010）
+}
+
+Enum session_mark {
+  guest_attending        // ★ 影人出席
+  mandarin_no_subtitle   // ◆ 華語無中英字幕
+  no_english_subtitle    // ▲ 非英語無英文字幕
+  non_ticketed           // ⊚ 非售票活動
+  priority_screening     // 優先特映場（官網有、spec 未提；只顯示）
+}
+
+Table catalog {
+  festival_year int [pk]
+  source_url varchar
+  fetched_at timestamp
+
+  Note: '快照中繼資料；整份 sessions.json 的根。'
+}
+
+Table films {
+  film_id varchar [pk, note: '官網 films/detail/<id>']
+  title varchar
+  runtime_min int [note: '片長（分）']
+  rating varchar [note: '分級，例：普、12+、15+']
+
+  Note: '影片；擁有一或多個場次。使用者以影片為單位分層（FR-002、FR-004）。'
+}
+
+Table venues {
+  venue_name varchar [pk, note: '官網影廳原文，例：信義威秀10廳、TITAN']
+  cinema cinema
+
+  Note: '影廳與所屬影城；決定轉場緩衝（FR-010）。'
+}
+
+Table sessions {
+  session_id varchar [pk, note: '由 film_id + date + start 組成，穩定可重現']
+  film_id varchar
+  date date
+  start_min int [note: '開演，當日分鐘數']
+  end_min int [note: '散場 = start_min + runtime_min，可 > 1440 表示跨午夜']
+  venue_name varchar
+  marks "session_mark[]"
+
+  Note: '單一場次。散場時間依 spec 公式推導（FR-006）。'
+}
+
+Ref: sessions.film_id > films.film_id
+Ref: sessions.venue_name > venues.venue_name
+
+// ───────── 使用者狀態（user_state，localStorage） ─────────
+
+Enum tier {
+  must      // 必看
+  want      // 想看
+  maybe     // 有空再看
+}
+
+Enum ticket_result {
+  pending   // 未處理
+  got       // 搶到（鎖定）
+  missed    // 沒搶到
+}
+
+Table user_state {
+  schema_version int [pk, note: '保存格式版本；分享連結與 localStorage 共用']
+  daily_limit int [null, note: 'null = 不設上限（CL-005）']
+  manual_order "film_id[]" [null, note: '使用者手動調整的搶票順序；重新排程前保留（FR-015）']
+  updated_at timestamp
+
+  Note: '單一使用者的全部狀態根（FR-022）。分享連結編碼整個 user_state（FR-018）。'
+}
+
+Table film_preferences {
+  film_id varchar [pk]
+  tier tier
+  is_hot boolean [note: '手動標記熱門（CL-007）']
+
+  Note: '選片偏好；沒有紀錄 = 未標記，不排程（FR-004）。'
+}
+
+Table unavailable_slots {
+  date date
+  start_min int [null, note: 'null 搭配 end_min null = 整天不可看']
+  end_min int [null]
+
+  indexes {
+    (date, start_min, end_min) [pk]
+  }
+
+  Note: '不可看時段；未設定的時段皆可看（FR-005）。一次套用多日 = 寫入多筆（FR-007）。'
+}
+
+Table ticket_marks {
+  session_id varchar [pk]
+  result ticket_result
+
+  Note: '搶票標記。got 場次重新排程時保留；missed 場次不再排入（FR-019、FR-021）。撤銷 = 刪除該筆。'
+}
+
+Ref: film_preferences.film_id > films.film_id
+Ref: ticket_marks.session_id > sessions.session_id
+
+// ───────── 衍生結果（derived，不保存） ─────────
+
+Enum unscheduled_reason {
+  no_available_session   // 沒有可看場次
+  conflicts_with_must    // 與其他必看片衝堂（附衝堂片名）
+  daily_limit            // 受每日上限限制
+}
+
+Table itinerary_entries {
+  session_id varchar [pk]
+  tier tier
+  is_non_ticketed boolean [note: '⊚ 場次，行程中標示「非售票」（FR-014）']
+
+  Note: '最佳行程；每部影片最多一場，依日期與開演排列（FR-008、FR-013）。'
+}
+
+Table unscheduled_must_films {
+  film_id varchar [pk]
+  reason unscheduled_reason
+  conflict_film_ids "film_id[]" [null]
+
+  Note: '未排入的必看片與原因（FR-012）。'
+}
+
+Table ticket_list_items {
+  film_id varchar [pk]
+  order int
+  current_session_id varchar [note: '目前要搶的場次：排定場次，或沒搶到後切換的下一個備案']
+  backup_session_ids "session_id[]" [note: '備案：★ 優先、再依時間；排程時須與行程其他場次相容（FR-016），搶票中只需與 got 場次相容（FR-020）']
+  exhausted boolean [note: '已無可用場次']
+
+  Note: '搶票清單；不含 ⊚ 場次（FR-017）。順序規則見 spec「狀態與公式」。'
+}
+
+Ref: itinerary_entries.session_id > sessions.session_id
+Ref: ticket_list_items.film_id > films.film_id
