@@ -1,5 +1,5 @@
 import type { Catalog, DuoItineraryEntry, ItineraryParticipant, PartnerData, Session, UnscheduledMustFilm, UserState } from "./types";
-import { assignSessions, explainUnscheduled, makeContext, personInputOf, personalFilmSet, preparePerson } from "./schedule";
+import { assignSessions, explainUnscheduled, makeContext, personInputOf, personalSolution, preparePerson } from "./schedule";
 import { sessionStartAbs } from "./time";
 import { availabilityOf, isSessionAvailable } from "./availability";
 
@@ -30,8 +30,8 @@ export function scheduleDuo(catalog: Catalog, self: UserState, partner: PartnerD
     preparePerson(ctx, personInputOf({ ...self, ticket_marks: ownMarks })),
     preparePerson(ctx, personInputOf({ ...partner, ticket_marks: [] })),
   ];
-  const sets = plans.map((p) => personalFilmSet(p));
-  const { sessions } = assignSessions(plans, sets);
+  const sols = plans.map((p) => personalSolution(p));
+  const { sessions } = assignSessions(plans, sols.map((s) => s.films), sols.map((s) => s.pick));
 
   const bySession = new Map<string, { session: Session; self: boolean; partner: boolean }>();
   sessions.forEach((list, p) => {

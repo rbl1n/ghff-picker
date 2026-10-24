@@ -1,9 +1,8 @@
 import { useSyncExternalStore } from "react";
 import { sortFilmsByCatalogOrder } from "../domain/catalog-order";
 import type { Catalog, DuoItineraryEntry, FilmPreference, ItineraryEntry, PartnerData, PersonSide, SessionPref, UnscheduledMustFilm, UserState } from "../domain/types";
-import { buildTradeoffs, type Tradeoff } from "../domain/tradeoff";
-import { buildItinerary } from "../domain/schedule";
-import { scheduleDuo } from "../domain/duo";
+import type { Tradeoff } from "../domain/tradeoff";
+import { computePlan, type PlanResult } from "../domain/plan";
 import { initTierRanks } from "../domain/order";
 import { migrateToV3 } from "../state/migrate";
 import { SCHEMA_VERSION, loadState, saveState } from "../state/storage";
@@ -214,6 +213,46 @@ export function scheduleSignature(u: UserState): string {
   return JSON.stringify(u.partner ? [...own(u), own(u.partner)] : own(u));
 }
 
+let worker: Worker | null = null;
+let requestId = 0;
+const pendingInputs = new Map<number, { catalog: Catalog; input: UserState; sig: string }>();
+
+function finishSchedule(id: number, sig: string, result: PlanResult): void {
+  pendingInputs.delete(id);
+  if (id !== requestId) return; // 已有較新的排程要求，捨棄舊結果
+  set({ schedule: { sig, ...result }, scheduling: false });
+}
+
+/** 主執行緒備援（沒有 Worker，或 Worker 出錯時）：先讓畫面顯示「排程中」再算 */
+function computeOnMainThread(id: number): void {
+  setTimeout(() => {
+    const job = pendingInputs.get(id);
+    if (job) finishSchedule(id, job.sig, computePlan(job.catalog, job.input));
+  }, 0);
+}
+
+function ensureWorker(): Worker | null {
+  if (worker) return worker;
+  if (typeof Worker === "undefined") return null;
+  try {
+    const w = new Worker(new URL("./schedule.worker.ts", import.meta.url), { type: "module" });
+    w.onmessage = (e: MessageEvent<{ id: number; result: PlanResult }>) => {
+      const job = pendingInputs.get(e.data.id);
+      if (job) finishSchedule(e.data.id, job.sig, e.data.result);
+    };
+    w.onerror = () => {
+      // Worker 載入或執行失敗：改在主執行緒算尚未完成的要求
+      worker = null;
+      w.terminate();
+      for (const id of pendingInputs.keys()) computeOnMainThread(id);
+    };
+    worker = w;
+  } catch {
+    worker = null;
+  }
+  return worker;
+}
+
 function compute(): void {
   wantSchedule = false;
   if (snap.catalog.status !== "ready") return;
@@ -221,17 +260,11 @@ function compute(): void {
   // 一般排程只看分層、時段與上限；「依搶到結果重新排程」才把搶票標記納入
   const input = wantMarks ? snap.user : { ...snap.user, ticket_marks: [] };
   wantMarks = false;
-  let result: Pick<Schedule, "itinerary" | "duo" | "unscheduled" | "tradeoffs">;
-  if (input.partner) {
-    const duo = scheduleDuo(catalog, input, input.partner);
-    const mine: ItineraryEntry[] = duo.entries
-      .filter((e) => e.participant !== "partner")
-      .map((e) => ({ session_id: e.session_id, tier: e.tier!, is_non_ticketed: e.is_non_ticketed, participant: e.participant, partner_tier: e.partner_tier }));
-    result = { itinerary: mine, duo: duo.entries, unscheduled: duo.unscheduled, tradeoffs: buildTradeoffs(catalog, input, input.partner, duo) };
-  } else {
-    result = { ...buildItinerary(catalog, input), duo: null, tradeoffs: [] };
-  }
-  set({ schedule: { sig: scheduleSignature(snap.user), ...result }, scheduling: false });
+  const id = ++requestId;
+  pendingInputs.set(id, { catalog, input, sig: scheduleSignature(snap.user) });
+  const w = ensureWorker();
+  if (w) w.postMessage({ id, catalog, input });
+  else computeOnMainThread(id);
 }
 
 /** 依目前條件重新排程；先讓畫面顯示「排程中」再計算。withMarks：保留已搶到、避開沒搶到的場次 */
