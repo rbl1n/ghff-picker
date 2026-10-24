@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { createBdd, type DataTable } from "playwright-bdd";
-import { Given, When, Then, expect, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
+import { Given, When, Then, expect, expectFilterTitles, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
 import { TIER_LABEL_TO_ENUM } from "../../support/tables";
 import {
   applyManualOrder,
@@ -169,12 +169,35 @@ When("觀眾用手機開啟該分享連結並確認取代", async ({ page }) => 
   await phoneImport(phoneOf(page), bState(page).phoneUrl!);
 });
 
+// 004
+Then("手機的選片頁 {string} 篩選列出的影片如下：", async ({ page, world }, filter: string, table: DataTable) => {
+  const phone = phoneOf(page);
+  await phone.goto(new URL("#/pick", phone.url()).toString());
+  await phone.getByTestId("film-card").first().waitFor();
+  await expectFilterTitles(phone, world, filter, table.hashes().map((r) => r["片名"]));
+});
+
 // T135
 Then("選片頁顯示影片層級如下：", async ({ page, world }, dataTable: DataTable) => {
   const rows = dataTable.hashes();
   const check = async () => {
     await navLink(page, "選片").click();
-    for (const r of rows) {
+    // 004：不看的片只在「不看」篩選列出，三個層級都不啟用、「不看」啟用
+    const skippedRows = rows.filter((r) => r["層級"] === "不看");
+    if (skippedRows.length) {
+      await page.locator(".chip", { hasText: "不看" }).click();
+      for (const r of skippedRows) {
+        const card = filmCard(page, r["片名"]);
+        await expect(card, r["片名"]).toBeVisible();
+        await expect(card.getByRole("button", { name: "不看", exact: true })).toHaveAttribute("aria-pressed", "true");
+        for (const label of ["必看", "想看", "有空再看"]) {
+          await expect(card.getByRole("button", { name: label, exact: true })).toHaveAttribute("aria-pressed", "false");
+        }
+      }
+      await page.locator(".chip", { hasText: "全部" }).click();
+      for (const r of skippedRows) await expect(filmCard(page, r["片名"]), `${r["片名"]} 不在全部清單`).toHaveCount(0);
+    }
+    for (const r of rows.filter((x) => x["層級"] !== "不看")) {
       const card = filmCard(page, r["片名"]);
       await expect(card, r["片名"]).toBeVisible();
       for (const label of ["必看", "想看", "有空再看"]) {
@@ -190,7 +213,10 @@ Then("選片頁顯示影片層級如下：", async ({ page, world }, dataTable: 
     for (const r of rows) {
       const film = cat.films.find((f) => f.title === r["片名"]);
       const pref = state.film_preferences.find((f) => f.film_id === film?.film_id);
-      if (r["層級"] === "未標記") expect(pref, `${r["片名"]} 不應有層級`).toBeUndefined();
+      if (r["層級"] === "不看") {
+        expect(state.skipped_film_ids ?? [], `${r["片名"]} 不看`).toContain(film?.film_id);
+        expect(pref, `${r["片名"]} 不應有層級`).toBeUndefined();
+      } else if (r["層級"] === "未標記") expect(pref, `${r["片名"]} 不應有層級`).toBeUndefined();
       else expect(pref?.tier, `${r["片名"]} 層級`).toBe(TIER_LABEL_TO_ENUM[r["層級"]]);
     }
   };

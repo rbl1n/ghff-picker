@@ -130,6 +130,18 @@ Table film_preferences {
   '''
 }
 
+Table skipped_films {
+  film_id varchar [pk]
+
+  Note: '''
+  不看（004）：使用者明確不想看的影片，保存為 user_state 的選填欄位 `skipped_film_ids`（film_id[]；沒有欄位或空陣列 = 沒有不看）。
+  - 與 film_preferences 互斥：同一部片不會同時在兩邊；標為不看 = 移除該片的 film_preferences 紀錄（原層名次遞補）並加入此表；標為任一層級 = 移出此表。
+  - 對排程與搶票與「未標記」相同（不排入、不進搶票清單、不當必看），只是在選片頁的「全部」「未標記」篩選中隱藏，「不看」篩選才列出，方便取消。
+  - 不改 schema_version（仍為 3）：欄位選填，1、2、3 版舊資料沒有此欄位時照常讀取，遷移規則不變；分享連結 payload 的 state 一併帶出。
+  - 同伴（partner）同樣可有 `skipped_film_ids`（選填）；同伴的不看只代表同伴不看這部片（沒有層級），不影響排程規則。
+  '''
+}
+
 Table day_availability {
   date date [pk]
 

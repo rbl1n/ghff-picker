@@ -2,12 +2,13 @@ import type { DataTable } from "playwright-bdd";
 import {
   Given,
   Then,
+  When,
+  openLanding,
   TIER_LABEL_TO_ENUM,
   buildCatalog,
   buildState,
   dateDisp,
   expect,
-  expandCard,
   filmCard,
   filmIdOf,
   navLink,
@@ -58,6 +59,12 @@ Given("觀眾已標記影片層級如下：", async ({ page, world }, table: Dat
   for (const r of table.hashes()) {
     world.prefs.push({ title: r["片名"], tier: TIER_LABEL_TO_ENUM[r["層級"]], is_hot: (r["熱門"] ?? "").trim() === "是" });
   }
+  await reapplyState(page, world, "選片");
+});
+
+// 004：不看與三個層級互斥；Given 只寫入預載狀態
+Given("觀眾已把以下影片標為不看：", async ({ page, world }, table: DataTable) => {
+  for (const r of table.hashes()) world.skipped.push(r["片名"]);
   await reapplyState(page, world, "選片");
 });
 
@@ -161,7 +168,6 @@ Then("{string} 顯示熱門標示", async ({ page, world }, title: string) => {
   await openTab(page, world, "選片");
   const card = filmCard(page, title);
   await expect(card.getByTestId("hot-badge")).toBeVisible();
-  await expandCard(card);
   await expect(card.getByRole("checkbox", { name: /熱門/ })).toBeChecked();
   const fid = filmIdOf(world, title);
   await expect
@@ -314,4 +320,13 @@ Then("行程頁依日期顯示以下場次：", async ({ page, world }, table: D
     .map((r) => [r["日期"], r["開演"], r["散場"], r["片名"], r["影廳"], r["層級"], ...(hasParticipant ? [norm(r["參與者"])] : [])].join("|"))
     .sort();
   expect(computed).toEqual(shown);
+});
+
+// 004：預設所有 context 已看過使用說明；這個 Given 以 cookie 讓 init script 不預載「已看過」記錄
+Given("觀眾是第一次使用，尚未看過使用說明", async ({ context, baseURL }) => {
+  await context.addCookies([{ name: "ghff_first_time", value: "1", url: baseURL ?? "http://127.0.0.1:4173" }]);
+});
+
+When("觀眾開啟網站首頁", async ({ page, world }) => {
+  await openLanding(page, world);
 });

@@ -10,6 +10,8 @@ import {
   dateDisp,
   expect,
   expandCard,
+  expectFilterTitles,
+  TIER_BUTTON,
   filmCard,
   filmIdOf,
   norm,
@@ -37,8 +39,12 @@ Given("場次資料無法載入", async ({ world }) => {
 When("觀眾把 {string} 標為 {string}", async ({ page, world }, title: string, tier: string) => {
   await openTab(page, world, "選片");
   const card = filmCard(page, title);
+  // 004：不看的片在預設清單隱藏，要先切到「不看」篩選才找得到
+  const fromSkipped = (await card.count()) === 0;
+  if (fromSkipped) await page.locator(".chip", { hasText: "不看" }).click();
   await card.getByRole("button", { name: tier, exact: true }).click();
-  await expect(card.getByRole("button", { name: tier, exact: true })).toHaveAttribute("aria-pressed", "true");
+  if (fromSkipped) await expect(card).toHaveCount(0);
+  else await expect(card.getByRole("button", { name: tier, exact: true })).toHaveAttribute("aria-pressed", "true");
   // 權威狀態：該片在目標層最後，各層名次仍從 1 連續
   const fid = filmIdOf(world, title);
   await expect
@@ -112,16 +118,46 @@ When("觀眾開啟工具", async ({ page, world }) => {
 When("觀眾取消 {string} 的標記", async ({ page, world }, title: string) => {
   await openTab(page, world, "選片");
   const card = filmCard(page, title);
-  await card.getByRole("button", { pressed: true }).click();
-  await expect(card.getByRole("button", { pressed: true })).toHaveCount(0);
+  await card.getByRole("button", { pressed: true, name: TIER_BUTTON }).click();
+  await expect(card.getByRole("button", { pressed: true, name: TIER_BUTTON })).toHaveCount(0);
 });
 
 When("觀眾把 {string} 標為熱門", async ({ page, world }, title: string) => {
   await openTab(page, world, "選片");
   const card = filmCard(page, title);
-  await expandCard(card);
+  // 不展開卡片：熱門開關在卡片外觀上
+  expect(await card.locator("details").first().evaluate((e) => (e as HTMLDetailsElement).open), "卡片應維持收合").toBe(false);
+  const box = await card.getByRole("checkbox", { name: /熱門/ }).locator("xpath=ancestor::label").boundingBox();
+  expect(box!.height, "觸控目標 ≥ 44px").toBeGreaterThanOrEqual(44);
   await card.getByRole("checkbox", { name: /熱門/ }).check();
   await expect(card.getByTestId("hot-badge")).toBeVisible();
+  expect(await card.locator("details").first().evaluate((e) => (e as HTMLDetailsElement).open), "卡片仍收合").toBe(false);
+});
+
+// 004：不看與三個層級互斥；標為不看後從預設清單消失
+When("觀眾把 {string} 標為不看", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const card = filmCard(page, title);
+  await card.getByRole("button", { name: "不看", exact: true }).click();
+  await expect(card).toHaveCount(0);
+  const fid = filmIdOf(world, title);
+  await expect.poll(async () => (await storedOrDefault(page)).skipped_film_ids?.includes(fid) ?? false).toBe(true);
+  expect((await storedOrDefault(page)).film_preferences.some((p) => p.film_id === fid), "不看與層級互斥").toBe(false);
+  expectContiguousRanks(prefsOf(await readStateOrEmpty(page)));
+});
+
+When("觀眾取消 {string} 的不看", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  await page.locator(".chip", { hasText: "不看" }).click();
+  const card = filmCard(page, title);
+  await card.getByRole("button", { name: "不看", exact: true }).click();
+  await expect(card).toHaveCount(0);
+  const fid = filmIdOf(world, title);
+  await expect.poll(async () => (await storedOrDefault(page)).skipped_film_ids?.includes(fid) ?? false).toBe(false);
+});
+
+Then("選片頁 {string} 篩選列出的影片如下：", async ({ page, world }, filter: string, table: DataTable) => {
+  await expectFilterTitles(page, world, filter, table.hashes().map((r) => r["片名"]));
 });
 
 Then("選片頁顯示 {string} 的場次如下：", async ({ page, world }, title: string, table: DataTable) => {
@@ -159,7 +195,7 @@ Then("畫面顯示標記說明如下：", async ({ page }, table: DataTable) => 
 
 Then("{string} 的層級顯示為 {string}", async ({ page, world }, title: string, tier: string) => {
   const card = filmCard(page, title);
-  const pressed = card.getByRole("button", { pressed: true });
+  const pressed = card.getByRole("button", { pressed: true, name: TIER_BUTTON });
   if (tier === "未標記") {
     await expect(pressed).toHaveCount(0);
   } else {
@@ -179,9 +215,12 @@ Then("選片頁頁首計數如下：", async ({ page }, table: DataTable) => {
   const text = norm(await counts.textContent());
   const st = await storedOrDefault(page);
   for (const r of table.hashes()) {
-    expect(TIER_LABELS).toContain(r["層級"] as (typeof TIER_LABELS)[number]);
+    expect([...TIER_LABELS, "不看"]).toContain(r["層級"]);
     expect(text).toMatch(new RegExp(`${r["數量"]}\\s*${r["層級"]}`));
-    const n = st.film_preferences.filter((p) => p.tier === TIER_LABEL_TO_ENUM[r["層級"]]).length;
+    const n =
+      r["層級"] === "不看"
+        ? (st.skipped_film_ids ?? []).length
+        : st.film_preferences.filter((p) => p.tier === TIER_LABEL_TO_ENUM[r["層級"]]).length;
     expect(n).toBe(Number(r["數量"]));
   }
 });

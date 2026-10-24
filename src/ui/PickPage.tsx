@@ -1,5 +1,5 @@
 import { memo, useMemo, useState } from "react";
-import type { Catalog, DayAvailability, Film, FilmPreference, Session, Tier } from "../domain/types";
+import type { Catalog, DayAvailability, Film, FilmPreference, Session, Tier, UserState } from "../domain/types";
 import { isSessionAvailable } from "../domain/availability";
 import { appendToTier, moveWithinTier, removeFromTier, tierOrder } from "../domain/order";
 import { sessionStartAbs } from "../domain/time";
@@ -9,23 +9,47 @@ import { runSchedule, updateUser, useStore } from "./store";
 
 const NO_AVAILABILITY: DayAvailability[] = [];
 
-type Filter = "all" | "marked" | "none";
+type Filter = "all" | "marked" | "none" | "skipped";
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "全部" },
   { key: "marked", label: "已標記" },
   { key: "none", label: "未標記" },
+  { key: "skipped", label: "不看" },
 ];
 
 export function PickPage() {
   return <CatalogGate>{(catalog) => <PickContent catalog={catalog} />}</CatalogGate>;
 }
 
-/** 新標記或改層的影片排在目標層最後，原層與取消標記後名次遞補（domain/order） */
+/** 去掉某部片的不看；沒有不看紀錄時回傳原物件，避免多寫一個空欄位 */
+function without(skipped: string[] | undefined, filmId: string): string[] | undefined {
+  return skipped?.includes(filmId) ? skipped.filter((id) => id !== filmId) : skipped;
+}
+
+/** 新標記或改層的影片排在目標層最後，原層與取消標記後名次遞補（domain/order）；標任一層級會清除該片的不看 */
 function setTier(filmId: string, tier: Tier | null): void {
-  updateUser((s) => ({
-    ...s,
-    film_preferences: tier === null ? removeFromTier(s.film_preferences, filmId) : appendToTier(s.film_preferences, filmId, tier),
-  }));
+  updateUser((s) => {
+    const next: UserState = {
+      ...s,
+      film_preferences: tier === null ? removeFromTier(s.film_preferences, filmId) : appendToTier(s.film_preferences, filmId, tier),
+    };
+    const skipped = tier === null ? s.skipped_film_ids : without(s.skipped_film_ids, filmId);
+    if (skipped !== s.skipped_film_ids) next.skipped_film_ids = skipped;
+    return next;
+  });
+}
+
+/** 不看與三個層級互斥：標為不看會移除層級紀錄（原層名次遞補）；再按一次取消不看 */
+function setSkipped(filmId: string, skip: boolean): void {
+  updateUser((s) => {
+    if (!skip) return { ...s, skipped_film_ids: without(s.skipped_film_ids, filmId) ?? [] };
+    const ids = s.skipped_film_ids ?? [];
+    return {
+      ...s,
+      film_preferences: removeFromTier(s.film_preferences, filmId),
+      skipped_film_ids: ids.includes(filmId) ? ids : [...ids, filmId],
+    };
+  });
 }
 
 /** 熱門屬於已分層的片；未標記的片被標熱門時以「想看」排在該層最後建立紀錄 */
@@ -96,10 +120,14 @@ function PickContent({ catalog }: { catalog: Catalog }) {
   }, [catalog]);
 
   const prefOf = useMemo(() => new Map(user.film_preferences.map((p) => [p.film_id, p])), [user.film_preferences]);
+  const skipped = useMemo(() => new Set(user.skipped_film_ids ?? []), [user.skipped_film_ids]);
   const counts = TIERS.map((t) => user.film_preferences.filter((p) => p.tier === t).length);
   const q = query.trim();
   const shown = catalog.films.filter((f) => {
     if (q && !f.title.includes(q)) return false;
+    const isSkipped = skipped.has(f.film_id);
+    if (filter === "skipped") return isSkipped;
+    if (isSkipped) return false; // 不看的片只在「不看」篩選列出
     const marked = prefOf.has(f.film_id);
     return filter === "all" || (filter === "marked" ? marked : !marked);
   });
@@ -113,6 +141,10 @@ function PickContent({ catalog }: { catalog: Catalog }) {
             {TIER_LABEL[t]}
           </div>
         ))}
+        <div>
+          <b>{catalog.films.filter((f) => skipped.has(f.film_id)).length}</b>
+          不看
+        </div>
       </div>
       <details className="legend">
         <summary>標記說明</summary>
@@ -147,6 +179,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           film={f}
           sessions={sessionsByFilm.get(f.film_id) ?? []}
           pref={prefOf.get(f.film_id)}
+          skipped={skipped.has(f.film_id)}
           availability={user.availability ?? NO_AVAILABILITY}
         />
       ))}
@@ -162,11 +195,12 @@ const FilmCard = memo(function FilmCard(props: {
   film: Film;
   sessions: Session[];
   pref: FilmPreference | undefined;
+  skipped: boolean;
   availability: DayAvailability[];
 }) {
-  const { film, sessions, pref, availability } = props;
+  const { film, sessions, pref, skipped, availability } = props;
   return (
-    <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""}>
+    <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
       <div className="row">
         <h2>{film.title}</h2>
         <span className="tag">{film.rating}</span>
@@ -190,7 +224,16 @@ const FilmCard = memo(function FilmCard(props: {
             {TIER_LABEL[t]}
           </button>
         ))}
+        <button className="tier skip" aria-pressed={skipped} onClick={() => setSkipped(film.film_id, !skipped)}>
+          不看
+        </button>
       </div>
+      {!skipped && (
+        <label className="hotrow">
+          <input type="checkbox" checked={pref?.is_hot ?? false} onChange={(e) => setHot(film.film_id, e.target.checked)} />
+          熱門（搶票優先）
+        </label>
+      )}
       <details>
         <summary>展開全部場次</summary>
         <ul className="sessions">
@@ -198,10 +241,6 @@ const FilmCard = memo(function FilmCard(props: {
             <SessionRow key={s.session_id} session={s} runtime={film.runtime_min} watchable={isSessionAvailable(s, availability)} />
           ))}
         </ul>
-        <label className="hotrow">
-          <input type="checkbox" checked={pref?.is_hot ?? false} onChange={(e) => setHot(film.film_id, e.target.checked)} />
-          標為熱門（搶票時優先）
-        </label>
       </details>
     </article>
   );

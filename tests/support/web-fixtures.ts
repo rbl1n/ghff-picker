@@ -28,9 +28,27 @@ export async function readUserState(page: Page): Promise<UserState | null> {
   return raw ? (JSON.parse(raw) as UserState) : null;
 }
 
+/**
+ * 預設所有 context 都已看過使用說明（避免對話框擋住其他流程）。
+ * 例外：Given「觀眾是第一次使用」會設 cookie ghff_first_time=1，init script 看到就不預載。
+ */
+export const ONBOARDING_KEY = "ghff-picker:onboarding-seen";
+export async function seedOnboardingSeen(context: BrowserContext): Promise<void> {
+  await context.addInitScript((key) => {
+    if (!document.cookie.includes("ghff_first_time=1")) {
+      try {
+        window.localStorage.setItem(key, "1");
+      } catch {
+        // 忽略
+      }
+    }
+  }, ONBOARDING_KEY);
+}
+
 /** 第二個 browser context，代表「另一台裝置」 */
 export async function newOtherDevice(browser: Browser): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext();
+  await seedOnboardingSeen(context);
   const page = await context.newPage();
   return { context, page };
 }

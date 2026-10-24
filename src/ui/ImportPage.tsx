@@ -74,6 +74,7 @@ function PersonalDialog({ decoded }: { decoded: DecodedShare }) {
     daily_limit: state.daily_limit,
     film_preferences: state.film_preferences,
     availability: state.availability ?? [],
+    ...(state.skipped_film_ids?.length ? { skipped_film_ids: state.skipped_film_ids } : {}),
   });
   const finish = () => window.location.replace("#/itinerary");
 

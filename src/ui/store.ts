@@ -43,6 +43,8 @@ export function emptyUserState(): UserState {
 /** 讀到 1、2 版的保存：在記憶體轉成 3（不可看時段相減）；層內名次待場次表就緒後依影片順序初始化，下次保存才寫回 3 */
 const stored = loadState();
 const storedLegacy = stored !== null && stored.schema_version < SCHEMA_VERSION;
+/** 開啟時本機是否已有保存的設定（第一次使用的判斷） */
+export const hadStoredState = stored !== null;
 let pendingSelfRanks = storedLegacy;
 let pendingPartnerRanks = storedLegacy && !!stored?.partner;
 

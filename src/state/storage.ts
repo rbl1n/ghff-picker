@@ -28,6 +28,10 @@ function hasTimeSettings(v: Record<string, unknown>): boolean {
   return (v.availability === undefined || isAvailability(v.availability)) && (Array.isArray(v.unavailable_slots) || isAvailability(v.availability));
 }
 
+function isSkipped(value: unknown): boolean {
+  return value === undefined || (Array.isArray(value) && value.every((x) => typeof x === "string"));
+}
+
 function isPartnerData(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const p = value as Record<string, unknown>;
@@ -35,7 +39,8 @@ function isPartnerData(value: unknown): boolean {
     typeof p.display_name === "string" &&
     (p.daily_limit === null || (typeof p.daily_limit === "number" && Number.isInteger(p.daily_limit) && p.daily_limit >= 0)) &&
     Array.isArray(p.film_preferences) &&
-    hasTimeSettings(p)
+    hasTimeSettings(p) &&
+    isSkipped(p.skipped_film_ids)
   );
 }
 
@@ -52,6 +57,7 @@ export function isUserState(value: unknown): value is UserState {
     (v.manual_order === null || (Array.isArray(v.manual_order) && v.manual_order.every((x) => typeof x === "string"))) &&
     Array.isArray(v.film_preferences) &&
     hasTimeSettings(v) &&
+    isSkipped(v.skipped_film_ids) &&
     Array.isArray(v.ticket_marks)
   );
 }

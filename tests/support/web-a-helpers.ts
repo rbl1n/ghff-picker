@@ -21,6 +21,8 @@ export interface WebWorld {
   prefs: { title: string; tier: Tier; is_hot: boolean }[];
   slots: { date: string; start_min: number | null; end_min: number | null }[];
   dailyLimit: number | null;
+  /** 不看的片名（004） */
+  skipped: string[];
   marks: PendingMark[];
   /** 是否已經開啟過網站（之後 Given 要直接寫 localStorage 並重新載入） */
   opened: boolean;
@@ -36,6 +38,7 @@ export function createWebWorld(): WebWorld {
     prefs: [],
     slots: [],
     dailyLimit: null,
+    skipped: [],
     marks: [],
     opened: false,
     routesReady: false,
@@ -44,10 +47,15 @@ export function createWebWorld(): WebWorld {
 }
 
 /** web 共用 test：所有 web steps 檔都應該用這個 test / Given / When / Then */
+import { seedOnboardingSeen } from "./web-fixtures";
 export const test = base.extend<{ world: WebWorld }>({
   // eslint-disable-next-line no-empty-pattern
   world: async ({}, use) => {
     await use(createWebWorld());
+  },
+  context: async ({ context }, use) => {
+    await seedOnboardingSeen(context);
+    await use(context);
   },
 });
 export const { Given, When, Then } = createBdd(test);
@@ -155,6 +163,7 @@ export function buildState(world: WebWorld): UserState {
   s.daily_limit = world.dailyLimit;
   s.film_preferences = ranked(world.prefs.map((p) => ({ film_id: filmIdOf(world, p.title), tier: p.tier, is_hot: p.is_hot })));
   s.availability = availFromSlots(world.slots);
+  if (world.skipped.length) s.skipped_film_ids = world.skipped.map((t) => filmIdOf(world, t));
   s.ticket_marks = world.marks.map((m) => ({
     session_id: sessionOf(world, m.title, m.sessionText).session_id,
     result: m.result,
@@ -179,6 +188,7 @@ function sortedNorm(s: UserState) {
     manual_order: s.manual_order,
     film_preferences: [...prefsOf(s)].sort((a, b) => a.film_id.localeCompare(b.film_id)),
     availability: [...availOf(s)].sort((a, b) => a.date.localeCompare(b.date)),
+    skipped_film_ids: [...(s.skipped_film_ids ?? [])].sort(),
     ticket_marks: [...s.ticket_marks].sort((a, b) => a.session_id.localeCompare(b.session_id)),
   };
 }
@@ -206,7 +216,7 @@ async function prepare(page: Page, world: WebWorld): Promise<void> {
         }),
   );
   const hasState =
-    world.prefs.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
+    world.prefs.length > 0 || world.skipped.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
   if (hasState) {
     const json = JSON.stringify(storageStateOf(world));
     await page.addInitScript(
@@ -232,7 +242,7 @@ export async function openTab(page: Page, world: WebWorld, label: TabLabel): Pro
     return;
   }
   const url = page.url();
-  if (!url.includes(`#/${hash}`) && !(hash === "pick" && !url.includes("#/"))) {
+  if (!url.includes(`#/${hash}`) && !(hash === "slots" && !url.includes("#/"))) {
     await navLink(page, label).click();
   }
 }
@@ -286,4 +296,68 @@ export async function expandCard(card: Locator): Promise<void> {
 export const MARK_NAME = ["影人出席", "華語無中英字幕", "非英語無英文字幕", "非售票活動"];
 
 export const TIER_LABELS = ["必看", "想看", "有空再看"] as const;
+/** 卡片上已啟用的層級按鈕（不含「不看」） */
+export const TIER_BUTTON = /^(必看|想看|有空再看)$/;
 export { TIER_LABEL_TO_ENUM };
+
+/** 004：切到選片頁的篩選 chip，回傳目前列出的片名（依畫面順序） */
+export async function titlesUnderFilter(page: Page, filter: string): Promise<string[]> {
+  const chip = page.getByRole("button", { name: filter, exact: true }).filter({ has: page.locator("xpath=self::*[contains(@class,'chip')]") });
+  await chip.click();
+  await expect(chip).toHaveAttribute("aria-pressed", "true");
+  // 等清單穩定：兩次讀取一致
+  let prev = "";
+  await expect
+    .poll(async () => {
+      const cur = (await page.getByTestId("film-card").evaluateAll((els) => els.map((e) => e.getAttribute("data-title")))).join("、");
+      const stable = cur === prev;
+      prev = cur;
+      return stable;
+    })
+    .toBe(true);
+  return page.getByTestId("film-card").evaluateAll((els) => els.map((e) => e.getAttribute("data-title") ?? ""));
+}
+
+/** 004：驗證某篩選列出的片名、與保存的 skipped_film_ids 一致；重新載入後再驗一次 */
+export async function expectFilterTitles(page: Page, world: WebWorld, filter: string, expected: string[]): Promise<void> {
+  const check = async () => {
+    expect(await titlesUnderFilter(page, filter), `${filter} 篩選`).toEqual(expected);
+    const st = await storedOrDefault(page);
+    const skipped = new Set(st.skipped_film_ids ?? []);
+    const cat = world.catalog!;
+    const idOf = (t: string) => cat.films.find((f) => f.title === t)!.film_id;
+    const prefIds = new Set(st.film_preferences.map((p) => p.film_id));
+    const want = cat.films
+      .filter((f) => {
+        if (filter === "不看") return skipped.has(f.film_id);
+        if (skipped.has(f.film_id)) return false;
+        return filter === "全部" || (filter === "已標記" ? prefIds.has(f.film_id) : !prefIds.has(f.film_id));
+      })
+      .map((f) => f.title);
+    expect(want).toEqual(expected);
+    for (const t of expected) if (filter === "不看") expect(skipped.has(idOf(t))).toBe(true);
+    for (const id of skipped) expect(prefIds.has(id), "不看與層級互斥").toBe(false);
+  };
+  await check();
+  await page.reload();
+  await check();
+}
+
+/** 004：開啟網站首頁（無 hash），首次開啟時先攔截場次快照與預載狀態 */
+export async function openLanding(page: Page, world: WebWorld): Promise<void> {
+  if (!world.opened) {
+    await prepare(page, world);
+    world.opened = true;
+  }
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "主要分頁" }).waitFor({ state: "visible" });
+}
+
+/** 004：以指定 hash 開啟（例如分享連結），首次開啟時先攔截場次快照與預載狀態 */
+export async function openUrl(page: Page, world: WebWorld, url: string): Promise<void> {
+  if (!world.opened) {
+    await prepare(page, world);
+    world.opened = true;
+  }
+  await page.goto(url);
+}

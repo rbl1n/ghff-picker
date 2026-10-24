@@ -2,7 +2,7 @@
 import { expect, type Browser, type Locator, type Page, type BrowserContext } from "@playwright/test";
 import type { Catalog, UserState } from "../../src/domain/types";
 import { STORAGE_KEY } from "../../src/state/storage";
-import { interceptSessions } from "./web-fixtures";
+import { interceptSessions, seedOnboardingSeen } from "./web-fixtures";
 import { dateDisp, navLink, openTab, pressSchedule, storedOrDefault, type WebWorld } from "./web-a-helpers";
 import { minToHhmm } from "./tables";
 import { computePlan } from "./web-003-helpers";
@@ -172,6 +172,7 @@ export async function createPhone(
     hasTouch: true,
   });
   allContexts.push(context);
+  await seedOnboardingSeen(context);
   const page = await context.newPage();
   await interceptSessions(page, catalog);
   return { context, page };

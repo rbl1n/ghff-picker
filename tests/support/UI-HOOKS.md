@@ -7,7 +7,7 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 
 | 頁面 | 定位點 | 屬性／行為 | 使用檔 |
 | --- | --- | --- | --- |
-| 全域 | `nav` aria-label=`主要分頁`，內含 link：`選片` `時段` `行程` `搶票` `分享`（accessible name 完全相符） | hash 路由：`#/pick` `#/slots` `#/itinerary` `#/tickets` `#/share`；首頁（無 hash）落在選片 | web-a-helpers（navLink/openTab）、行程/搶票/分享與保存 steps |
+| 全域 | `nav` aria-label=`主要分頁`，內含 link（由左到右）：`時段` `選片` `行程` `搶票` `分享`（accessible name 完全相符） | hash 路由：`#/pick` `#/slots` `#/itinerary` `#/tickets` `#/share`；首頁（無 hash）落在時段（004） | web-a-helpers（navLink/openTab）、行程/搶票/分享與保存 steps |
 | 全域 | 錯誤訊息文字 | 畫面顯示的錯誤為完整文字節點（`getByText(exact)`），不得出現技術錯誤碼、堆疊、`undefined`、`NaN` | shared.steps |
 | 全域 | 手機 390px 寬 | `main` 內任何元素 right ≤ viewport；ticket-row 內不得 overflow-x 裁切 | shared.steps |
 
@@ -16,12 +16,14 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 | 定位點 | 屬性 | 說明 | 使用檔 |
 | --- | --- | --- | --- |
 | `data-testid=film-card` | `data-title=<片名>` | 每部片一張卡；內含 `<details>`/`summary` 展開，或名稱含「展開」的 button | web-a-helpers(filmCard/expandCard)、選片/時段/shared steps |
-| button `必看` `想看` `有空再看`（卡片內，name 完全相符） | `aria-pressed=true|false`；已啟用者再按＝取消 | 層級切換；任一時刻最多一個 pressed | 選片、分享與保存、行程 steps |
+| button `必看` `想看` `有空再看`（卡片內，name 完全相符） | `aria-pressed=true|false`；已啟用者再按＝取消 | 層級切換；任一時刻最多一個 pressed（不含「不看」） |
+| button `不看`（卡片內，exact） | `aria-pressed`；再按＝取消；與三個層級互斥（004） | 不看的片在「全部」「未標記」篩選隱藏 |
+| 篩選 chips（`aria-pressed`）`全部` `已標記` `未標記` `不看` | `不看` 只列出不看的影片（004） | | 選片、分享與保存、行程 steps |
 | `data-testid=hot-badge` | 卡片內；熱門時可見 | 熱門標示 | shared/選片 steps |
-| checkbox name 含「熱門」（卡片展開後） | checked＝熱門 | 熱門開關 | shared/選片 steps |
+| checkbox name 含「熱門」（卡片外觀上，不必展開；004；不看的片不渲染） | checked＝熱門；觸控目標 ≥ 44px | 熱門開關 | shared/選片 steps |
 | `data-testid=session-row` | 卡片內每場一列，依日期、開演排序 | 文字含 `11/15（日）`、`HH:MM`、`<片長> 分鐘`、影廳、標記名稱（影人出席／華語無中英字幕／非英語無英文字幕／非售票活動）；不可看場次文字含「不可看」 | 選片、時段 steps |
 | 卡片文字含分級（如 `12+`） | | | 選片 steps |
-| `data-testid=tier-counts` | 文字含 `<n> 必看`、`<n> 想看`、`<n> 有空再看` | 頁首計數 | 選片 steps |
+| `data-testid=tier-counts` | 文字含 `<n> 必看`、`<n> 想看`、`<n> 有空再看`、`<n> 不看`（004） | 頁首計數 | 選片 steps |
 | text `標記說明`（可點）→ `data-testid=mark-legend` | 內文含 `<符號> <意義>` 逐列 | 展開後可見 | 選片 steps |
 | `data-testid=load-error` + button `重試` | 載入失敗時顯示；此時不渲染 film-card／session-row | | 選片 steps |
 | link 或 button，文字完全為 `排行程` | 按下後進入行程頁並計算 | | web-a-helpers(pressSchedule) |
@@ -205,3 +207,10 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 - `single-side-stats`（行程頁單方標記統計）與其「只有 … 標記」文字。
 - 行程頁 `兩人沒有共同標記的片，先到選片頁一起挑` 空狀態提示。
 - 搶票頁「每列 `買 2 張`」（改為一起 2／自己 1，見上）。
+
+## 004 不看、熱門外移、時段先於選片、使用說明
+
+- 選片卡：button `不看`（exact，`aria-pressed`）；篩選 chip `全部` `已標記` `未標記` `不看`；`tier-counts` 多一格 `不看`。保存欄位 `skipped_film_ids`（選填，與 `film_preferences` 互斥，隨分享連結帶出）。
+- 熱門 checkbox（name 含「熱門」）在收合的卡片面上，label 高度 ≥ 44px；展開區不再有第二個。不看的片不渲染熱門開關。
+- 時段頁底部 link `下一步：選片`（`#/pick`）；選片頁保留 `排行程`。
+- 使用說明：`data-testid=onboarding-dialog`（role=dialog），`onboarding-progress`（`n/4`）、`onboarding-title`；buttons `上一步` `下一步` `開始使用` `略過`；頁首 button `使用說明`（aria-label，顯示 `?`）。已看過記錄 localStorage `ghff-picker:onboarding-seen`。測試預設由 context init script 預載該記錄；Given `觀眾是第一次使用…` 設 cookie `ghff_first_time=1` 讓它不預載。

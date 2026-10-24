@@ -94,6 +94,8 @@ export interface PartnerData {
   unavailable_slots?: UnavailableSlot[];
   /** 有空時段（003）；未設 = 全天有空 */
   availability?: DayAvailability[];
+  /** 不看（004）：選填；同伴不看 = 同伴不看這部片（沒有層級） */
+  skipped_film_ids?: string[];
 }
 
 export interface UserState {
@@ -110,6 +112,8 @@ export interface UserState {
   unavailable_slots?: UnavailableSlot[];
   /** 有空時段（003）；未設 = 全天有空 */
   availability?: DayAvailability[];
+  /** 不看（004）：選填；與 film_preferences 互斥；沒有欄位或空陣列 = 沒有不看。不排程、不進搶票清單 */
+  skipped_film_ids?: string[];
   ticket_marks: TicketMark[];
 }
 

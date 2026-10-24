@@ -3,6 +3,7 @@ import type { DataTable } from "playwright-bdd";
 import {
   Then,
   When,
+  navLink,
   buildState,
   dateDisp,
   expandCard,
@@ -203,4 +204,21 @@ Then("選片頁的場次可看狀態如下：", async ({ page, world }, table: D
     const s = sessionOf(world, r["片名"], `${r["日期"]} ${r["開演"]}`);
     expect(isSessionAvailable(s, availOf(st)) ? "可看" : "不可看").toBe(r["可看"]);
   }
+});
+
+// 004：先供給（時段）、後需求（選片）
+When("觀眾在時段頁按下「下一步：選片」", async ({ page, world }) => {
+  await openTab(page, world, "時段");
+  await page.getByRole("link", { name: "下一步：選片", exact: true }).click();
+});
+
+Then("底部分頁順序為 {string}", async ({ page }, order: string) => {
+  const names = await page.getByRole("navigation", { name: "主要分頁" }).getByRole("link").allInnerTexts();
+  expect(names.map((n) => n.trim()).join("、")).toBe(order);
+});
+
+Then("畫面停在 {string} 頁", async ({ page }, name: string) => {
+  const link = navLink(page, name as "時段");
+  await expect(link).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();
 });

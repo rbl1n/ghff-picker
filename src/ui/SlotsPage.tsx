@@ -3,7 +3,7 @@ import { addInterval, complementOf, hourCellState, subtractInterval, toggleHour,
 import { formatTime, parseTime } from "../domain/time";
 import type { DayAvailability, UnavailableSlot } from "../domain/types";
 import { dateLabel, weekdayLabel } from "./format";
-import { runSchedule, updateUser, useStore } from "./store";
+import { updateUser, useStore } from "./store";
 
 /** 影展預設日期範圍（11/06–11/22）；金馬影展每年大致落在這段期間 */
 const FESTIVAL_START = "11-06";
@@ -257,8 +257,8 @@ export function SlotsPage() {
         )}
       </section>
 
-      <a className="btn btn-primary btn-block" href="#/itinerary" onClick={() => runSchedule()}>
-        排行程
+      <a className="btn btn-primary btn-block" href="#/pick">
+        下一步：選片
       </a>
     </>
   );
