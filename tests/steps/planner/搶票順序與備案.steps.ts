@@ -78,7 +78,8 @@ Then("搶票清單的備案場次如下：", async ({}, table: DataTable) => {
     for (const b of backups) {
       expect(isSessionWatchable(b, state.unavailable_slots), `備案 ${formatSession(b)} 須在可看時段`).toBe(true);
       for (const o of others) {
-        expect(areSessionsCompatible(b, o, cinemaOfVenue), `備案與行程中 ${formatSession(o)} 須相容`).toBe(true);
+        const [first, second] = b.date < o.date || (b.date === o.date && b.start_min <= o.start_min) ? [b, o] : [o, b];
+        expect(areSessionsCompatible(first, second, cinemaOfVenue), `備案與行程中 ${formatSession(o)} 須相容`).toBe(true);
       }
       if (state.daily_limit !== null) {
         const sameDay = others.filter((o) => o.date === b.date).length;

@@ -1,0 +1,4783 @@
+{
+  "festival_year": 2026,
+  "source_url": "https://www.goldenhorse.org.tw/film/programme/schedule/",
+  "fetched_at": "2026-10-24T09:21:30.352Z",
+  "films": [
+    {
+      "film_id": "4408",
+      "title": "泥娃娃",
+      "runtime_min": 111,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4409",
+      "title": "完美家庭風暴",
+      "runtime_min": 146,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4410",
+      "title": "死亡賭局",
+      "runtime_min": 96,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4411",
+      "title": "野馬九號",
+      "runtime_min": 116,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4416",
+      "title": "克里姆林宮的巫師",
+      "runtime_min": 145,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4418",
+      "title": "橘子味婚禮",
+      "runtime_min": 115,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4419",
+      "title": "醉愛每一天",
+      "runtime_min": 115,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4420",
+      "title": "我們不是什麼",
+      "runtime_min": 128,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4421",
+      "title": "親密怪物",
+      "runtime_min": 115,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4422",
+      "title": "豪宅女僕日記",
+      "runtime_min": 93,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4427",
+      "title": "功夫",
+      "runtime_min": 127,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4428",
+      "title": "蝴蝶果醬的滋味",
+      "runtime_min": 102,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4429",
+      "title": "瘋癲老人日記",
+      "runtime_min": 121,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4430",
+      "title": "告別的年代",
+      "runtime_min": 142,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4431",
+      "title": "腥紅女爵",
+      "runtime_min": 119,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4435",
+      "title": "假如愛有如果",
+      "runtime_min": 164,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4436",
+      "title": "UFO離奇命案",
+      "runtime_min": 86,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4437",
+      "title": "愛到舞春",
+      "runtime_min": 122,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4439",
+      "title": "池畔的夏日憂傷",
+      "runtime_min": 91,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4440",
+      "title": "肚皮拉警報",
+      "runtime_min": 76,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4445",
+      "title": "中場休息 ( 含10分鐘中場休息 )",
+      "runtime_min": 226,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4446",
+      "title": "家的形狀",
+      "runtime_min": 89,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4452",
+      "title": "終極殺鎮",
+      "runtime_min": 91,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4453",
+      "title": "雲朵上的點點名",
+      "runtime_min": 80,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4455",
+      "title": "明月共此時",
+      "runtime_min": 104,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4458",
+      "title": "豬與軍艦",
+      "runtime_min": 108,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4461",
+      "title": "菲律賓女孩",
+      "runtime_min": 100,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4462",
+      "title": "靈魂未知數",
+      "runtime_min": 141,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4463",
+      "title": "暗夜魔嬰",
+      "runtime_min": 92,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4467",
+      "title": "日本昆蟲記",
+      "runtime_min": 123,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4469",
+      "title": "NAZA：附帶損傷",
+      "runtime_min": 77,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4471",
+      "title": "赤色殺意",
+      "runtime_min": 150,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4473",
+      "title": "紅岩小鬼大激鬥",
+      "runtime_min": 91,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4474",
+      "title": "沙河下的祕密",
+      "runtime_min": 95,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4475",
+      "title": "瘦怨",
+      "runtime_min": 112,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4476",
+      "title": "最初的世界",
+      "runtime_min": 115,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4477",
+      "title": "革命練習曲",
+      "runtime_min": 101,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4478",
+      "title": "我們的藍調時光：第1-2集",
+      "runtime_min": 96,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4480",
+      "title": "那張照片裡的我們",
+      "runtime_min": 141,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4481",
+      "title": "坂本日常",
+      "runtime_min": 129,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4482",
+      "title": "有用的人",
+      "runtime_min": 111,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4483",
+      "title": "我蓋了一座小屋想妳",
+      "runtime_min": 78,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4484",
+      "title": "急診室的奇蹟：第1-2集",
+      "runtime_min": 94,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4486",
+      "title": "人類學入門",
+      "runtime_min": 128,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4487",
+      "title": "暗影天使 ( 司法講堂 )",
+      "runtime_min": 129,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4490",
+      "title": "首爾守護者 ( 司法講堂 )",
+      "runtime_min": 72,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4491",
+      "title": "噤聲：她們的故事",
+      "runtime_min": 97,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4495",
+      "title": "黑雨",
+      "runtime_min": 122,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4498",
+      "title": "檢察追緝令 ( 司法講堂 )",
+      "runtime_min": 114,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4499",
+      "title": "熊山記 Sinisusu Tua Pucumayan",
+      "runtime_min": 89,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4500",
+      "title": "以你的記憶審判我",
+      "runtime_min": 122,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4503",
+      "title": "破碎十七 ( 司法講堂 )",
+      "runtime_min": 106,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4504",
+      "title": "紐約同志情與慾",
+      "runtime_min": 97,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4506",
+      "title": "無處安放的青春 ( 司法講堂 )",
+      "runtime_min": 105,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4508",
+      "title": "日光",
+      "runtime_min": 101,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4515",
+      "title": "超派妖姬救地球",
+      "runtime_min": 90,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4517",
+      "title": "餘燼青春",
+      "runtime_min": 101,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4518",
+      "title": "駭人怪物",
+      "runtime_min": 120,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4520",
+      "title": "裝扮遊戲",
+      "runtime_min": 80,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4525",
+      "title": "親愛的不速之客",
+      "runtime_min": 99,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4527",
+      "title": "死亡密碼",
+      "runtime_min": 84,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4528",
+      "title": "破碎之後我們相擁",
+      "runtime_min": 121,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4530",
+      "title": "黑潮",
+      "runtime_min": 106,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4531",
+      "title": "高檔貨",
+      "runtime_min": 102,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4533",
+      "title": "黑天鵝",
+      "runtime_min": 108,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4535",
+      "title": "事到如今還談什麼愛",
+      "runtime_min": 128,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4537",
+      "title": "笑之大學",
+      "runtime_min": 121,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4538",
+      "title": "藍色是太陽的顏色",
+      "runtime_min": 110,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4540",
+      "title": "月亮上的業餘者",
+      "runtime_min": 72,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4543",
+      "title": "兩個油漆匠",
+      "runtime_min": 119,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4547",
+      "title": "獨奏者之舞",
+      "runtime_min": 130,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4555",
+      "title": "迴山",
+      "runtime_min": 110,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4557",
+      "title": "歡迎來到朵莉之家",
+      "runtime_min": 88,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4582",
+      "title": "克里斯馬克：未來式鄉愁",
+      "runtime_min": 76,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4583",
+      "title": "綠洲合唱團：莫帶憤怒回首",
+      "runtime_min": 123,
+      "rating": "12+"
+    },
+    {
+      "film_id": "e913-1yxsqxw",
+      "title": "電影沙龍：金馬✕柏林新世代｜電影如何與年輕觀眾相遇？",
+      "runtime_min": 90,
+      "rating": ""
+    },
+    {
+      "film_id": "4413",
+      "title": "雙生狂花",
+      "runtime_min": 109,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4415",
+      "title": "我們的救贖",
+      "runtime_min": 158,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4433",
+      "title": "生命中最美好的夏令營",
+      "runtime_min": 106,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4438",
+      "title": "陽光女子合唱團",
+      "runtime_min": 134,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4442",
+      "title": "迷霧中的大象",
+      "runtime_min": 108,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4443",
+      "title": "你不屬於這裡",
+      "runtime_min": 154,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4448",
+      "title": "燃燒幻夢",
+      "runtime_min": 118,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4449",
+      "title": "熱帶莊園魅影",
+      "runtime_min": 105,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4450",
+      "title": "夢迴險路",
+      "runtime_min": 163,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4454",
+      "title": "通靈少年神遊中",
+      "runtime_min": 119,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4456",
+      "title": "崩塌之家",
+      "runtime_min": 130,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4466",
+      "title": "歌舞的我們",
+      "runtime_min": 85,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4470",
+      "title": "我的意思是",
+      "runtime_min": 134,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4488",
+      "title": "鼠門秀",
+      "runtime_min": 95,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4489",
+      "title": "人間壞格",
+      "runtime_min": 67,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4493",
+      "title": "我要復仇",
+      "runtime_min": 141,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4494",
+      "title": "跨出溫室的愛戀",
+      "runtime_min": 103,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4497",
+      "title": "刺水",
+      "runtime_min": 63,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4501",
+      "title": "當戀愛顯化時",
+      "runtime_min": 102,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4505",
+      "title": "行過微光之路",
+      "runtime_min": 101,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4507",
+      "title": "當風吹來奈義町",
+      "runtime_min": 110,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4509",
+      "title": "男優阿虎",
+      "runtime_min": 126,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4510",
+      "title": "鰻魚",
+      "runtime_min": 117,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4512",
+      "title": "愛╳死╳藝術家",
+      "runtime_min": 102,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4513",
+      "title": "紅橋下的暖流",
+      "runtime_min": 119,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4519",
+      "title": "尼爾森先生，你殺過人嗎？",
+      "runtime_min": 116,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4523",
+      "title": "無人知曉的孩子們",
+      "runtime_min": 150,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4526",
+      "title": "非常母親",
+      "runtime_min": 129,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4534",
+      "title": "孽子",
+      "runtime_min": 106,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4541",
+      "title": "綿羊偵探團",
+      "runtime_min": 109,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4542",
+      "title": "和我說話",
+      "runtime_min": 69,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4548",
+      "title": "無用之人",
+      "runtime_min": 109,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4560",
+      "title": "南特傑克",
+      "runtime_min": 120,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4563",
+      "title": "南國再見，南國",
+      "runtime_min": 112,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4570",
+      "title": "櫻桃的滋味",
+      "runtime_min": 99,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4572",
+      "title": "盜夢偵探",
+      "runtime_min": 90,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4574",
+      "title": "尤里西斯生命之旅",
+      "runtime_min": 175,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4585",
+      "title": "我就愛搖滾",
+      "runtime_min": 111,
+      "rating": "15+"
+    },
+    {
+      "film_id": "e912-agz1ov",
+      "title": "今村昌平講堂：曹仕翰",
+      "runtime_min": 40,
+      "rating": ""
+    },
+    {
+      "film_id": "e911-15owkem",
+      "title": "大師講堂：凱爾巴爾達",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "e912-131lvh4",
+      "title": "今村昌平講堂：天願大介",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "e912-18wp69t",
+      "title": "今村昌平講堂：西川美和",
+      "runtime_min": 40,
+      "rating": ""
+    },
+    {
+      "film_id": "4414",
+      "title": "女孩",
+      "runtime_min": 124,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4417",
+      "title": "我親愛的怪孩子",
+      "runtime_min": 108,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4423",
+      "title": "愛的對峙",
+      "runtime_min": 135,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4424",
+      "title": "泡泡糖女孩 ( 業界限定場 )",
+      "runtime_min": 99,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4426",
+      "title": "謊言生活",
+      "runtime_min": 110,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4432",
+      "title": "第四幕",
+      "runtime_min": 113,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4434",
+      "title": "就是柳柳的他",
+      "runtime_min": 105,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4441",
+      "title": "沙央",
+      "runtime_min": 100,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4451",
+      "title": "順風順水",
+      "runtime_min": 89,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4457",
+      "title": "果樹下的戀愛夢",
+      "runtime_min": 97,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4460",
+      "title": "一路狂奔",
+      "runtime_min": 92,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4464",
+      "title": "善男信女",
+      "runtime_min": 97,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4468",
+      "title": "失落殘響",
+      "runtime_min": 128,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4492",
+      "title": "牧一：女人村傳奇",
+      "runtime_min": 93,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4496",
+      "title": "搭錯車",
+      "runtime_min": 93,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4514",
+      "title": "不軌劇場",
+      "runtime_min": 87,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4545",
+      "title": "富士子不能輸",
+      "runtime_min": 95,
+      "rating": "0+"
+    },
+    {
+      "film_id": "e913-19m7rwm",
+      "title": "電影沙龍：電影如何成為我們｜策展人的來訪",
+      "runtime_min": 90,
+      "rating": ""
+    },
+    {
+      "film_id": "e911-x1b0sh",
+      "title": "大師講堂：三谷幸喜",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "e911-1g6spiz",
+      "title": "大師講堂：戴倫艾洛諾夫斯基",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "4412",
+      "title": "雙囍",
+      "runtime_min": 130,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4444",
+      "title": "花臉貓：修羅道",
+      "runtime_min": 102,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4516",
+      "title": "狂忘警探 ( 業界限定場 )",
+      "runtime_min": 87,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4521",
+      "title": "我們不是陌生人 ( 業界限定場 )",
+      "runtime_min": 157,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4551",
+      "title": "那道陽光在外明媚",
+      "runtime_min": 84,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4552",
+      "title": "離開即景",
+      "runtime_min": 82,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4553",
+      "title": "嘉翠麗",
+      "runtime_min": 67,
+      "rating": "0+"
+    },
+    {
+      "film_id": "4554",
+      "title": "快要到達家了",
+      "runtime_min": 96,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4556",
+      "title": "魔法星圖",
+      "runtime_min": 85,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4558",
+      "title": "你不在這個蛋糕裡",
+      "runtime_min": 46,
+      "rating": "12+"
+    },
+    {
+      "film_id": "4565",
+      "title": "果",
+      "runtime_min": 56,
+      "rating": "18+"
+    },
+    {
+      "film_id": "4568",
+      "title": "蝶變",
+      "runtime_min": 90,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4573",
+      "title": "理性與感性",
+      "runtime_min": 136,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4576",
+      "title": "凡爾賽拜金女",
+      "runtime_min": 123,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4577",
+      "title": "三隻小豬",
+      "runtime_min": 61,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4579",
+      "title": "追逐蝴蝶",
+      "runtime_min": 118,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4580",
+      "title": "大象",
+      "runtime_min": 81,
+      "rating": "15+"
+    },
+    {
+      "film_id": "4581",
+      "title": "鏡頭之外：凡爾賽拜金女",
+      "runtime_min": 87,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4584",
+      "title": "Pulp：安可要唱哪一首",
+      "runtime_min": 99,
+      "rating": "6+"
+    },
+    {
+      "film_id": "4586",
+      "title": "世界上最寂寞的藍調",
+      "runtime_min": 86,
+      "rating": "6+"
+    },
+    {
+      "film_id": "e913-1sxz7hk",
+      "title": "電影沙龍：金馬✕奈派克｜亞洲電影新銳面對面A",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "e910-1bu4ux4",
+      "title": "新世代及奈派克頒獎典禮＋金馬電影學院作品放映暨結業典禮",
+      "runtime_min": 95,
+      "rating": ""
+    },
+    {
+      "film_id": "e913-1sxz7hl",
+      "title": "電影沙龍：金馬✕奈派克｜亞洲電影新銳面對面B",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "e913-1sxz7hm",
+      "title": "電影沙龍：金馬✕奈派克｜亞洲電影新銳面對面C",
+      "runtime_min": 60,
+      "rating": ""
+    },
+    {
+      "film_id": "4562",
+      "title": "滄海琴聲",
+      "runtime_min": 114,
+      "rating": "6+"
+    },
+    {
+      "film_id": "e912-aeyw6c",
+      "title": "今村昌平講堂：奉俊昊",
+      "runtime_min": 40,
+      "rating": ""
+    },
+    {
+      "film_id": "e911-eunhzu",
+      "title": "大師講堂：奉俊昊",
+      "runtime_min": 60,
+      "rating": ""
+    }
+  ],
+  "venues": [
+    {
+      "venue_name": "TITAN",
+      "cinema": "songren_muvie"
+    },
+    {
+      "venue_name": "10廳",
+      "cinema": "xinyi_vieshow"
+    },
+    {
+      "venue_name": "11廳",
+      "cinema": "xinyi_vieshow"
+    },
+    {
+      "venue_name": "12廳",
+      "cinema": "xinyi_vieshow"
+    },
+    {
+      "venue_name": "13廳",
+      "cinema": "xinyi_vieshow"
+    },
+    {
+      "venue_name": "15廳",
+      "cinema": "xinyi_vieshow"
+    },
+    {
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "cinema": "unknown"
+    },
+    {
+      "venue_name": "高雄大遠百威秀11廳",
+      "cinema": "unknown"
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "4435-2026-11-06-0930",
+      "film_id": "4435",
+      "date": "2026-11-06",
+      "start_min": 930,
+      "end_min": 1094,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4431-2026-11-06-1130",
+      "film_id": "4431",
+      "date": "2026-11-06",
+      "start_min": 1130,
+      "end_min": 1249,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4437-2026-11-06-1140",
+      "film_id": "4437",
+      "date": "2026-11-06",
+      "start_min": 1140,
+      "end_min": 1262,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4430-2026-11-06-1140-13廳",
+      "film_id": "4430",
+      "date": "2026-11-06",
+      "start_min": 1140,
+      "end_min": 1282,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4430-2026-11-06-1140-TITAN",
+      "film_id": "4430",
+      "date": "2026-11-06",
+      "start_min": 1140,
+      "end_min": 1282,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4500-2026-11-06-1280",
+      "film_id": "4500",
+      "date": "2026-11-06",
+      "start_min": 1280,
+      "end_min": 1402,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4458-2026-11-06-1290",
+      "film_id": "4458",
+      "date": "2026-11-06",
+      "start_min": 1290,
+      "end_min": 1398,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4428-2026-11-06-1310",
+      "film_id": "4428",
+      "date": "2026-11-06",
+      "start_min": 1310,
+      "end_min": 1412,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4527-2026-11-06-1320",
+      "film_id": "4527",
+      "date": "2026-11-06",
+      "start_min": 1320,
+      "end_min": 1404,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4440-2026-11-06-1340",
+      "film_id": "4440",
+      "date": "2026-11-06",
+      "start_min": 1340,
+      "end_min": 1416,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4476-2026-11-07-0610",
+      "film_id": "4476",
+      "date": "2026-11-07",
+      "start_min": 610,
+      "end_min": 725,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4517-2026-11-07-0620",
+      "film_id": "4517",
+      "date": "2026-11-07",
+      "start_min": 620,
+      "end_min": 721,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4435-2026-11-07-0620",
+      "film_id": "4435",
+      "date": "2026-11-07",
+      "start_min": 620,
+      "end_min": 784,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4453-2026-11-07-0630",
+      "film_id": "4453",
+      "date": "2026-11-07",
+      "start_min": 630,
+      "end_min": 710,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4480-2026-11-07-0670",
+      "film_id": "4480",
+      "date": "2026-11-07",
+      "start_min": 670,
+      "end_min": 811,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4482-2026-11-07-0750",
+      "film_id": "4482",
+      "date": "2026-11-07",
+      "start_min": 750,
+      "end_min": 861,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4520-2026-11-07-0760",
+      "film_id": "4520",
+      "date": "2026-11-07",
+      "start_min": 760,
+      "end_min": 840,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4498-2026-11-07-0780",
+      "film_id": "4498",
+      "date": "2026-11-07",
+      "start_min": 780,
+      "end_min": 894,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4445-2026-11-07-0820",
+      "film_id": "4445",
+      "date": "2026-11-07",
+      "start_min": 820,
+      "end_min": 1046,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4446-2026-11-07-0870",
+      "film_id": "4446",
+      "date": "2026-11-07",
+      "start_min": 870,
+      "end_min": 959,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4535-2026-11-07-0910",
+      "film_id": "4535",
+      "date": "2026-11-07",
+      "start_min": 910,
+      "end_min": 1038,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4506-2026-11-07-0970",
+      "film_id": "4506",
+      "date": "2026-11-07",
+      "start_min": 970,
+      "end_min": 1075,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4474-2026-11-07-1000",
+      "film_id": "4474",
+      "date": "2026-11-07",
+      "start_min": 1000,
+      "end_min": 1095,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4582-2026-11-07-1010",
+      "film_id": "4582",
+      "date": "2026-11-07",
+      "start_min": 1010,
+      "end_min": 1086,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4555-2026-11-07-1090",
+      "film_id": "4555",
+      "date": "2026-11-07",
+      "start_min": 1090,
+      "end_min": 1200,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4484-2026-11-07-1110",
+      "film_id": "4484",
+      "date": "2026-11-07",
+      "start_min": 1110,
+      "end_min": 1204,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4491-2026-11-07-1130",
+      "film_id": "4491",
+      "date": "2026-11-07",
+      "start_min": 1130,
+      "end_min": 1227,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4429-2026-11-07-1140",
+      "film_id": "4429",
+      "date": "2026-11-07",
+      "start_min": 1140,
+      "end_min": 1261,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4467-2026-11-07-1140",
+      "film_id": "4467",
+      "date": "2026-11-07",
+      "start_min": 1140,
+      "end_min": 1263,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4408-2026-11-07-1260",
+      "film_id": "4408",
+      "date": "2026-11-07",
+      "start_min": 1260,
+      "end_min": 1371,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4471-2026-11-07-1270",
+      "film_id": "4471",
+      "date": "2026-11-07",
+      "start_min": 1270,
+      "end_min": 1420,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4481-2026-11-07-1270",
+      "film_id": "4481",
+      "date": "2026-11-07",
+      "start_min": 1270,
+      "end_min": 1399,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4419-2026-11-07-1300",
+      "film_id": "4419",
+      "date": "2026-11-07",
+      "start_min": 1300,
+      "end_min": 1415,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4422-2026-11-07-1320",
+      "film_id": "4422",
+      "date": "2026-11-07",
+      "start_min": 1320,
+      "end_min": 1413,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4538-2026-11-08-0620",
+      "film_id": "4538",
+      "date": "2026-11-08",
+      "start_min": 620,
+      "end_min": 730,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4535-2026-11-08-0620",
+      "film_id": "4535",
+      "date": "2026-11-08",
+      "start_min": 620,
+      "end_min": 748,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4484-2026-11-08-0630",
+      "film_id": "4484",
+      "date": "2026-11-08",
+      "start_min": 630,
+      "end_min": 724,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4557-2026-11-08-0660",
+      "film_id": "4557",
+      "date": "2026-11-08",
+      "start_min": 660,
+      "end_min": 748,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4487-2026-11-08-0750",
+      "film_id": "4487",
+      "date": "2026-11-08",
+      "start_min": 750,
+      "end_min": 879,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4429-2026-11-08-0760",
+      "film_id": "4429",
+      "date": "2026-11-08",
+      "start_min": 760,
+      "end_min": 881,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4530-2026-11-08-0790",
+      "film_id": "4530",
+      "date": "2026-11-08",
+      "start_min": 790,
+      "end_min": 896,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4439-2026-11-08-0800",
+      "film_id": "4439",
+      "date": "2026-11-08",
+      "start_min": 800,
+      "end_min": 891,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4547-2026-11-08-0800",
+      "film_id": "4547",
+      "date": "2026-11-08",
+      "start_min": 800,
+      "end_min": 930,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4525-2026-11-08-0920",
+      "film_id": "4525",
+      "date": "2026-11-08",
+      "start_min": 920,
+      "end_min": 1019,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4503-2026-11-08-0950",
+      "film_id": "4503",
+      "date": "2026-11-08",
+      "start_min": 950,
+      "end_min": 1056,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "e913-1yxsqxw-2026-11-08-0960",
+      "film_id": "e913-1yxsqxw",
+      "date": "2026-11-08",
+      "start_min": 960,
+      "end_min": 1050,
+      "venue_name": "15廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4583-2026-11-08-0960",
+      "film_id": "4583",
+      "date": "2026-11-08",
+      "start_min": 960,
+      "end_min": 1083,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4419-2026-11-08-0990",
+      "film_id": "4419",
+      "date": "2026-11-08",
+      "start_min": 990,
+      "end_min": 1105,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4540-2026-11-08-1050",
+      "film_id": "4540",
+      "date": "2026-11-08",
+      "start_min": 1050,
+      "end_min": 1122,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4527-2026-11-08-1120",
+      "film_id": "4527",
+      "date": "2026-11-08",
+      "start_min": 1120,
+      "end_min": 1204,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4452-2026-11-08-1130",
+      "film_id": "4452",
+      "date": "2026-11-08",
+      "start_min": 1130,
+      "end_min": 1221,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4455-2026-11-08-1140",
+      "film_id": "4455",
+      "date": "2026-11-08",
+      "start_min": 1140,
+      "end_min": 1244,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4428-2026-11-08-1140",
+      "film_id": "4428",
+      "date": "2026-11-08",
+      "start_min": 1140,
+      "end_min": 1242,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4418-2026-11-08-1180",
+      "film_id": "4418",
+      "date": "2026-11-08",
+      "start_min": 1180,
+      "end_min": 1295,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4435-2026-11-08-1240",
+      "film_id": "4435",
+      "date": "2026-11-08",
+      "start_min": 1240,
+      "end_min": 1404,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4498-2026-11-08-1260",
+      "film_id": "4498",
+      "date": "2026-11-08",
+      "start_min": 1260,
+      "end_min": 1374,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4528-2026-11-08-1280",
+      "film_id": "4528",
+      "date": "2026-11-08",
+      "start_min": 1280,
+      "end_min": 1401,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4475-2026-11-08-1300",
+      "film_id": "4475",
+      "date": "2026-11-08",
+      "start_min": 1300,
+      "end_min": 1412,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4586-2026-11-08-1320",
+      "film_id": "4586",
+      "date": "2026-11-08",
+      "start_min": 1320,
+      "end_min": 1406,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4421-2026-11-09-0660",
+      "film_id": "4421",
+      "date": "2026-11-09",
+      "start_min": 660,
+      "end_min": 775,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4420-2026-11-09-0710",
+      "film_id": "4420",
+      "date": "2026-11-09",
+      "start_min": 710,
+      "end_min": 838,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4515-2026-11-09-0720",
+      "film_id": "4515",
+      "date": "2026-11-09",
+      "start_min": 720,
+      "end_min": 810,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4486-2026-11-09-0740",
+      "film_id": "4486",
+      "date": "2026-11-09",
+      "start_min": 740,
+      "end_min": 868,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4462-2026-11-09-0810",
+      "film_id": "4462",
+      "date": "2026-11-09",
+      "start_min": 810,
+      "end_min": 951,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4469-2026-11-09-0850",
+      "film_id": "4469",
+      "date": "2026-11-09",
+      "start_min": 850,
+      "end_min": 927,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4480-2026-11-09-0870",
+      "film_id": "4480",
+      "date": "2026-11-09",
+      "start_min": 870,
+      "end_min": 1011,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4508-2026-11-09-0900",
+      "film_id": "4508",
+      "date": "2026-11-09",
+      "start_min": 900,
+      "end_min": 1001,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4580-2026-11-09-0920",
+      "film_id": "4580",
+      "date": "2026-11-09",
+      "start_min": 920,
+      "end_min": 1001,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4455-2026-11-09-0960",
+      "film_id": "4455",
+      "date": "2026-11-09",
+      "start_min": 960,
+      "end_min": 1064,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4584-2026-11-09-0990",
+      "film_id": "4584",
+      "date": "2026-11-09",
+      "start_min": 990,
+      "end_min": 1089,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4436-2026-11-09-1030",
+      "film_id": "4436",
+      "date": "2026-11-09",
+      "start_min": 1030,
+      "end_min": 1116,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4577-2026-11-09-1030",
+      "film_id": "4577",
+      "date": "2026-11-09",
+      "start_min": 1030,
+      "end_min": 1091,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4410-2026-11-09-1040",
+      "film_id": "4410",
+      "date": "2026-11-09",
+      "start_min": 1040,
+      "end_min": 1136,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4463-2026-11-09-1120",
+      "film_id": "4463",
+      "date": "2026-11-09",
+      "start_min": 1120,
+      "end_min": 1212,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4409-2026-11-09-1120",
+      "film_id": "4409",
+      "date": "2026-11-09",
+      "start_min": 1120,
+      "end_min": 1266,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4490-2026-11-09-1130",
+      "film_id": "4490",
+      "date": "2026-11-09",
+      "start_min": 1130,
+      "end_min": 1202,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4552-2026-11-09-1150",
+      "film_id": "4552",
+      "date": "2026-11-09",
+      "start_min": 1150,
+      "end_min": 1232,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4473-2026-11-09-1170",
+      "film_id": "4473",
+      "date": "2026-11-09",
+      "start_min": 1170,
+      "end_min": 1261,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4416-2026-11-09-1250",
+      "film_id": "4416",
+      "date": "2026-11-09",
+      "start_min": 1250,
+      "end_min": 1395,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4537-2026-11-09-1280",
+      "film_id": "4537",
+      "date": "2026-11-09",
+      "start_min": 1280,
+      "end_min": 1401,
+      "venue_name": "11廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4576-2026-11-09-1280",
+      "film_id": "4576",
+      "date": "2026-11-09",
+      "start_min": 1280,
+      "end_min": 1403,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4461-2026-11-09-1290",
+      "film_id": "4461",
+      "date": "2026-11-09",
+      "start_min": 1290,
+      "end_min": 1390,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4583-2026-11-10-0640",
+      "film_id": "4583",
+      "date": "2026-11-10",
+      "start_min": 640,
+      "end_min": 763,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4543-2026-11-10-0710",
+      "film_id": "4543",
+      "date": "2026-11-10",
+      "start_min": 710,
+      "end_min": 829,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4579-2026-11-10-0740",
+      "film_id": "4579",
+      "date": "2026-11-10",
+      "start_min": 740,
+      "end_min": 858,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4411-2026-11-10-0800",
+      "film_id": "4411",
+      "date": "2026-11-10",
+      "start_min": 800,
+      "end_min": 916,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4475-2026-11-10-0830",
+      "film_id": "4475",
+      "date": "2026-11-10",
+      "start_min": 830,
+      "end_min": 942,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4498-2026-11-10-0860",
+      "film_id": "4498",
+      "date": "2026-11-10",
+      "start_min": 860,
+      "end_min": 974,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4422-2026-11-10-0880",
+      "film_id": "4422",
+      "date": "2026-11-10",
+      "start_min": 880,
+      "end_min": 973,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4481-2026-11-10-0890",
+      "film_id": "4481",
+      "date": "2026-11-10",
+      "start_min": 890,
+      "end_min": 1019,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4495-2026-11-10-0960",
+      "film_id": "4495",
+      "date": "2026-11-10",
+      "start_min": 960,
+      "end_min": 1082,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4477-2026-11-10-0980",
+      "film_id": "4477",
+      "date": "2026-11-10",
+      "start_min": 980,
+      "end_min": 1081,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4533-2026-11-10-1010",
+      "film_id": "4533",
+      "date": "2026-11-10",
+      "start_min": 1010,
+      "end_min": 1118,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4557-2026-11-10-1030",
+      "film_id": "4557",
+      "date": "2026-11-10",
+      "start_min": 1030,
+      "end_min": 1118,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4540-2026-11-10-1050",
+      "film_id": "4540",
+      "date": "2026-11-10",
+      "start_min": 1050,
+      "end_min": 1122,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4482-2026-11-10-1110",
+      "film_id": "4482",
+      "date": "2026-11-10",
+      "start_min": 1110,
+      "end_min": 1221,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4478-2026-11-10-1120",
+      "film_id": "4478",
+      "date": "2026-11-10",
+      "start_min": 1120,
+      "end_min": 1216,
+      "venue_name": "TITAN",
+      "marks": [
+        "no_english_subtitle",
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4499-2026-11-10-1150",
+      "film_id": "4499",
+      "date": "2026-11-10",
+      "start_min": 1150,
+      "end_min": 1239,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4483-2026-11-10-1150",
+      "film_id": "4483",
+      "date": "2026-11-10",
+      "start_min": 1150,
+      "end_min": 1228,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4469-2026-11-10-1160",
+      "film_id": "4469",
+      "date": "2026-11-10",
+      "start_min": 1160,
+      "end_min": 1237,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4427-2026-11-10-1260",
+      "film_id": "4427",
+      "date": "2026-11-10",
+      "start_min": 1260,
+      "end_min": 1387,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4518-2026-11-10-1270",
+      "film_id": "4518",
+      "date": "2026-11-10",
+      "start_min": 1270,
+      "end_min": 1390,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4573-2026-11-10-1280",
+      "film_id": "4573",
+      "date": "2026-11-10",
+      "start_min": 1280,
+      "end_min": 1416,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4531-2026-11-10-1290",
+      "film_id": "4531",
+      "date": "2026-11-10",
+      "start_min": 1290,
+      "end_min": 1392,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4504-2026-11-10-1300",
+      "film_id": "4504",
+      "date": "2026-11-10",
+      "start_min": 1300,
+      "end_min": 1397,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4506-2026-11-11-0680",
+      "film_id": "4506",
+      "date": "2026-11-11",
+      "start_min": 680,
+      "end_min": 785,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4530-2026-11-11-0710",
+      "film_id": "4530",
+      "date": "2026-11-11",
+      "start_min": 710,
+      "end_min": 816,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4586-2026-11-11-0780",
+      "film_id": "4586",
+      "date": "2026-11-11",
+      "start_min": 780,
+      "end_min": 866,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4443-2026-11-11-0810",
+      "film_id": "4443",
+      "date": "2026-11-11",
+      "start_min": 810,
+      "end_min": 964,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4493-2026-11-11-0810",
+      "film_id": "4493",
+      "date": "2026-11-11",
+      "start_min": 810,
+      "end_min": 951,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4552-2026-11-11-0820",
+      "film_id": "4552",
+      "date": "2026-11-11",
+      "start_min": 820,
+      "end_min": 902,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4534-2026-11-11-0850",
+      "film_id": "4534",
+      "date": "2026-11-11",
+      "start_min": 850,
+      "end_min": 956,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4488-2026-11-11-0900",
+      "film_id": "4488",
+      "date": "2026-11-11",
+      "start_min": 900,
+      "end_min": 995,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4446-2026-11-11-0960",
+      "film_id": "4446",
+      "date": "2026-11-11",
+      "start_min": 960,
+      "end_min": 1049,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4427-2026-11-11-0980",
+      "film_id": "4427",
+      "date": "2026-11-11",
+      "start_min": 980,
+      "end_min": 1107,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4560-2026-11-11-0990",
+      "film_id": "4560",
+      "date": "2026-11-11",
+      "start_min": 990,
+      "end_min": 1110,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4510-2026-11-11-0990",
+      "film_id": "4510",
+      "date": "2026-11-11",
+      "start_min": 990,
+      "end_min": 1107,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4478-2026-11-11-1030",
+      "film_id": "4478",
+      "date": "2026-11-11",
+      "start_min": 1030,
+      "end_min": 1126,
+      "venue_name": "11廳",
+      "marks": [
+        "no_english_subtitle",
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4470-2026-11-11-1110",
+      "film_id": "4470",
+      "date": "2026-11-11",
+      "start_min": 1110,
+      "end_min": 1244,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4519-2026-11-11-1140",
+      "film_id": "4519",
+      "date": "2026-11-11",
+      "start_min": 1140,
+      "end_min": 1256,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4500-2026-11-11-1140",
+      "film_id": "4500",
+      "date": "2026-11-11",
+      "start_min": 1140,
+      "end_min": 1262,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4548-2026-11-11-1140",
+      "film_id": "4548",
+      "date": "2026-11-11",
+      "start_min": 1140,
+      "end_min": 1249,
+      "venue_name": "TITAN",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4517-2026-11-11-1180",
+      "film_id": "4517",
+      "date": "2026-11-11",
+      "start_min": 1180,
+      "end_min": 1281,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4585-2026-11-11-1290",
+      "film_id": "4585",
+      "date": "2026-11-11",
+      "start_min": 1290,
+      "end_min": 1401,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4410-2026-11-11-1290",
+      "film_id": "4410",
+      "date": "2026-11-11",
+      "start_min": 1290,
+      "end_min": 1386,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4501-2026-11-11-1290",
+      "film_id": "4501",
+      "date": "2026-11-11",
+      "start_min": 1290,
+      "end_min": 1392,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4512-2026-11-11-1300",
+      "film_id": "4512",
+      "date": "2026-11-11",
+      "start_min": 1300,
+      "end_min": 1402,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4542-2026-11-11-1310",
+      "film_id": "4542",
+      "date": "2026-11-11",
+      "start_min": 1310,
+      "end_min": 1379,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4572-2026-11-12-0630",
+      "film_id": "4572",
+      "date": "2026-11-12",
+      "start_min": 630,
+      "end_min": 720,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4582-2026-11-12-0730",
+      "film_id": "4582",
+      "date": "2026-11-12",
+      "start_min": 730,
+      "end_min": 806,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4490-2026-11-12-0760",
+      "film_id": "4490",
+      "date": "2026-11-12",
+      "start_min": 760,
+      "end_min": 832,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4574-2026-11-12-0760",
+      "film_id": "4574",
+      "date": "2026-11-12",
+      "start_min": 760,
+      "end_min": 935,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4409-2026-11-12-0790",
+      "film_id": "4409",
+      "date": "2026-11-12",
+      "start_min": 790,
+      "end_min": 936,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4497-2026-11-12-0840",
+      "film_id": "4497",
+      "date": "2026-11-12",
+      "start_min": 840,
+      "end_min": 903,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4555-2026-11-12-0840",
+      "film_id": "4555",
+      "date": "2026-11-12",
+      "start_min": 840,
+      "end_min": 950,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4452-2026-11-12-0870",
+      "film_id": "4452",
+      "date": "2026-11-12",
+      "start_min": 870,
+      "end_min": 961,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4454-2026-11-12-0970",
+      "film_id": "4454",
+      "date": "2026-11-12",
+      "start_min": 970,
+      "end_min": 1089,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4438-2026-11-12-0970",
+      "film_id": "4438",
+      "date": "2026-11-12",
+      "start_min": 970,
+      "end_min": 1104,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4583-2026-11-12-0970",
+      "film_id": "4583",
+      "date": "2026-11-12",
+      "start_min": 970,
+      "end_min": 1093,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4428-2026-11-12-0990",
+      "film_id": "4428",
+      "date": "2026-11-12",
+      "start_min": 990,
+      "end_min": 1092,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4491-2026-11-12-1000",
+      "film_id": "4491",
+      "date": "2026-11-12",
+      "start_min": 1000,
+      "end_min": 1097,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4450-2026-11-12-1120",
+      "film_id": "4450",
+      "date": "2026-11-12",
+      "start_min": 1120,
+      "end_min": 1283,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4508-2026-11-12-1120",
+      "film_id": "4508",
+      "date": "2026-11-12",
+      "start_min": 1120,
+      "end_min": 1221,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4458-2026-11-12-1130",
+      "film_id": "4458",
+      "date": "2026-11-12",
+      "start_min": 1130,
+      "end_min": 1238,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4415-2026-11-12-1130",
+      "film_id": "4415",
+      "date": "2026-11-12",
+      "start_min": 1130,
+      "end_min": 1288,
+      "venue_name": "13廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4449-2026-11-12-1130",
+      "film_id": "4449",
+      "date": "2026-11-12",
+      "start_min": 1130,
+      "end_min": 1235,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "e912-agz1ov-2026-11-12-1240",
+      "film_id": "e912-agz1ov",
+      "date": "2026-11-12",
+      "start_min": 1240,
+      "end_min": 1280,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4462-2026-11-12-1270",
+      "film_id": "4462",
+      "date": "2026-11-12",
+      "start_min": 1270,
+      "end_min": 1411,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4411-2026-11-12-1290",
+      "film_id": "4411",
+      "date": "2026-11-12",
+      "start_min": 1290,
+      "end_min": 1406,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4473-2026-11-12-1310",
+      "film_id": "4473",
+      "date": "2026-11-12",
+      "start_min": 1310,
+      "end_min": 1401,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4489-2026-11-12-1320",
+      "film_id": "4489",
+      "date": "2026-11-12",
+      "start_min": 1320,
+      "end_min": 1387,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4439-2026-11-12-1320",
+      "film_id": "4439",
+      "date": "2026-11-12",
+      "start_min": 1320,
+      "end_min": 1411,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4499-2026-11-13-0640",
+      "film_id": "4499",
+      "date": "2026-11-13",
+      "start_min": 640,
+      "end_min": 729,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4431-2026-11-13-0660",
+      "film_id": "4431",
+      "date": "2026-11-13",
+      "start_min": 660,
+      "end_min": 779,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4518-2026-11-13-0660",
+      "film_id": "4518",
+      "date": "2026-11-13",
+      "start_min": 660,
+      "end_min": 780,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4520-2026-11-13-0670",
+      "film_id": "4520",
+      "date": "2026-11-13",
+      "start_min": 670,
+      "end_min": 750,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4547-2026-11-13-0760",
+      "film_id": "4547",
+      "date": "2026-11-13",
+      "start_min": 760,
+      "end_min": 890,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4531-2026-11-13-0780",
+      "film_id": "4531",
+      "date": "2026-11-13",
+      "start_min": 780,
+      "end_min": 882,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4449-2026-11-13-0790",
+      "film_id": "4449",
+      "date": "2026-11-13",
+      "start_min": 790,
+      "end_min": 895,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4512-2026-11-13-0820",
+      "film_id": "4512",
+      "date": "2026-11-13",
+      "start_min": 820,
+      "end_min": 922,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4526-2026-11-13-0820",
+      "film_id": "4526",
+      "date": "2026-11-13",
+      "start_min": 820,
+      "end_min": 949,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4525-2026-11-13-0920",
+      "film_id": "4525",
+      "date": "2026-11-13",
+      "start_min": 920,
+      "end_min": 1019,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4470-2026-11-13-0940",
+      "film_id": "4470",
+      "date": "2026-11-13",
+      "start_min": 940,
+      "end_min": 1074,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4509-2026-11-13-0950",
+      "film_id": "4509",
+      "date": "2026-11-13",
+      "start_min": 950,
+      "end_min": 1076,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4519-2026-11-13-0960",
+      "film_id": "4519",
+      "date": "2026-11-13",
+      "start_min": 960,
+      "end_min": 1076,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4413-2026-11-13-0990",
+      "film_id": "4413",
+      "date": "2026-11-13",
+      "start_min": 990,
+      "end_min": 1099,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4416-2026-11-13-1110",
+      "film_id": "4416",
+      "date": "2026-11-13",
+      "start_min": 1110,
+      "end_min": 1255,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4513-2026-11-13-1110",
+      "film_id": "4513",
+      "date": "2026-11-13",
+      "start_min": 1110,
+      "end_min": 1229,
+      "venue_name": "11廳",
+      "marks": [
+        "no_english_subtitle",
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4446-2026-11-13-1110",
+      "film_id": "4446",
+      "date": "2026-11-13",
+      "start_min": 1110,
+      "end_min": 1199,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4453-2026-11-13-1130",
+      "film_id": "4453",
+      "date": "2026-11-13",
+      "start_min": 1130,
+      "end_min": 1210,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4584-2026-11-13-1140",
+      "film_id": "4584",
+      "date": "2026-11-13",
+      "start_min": 1140,
+      "end_min": 1239,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4456-2026-11-13-1260",
+      "film_id": "4456",
+      "date": "2026-11-13",
+      "start_min": 1260,
+      "end_min": 1390,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4583-2026-11-13-1270",
+      "film_id": "4583",
+      "date": "2026-11-13",
+      "start_min": 1270,
+      "end_min": 1393,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4442-2026-11-13-1280",
+      "film_id": "4442",
+      "date": "2026-11-13",
+      "start_min": 1280,
+      "end_min": 1388,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4421-2026-11-13-1290",
+      "film_id": "4421",
+      "date": "2026-11-13",
+      "start_min": 1290,
+      "end_min": 1405,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4515-2026-11-13-1290",
+      "film_id": "4515",
+      "date": "2026-11-13",
+      "start_min": 1290,
+      "end_min": 1380,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4483-2026-11-14-0630",
+      "film_id": "4483",
+      "date": "2026-11-14",
+      "start_min": 630,
+      "end_min": 708,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4570-2026-11-14-0630",
+      "film_id": "4570",
+      "date": "2026-11-14",
+      "start_min": 630,
+      "end_min": 729,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4505-2026-11-14-0660",
+      "film_id": "4505",
+      "date": "2026-11-14",
+      "start_min": 660,
+      "end_min": 761,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4490-2026-11-14-0660",
+      "film_id": "4490",
+      "date": "2026-11-14",
+      "start_min": 660,
+      "end_min": 732,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4579-2026-11-14-0740",
+      "film_id": "4579",
+      "date": "2026-11-14",
+      "start_min": 740,
+      "end_min": 858,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4490-2026-11-14-0750",
+      "film_id": "4490",
+      "date": "2026-11-14",
+      "start_min": 750,
+      "end_min": 822,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "4495-2026-11-14-0760",
+      "film_id": "4495",
+      "date": "2026-11-14",
+      "start_min": 760,
+      "end_min": 882,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4576-2026-11-14-0760",
+      "film_id": "4576",
+      "date": "2026-11-14",
+      "start_min": 760,
+      "end_min": 883,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4482-2026-11-14-0760",
+      "film_id": "4482",
+      "date": "2026-11-14",
+      "start_min": 760,
+      "end_min": 871,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4515-2026-11-14-0790",
+      "film_id": "4515",
+      "date": "2026-11-14",
+      "start_min": 790,
+      "end_min": 880,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4497-2026-11-14-0840",
+      "film_id": "4497",
+      "date": "2026-11-14",
+      "start_min": 840,
+      "end_min": 903,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4482-2026-11-14-0860",
+      "film_id": "4482",
+      "date": "2026-11-14",
+      "start_min": 860,
+      "end_min": 971,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "e912-131lvh4-2026-11-14-0880",
+      "film_id": "e912-131lvh4",
+      "date": "2026-11-14",
+      "start_min": 880,
+      "end_min": 940,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4433-2026-11-14-0920",
+      "film_id": "4433",
+      "date": "2026-11-14",
+      "start_min": 920,
+      "end_min": 1026,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4563-2026-11-14-0920",
+      "film_id": "4563",
+      "date": "2026-11-14",
+      "start_min": 920,
+      "end_min": 1032,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4456-2026-11-14-0940",
+      "film_id": "4456",
+      "date": "2026-11-14",
+      "start_min": 940,
+      "end_min": 1070,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4487-2026-11-14-0950",
+      "film_id": "4487",
+      "date": "2026-11-14",
+      "start_min": 950,
+      "end_min": 1079,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4466-2026-11-14-0960",
+      "film_id": "4466",
+      "date": "2026-11-14",
+      "start_min": 960,
+      "end_min": 1045,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4448-2026-11-14-0980",
+      "film_id": "4448",
+      "date": "2026-11-14",
+      "start_min": 980,
+      "end_min": 1098,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4487-2026-11-14-1000",
+      "film_id": "4487",
+      "date": "2026-11-14",
+      "start_min": 1000,
+      "end_min": 1129,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "4541-2026-11-14-1060",
+      "film_id": "4541",
+      "date": "2026-11-14",
+      "start_min": 1060,
+      "end_min": 1169,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4534-2026-11-14-1100",
+      "film_id": "4534",
+      "date": "2026-11-14",
+      "start_min": 1100,
+      "end_min": 1206,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4523-2026-11-14-1100",
+      "film_id": "4523",
+      "date": "2026-11-14",
+      "start_min": 1100,
+      "end_min": 1250,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4462-2026-11-14-1130",
+      "film_id": "4462",
+      "date": "2026-11-14",
+      "start_min": 1130,
+      "end_min": 1271,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4494-2026-11-14-1130",
+      "film_id": "4494",
+      "date": "2026-11-14",
+      "start_min": 1130,
+      "end_min": 1233,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "e911-15owkem-2026-11-14-1170",
+      "film_id": "e911-15owkem",
+      "date": "2026-11-14",
+      "start_min": 1170,
+      "end_min": 1230,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4509-2026-11-14-1260",
+      "film_id": "4509",
+      "date": "2026-11-14",
+      "start_min": 1260,
+      "end_min": 1386,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4507-2026-11-14-1260",
+      "film_id": "4507",
+      "date": "2026-11-14",
+      "start_min": 1260,
+      "end_min": 1370,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4418-2026-11-14-1300",
+      "film_id": "4418",
+      "date": "2026-11-14",
+      "start_min": 1300,
+      "end_min": 1415,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4572-2026-11-14-1320",
+      "film_id": "4572",
+      "date": "2026-11-14",
+      "start_min": 1320,
+      "end_min": 1410,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4574-2026-11-15-0620",
+      "film_id": "4574",
+      "date": "2026-11-15",
+      "start_min": 620,
+      "end_min": 795,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4423-2026-11-15-0630",
+      "film_id": "4423",
+      "date": "2026-11-15",
+      "start_min": 630,
+      "end_min": 765,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4466-2026-11-15-0650",
+      "film_id": "4466",
+      "date": "2026-11-15",
+      "start_min": 650,
+      "end_min": 735,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4545-2026-11-15-0650",
+      "film_id": "4545",
+      "date": "2026-11-15",
+      "start_min": 650,
+      "end_min": 745,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4573-2026-11-15-0660",
+      "film_id": "4573",
+      "date": "2026-11-15",
+      "start_min": 660,
+      "end_min": 796,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4498-2026-11-15-0660",
+      "film_id": "4498",
+      "date": "2026-11-15",
+      "start_min": 660,
+      "end_min": 774,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "4498-2026-11-15-0720",
+      "film_id": "4498",
+      "date": "2026-11-15",
+      "start_min": 720,
+      "end_min": 834,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4586-2026-11-15-0780",
+      "film_id": "4586",
+      "date": "2026-11-15",
+      "start_min": 780,
+      "end_min": 866,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4543-2026-11-15-0790",
+      "film_id": "4543",
+      "date": "2026-11-15",
+      "start_min": 790,
+      "end_min": 909,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4538-2026-11-15-0800",
+      "film_id": "4538",
+      "date": "2026-11-15",
+      "start_min": 800,
+      "end_min": 910,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4506-2026-11-15-0810",
+      "film_id": "4506",
+      "date": "2026-11-15",
+      "start_min": 810,
+      "end_min": 915,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "4507-2026-11-15-0830",
+      "film_id": "4507",
+      "date": "2026-11-15",
+      "start_min": 830,
+      "end_min": 940,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4477-2026-11-15-0860",
+      "film_id": "4477",
+      "date": "2026-11-15",
+      "start_min": 860,
+      "end_min": 961,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4506-2026-11-15-0870",
+      "film_id": "4506",
+      "date": "2026-11-15",
+      "start_min": 870,
+      "end_min": 975,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4468-2026-11-15-0900",
+      "film_id": "4468",
+      "date": "2026-11-15",
+      "start_min": 900,
+      "end_min": 1028,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "e913-19m7rwm-2026-11-15-0900",
+      "film_id": "e913-19m7rwm",
+      "date": "2026-11-15",
+      "start_min": 900,
+      "end_min": 990,
+      "venue_name": "15廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4496-2026-11-15-0960",
+      "film_id": "4496",
+      "date": "2026-11-15",
+      "start_min": 960,
+      "end_min": 1053,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4421-2026-11-15-0970",
+      "film_id": "4421",
+      "date": "2026-11-15",
+      "start_min": 970,
+      "end_min": 1085,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4503-2026-11-15-0980",
+      "film_id": "4503",
+      "date": "2026-11-15",
+      "start_min": 980,
+      "end_min": 1086,
+      "venue_name": "台中iFG遠雄廣場威秀3廳",
+      "marks": []
+    },
+    {
+      "session_id": "4560-2026-11-15-0990",
+      "film_id": "4560",
+      "date": "2026-11-15",
+      "start_min": 990,
+      "end_min": 1110,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4493-2026-11-15-1010",
+      "film_id": "4493",
+      "date": "2026-11-15",
+      "start_min": 1010,
+      "end_min": 1151,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4503-2026-11-15-1010",
+      "film_id": "4503",
+      "date": "2026-11-15",
+      "start_min": 1010,
+      "end_min": 1116,
+      "venue_name": "高雄大遠百威秀11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4461-2026-11-15-1060",
+      "film_id": "4461",
+      "date": "2026-11-15",
+      "start_min": 1060,
+      "end_min": 1160,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4580-2026-11-15-1100",
+      "film_id": "4580",
+      "date": "2026-11-15",
+      "start_min": 1100,
+      "end_min": 1181,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4443-2026-11-15-1120",
+      "film_id": "4443",
+      "date": "2026-11-15",
+      "start_min": 1120,
+      "end_min": 1274,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4514-2026-11-15-1140",
+      "film_id": "4514",
+      "date": "2026-11-15",
+      "start_min": 1140,
+      "end_min": 1227,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "e912-18wp69t-2026-11-15-1150",
+      "film_id": "e912-18wp69t",
+      "date": "2026-11-15",
+      "start_min": 1150,
+      "end_min": 1190,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4523-2026-11-15-1220",
+      "film_id": "4523",
+      "date": "2026-11-15",
+      "start_min": 1220,
+      "end_min": 1370,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4415-2026-11-15-1230",
+      "film_id": "4415",
+      "date": "2026-11-15",
+      "start_min": 1230,
+      "end_min": 1388,
+      "venue_name": "TITAN",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4487-2026-11-15-1240",
+      "film_id": "4487",
+      "date": "2026-11-15",
+      "start_min": 1240,
+      "end_min": 1369,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4463-2026-11-15-1310",
+      "film_id": "4463",
+      "date": "2026-11-15",
+      "start_min": 1310,
+      "end_min": 1402,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4450-2026-11-16-0670",
+      "film_id": "4450",
+      "date": "2026-11-16",
+      "start_min": 670,
+      "end_min": 833,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4585-2026-11-16-0680",
+      "film_id": "4585",
+      "date": "2026-11-16",
+      "start_min": 680,
+      "end_min": 791,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4496-2026-11-16-0740",
+      "film_id": "4496",
+      "date": "2026-11-16",
+      "start_min": 740,
+      "end_min": 833,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4538-2026-11-16-0770",
+      "film_id": "4538",
+      "date": "2026-11-16",
+      "start_min": 770,
+      "end_min": 880,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4565-2026-11-16-0790",
+      "film_id": "4565",
+      "date": "2026-11-16",
+      "start_min": 790,
+      "end_min": 846,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4528-2026-11-16-0830",
+      "film_id": "4528",
+      "date": "2026-11-16",
+      "start_min": 830,
+      "end_min": 951,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4467-2026-11-16-0860",
+      "film_id": "4467",
+      "date": "2026-11-16",
+      "start_min": 860,
+      "end_min": 983,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4537-2026-11-16-0870",
+      "film_id": "4537",
+      "date": "2026-11-16",
+      "start_min": 870,
+      "end_min": 991,
+      "venue_name": "TITAN",
+      "marks": [
+        "no_english_subtitle",
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4489-2026-11-16-0910",
+      "film_id": "4489",
+      "date": "2026-11-16",
+      "start_min": 910,
+      "end_min": 977,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4527-2026-11-16-0940",
+      "film_id": "4527",
+      "date": "2026-11-16",
+      "start_min": 940,
+      "end_min": 1024,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4460-2026-11-16-0980",
+      "film_id": "4460",
+      "date": "2026-11-16",
+      "start_min": 980,
+      "end_min": 1072,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "e911-x1b0sh-2026-11-16-0990",
+      "film_id": "e911-x1b0sh",
+      "date": "2026-11-16",
+      "start_min": 990,
+      "end_min": 1050,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4440-2026-11-16-1010",
+      "film_id": "4440",
+      "date": "2026-11-16",
+      "start_min": 1010,
+      "end_min": 1086,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4568-2026-11-16-1010",
+      "film_id": "4568",
+      "date": "2026-11-16",
+      "start_min": 1010,
+      "end_min": 1100,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4563-2026-11-16-1050",
+      "film_id": "4563",
+      "date": "2026-11-16",
+      "start_min": 1050,
+      "end_min": 1162,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4533-2026-11-16-1090",
+      "film_id": "4533",
+      "date": "2026-11-16",
+      "start_min": 1090,
+      "end_min": 1198,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4442-2026-11-16-1110",
+      "film_id": "4442",
+      "date": "2026-11-16",
+      "start_min": 1110,
+      "end_min": 1218,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4417-2026-11-16-1120",
+      "film_id": "4417",
+      "date": "2026-11-16",
+      "start_min": 1120,
+      "end_min": 1228,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4486-2026-11-16-1130",
+      "film_id": "4486",
+      "date": "2026-11-16",
+      "start_min": 1130,
+      "end_min": 1258,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4581-2026-11-16-1200",
+      "film_id": "4581",
+      "date": "2026-11-16",
+      "start_min": 1200,
+      "end_min": 1287,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "e911-1g6spiz-2026-11-16-1200",
+      "film_id": "e911-1g6spiz",
+      "date": "2026-11-16",
+      "start_min": 1200,
+      "end_min": 1260,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4474-2026-11-16-1280",
+      "film_id": "4474",
+      "date": "2026-11-16",
+      "start_min": 1280,
+      "end_min": 1375,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4464-2026-11-16-1290",
+      "film_id": "4464",
+      "date": "2026-11-16",
+      "start_min": 1290,
+      "end_min": 1387,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4497-2026-11-16-1320",
+      "film_id": "4497",
+      "date": "2026-11-16",
+      "start_min": 1320,
+      "end_min": 1383,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4437-2026-11-17-0670",
+      "film_id": "4437",
+      "date": "2026-11-17",
+      "start_min": 670,
+      "end_min": 792,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4424-2026-11-17-0690",
+      "film_id": "4424",
+      "date": "2026-11-17",
+      "start_min": 690,
+      "end_min": 789,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4473-2026-11-17-0730",
+      "film_id": "4473",
+      "date": "2026-11-17",
+      "start_min": 730,
+      "end_min": 821,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4558-2026-11-17-0770",
+      "film_id": "4558",
+      "date": "2026-11-17",
+      "start_min": 770,
+      "end_min": 816,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4521-2026-11-17-0820",
+      "film_id": "4521",
+      "date": "2026-11-17",
+      "start_min": 820,
+      "end_min": 977,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4448-2026-11-17-0830",
+      "film_id": "4448",
+      "date": "2026-11-17",
+      "start_min": 830,
+      "end_min": 948,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4418-2026-11-17-0830",
+      "film_id": "4418",
+      "date": "2026-11-17",
+      "start_min": 830,
+      "end_min": 945,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4458-2026-11-17-0850",
+      "film_id": "4458",
+      "date": "2026-11-17",
+      "start_min": 850,
+      "end_min": 958,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4514-2026-11-17-0850",
+      "film_id": "4514",
+      "date": "2026-11-17",
+      "start_min": 850,
+      "end_min": 937,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4419-2026-11-17-0970",
+      "film_id": "4419",
+      "date": "2026-11-17",
+      "start_min": 970,
+      "end_min": 1085,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4476-2026-11-17-0980",
+      "film_id": "4476",
+      "date": "2026-11-17",
+      "start_min": 980,
+      "end_min": 1095,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4423-2026-11-17-0980",
+      "film_id": "4423",
+      "date": "2026-11-17",
+      "start_min": 980,
+      "end_min": 1115,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4553-2026-11-17-0990",
+      "film_id": "4553",
+      "date": "2026-11-17",
+      "start_min": 990,
+      "end_min": 1057,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "e913-1sxz7hk-2026-11-17-0990",
+      "film_id": "e913-1sxz7hk",
+      "date": "2026-11-17",
+      "start_min": 990,
+      "end_min": 1050,
+      "venue_name": "15廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4516-2026-11-17-1010",
+      "film_id": "4516",
+      "date": "2026-11-17",
+      "start_min": 1010,
+      "end_min": 1097,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4451-2026-11-17-1120",
+      "film_id": "4451",
+      "date": "2026-11-17",
+      "start_min": 1120,
+      "end_min": 1209,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4545-2026-11-17-1120",
+      "film_id": "4545",
+      "date": "2026-11-17",
+      "start_min": 1120,
+      "end_min": 1215,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4457-2026-11-17-1130",
+      "film_id": "4457",
+      "date": "2026-11-17",
+      "start_min": 1130,
+      "end_min": 1227,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4492-2026-11-17-1150",
+      "film_id": "4492",
+      "date": "2026-11-17",
+      "start_min": 1150,
+      "end_min": 1243,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4434-2026-11-17-1150",
+      "film_id": "4434",
+      "date": "2026-11-17",
+      "start_min": 1150,
+      "end_min": 1255,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4426-2026-11-17-1260",
+      "film_id": "4426",
+      "date": "2026-11-17",
+      "start_min": 1260,
+      "end_min": 1370,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4461-2026-11-17-1270",
+      "film_id": "4461",
+      "date": "2026-11-17",
+      "start_min": 1270,
+      "end_min": 1370,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4568-2026-11-17-1280",
+      "film_id": "4568",
+      "date": "2026-11-17",
+      "start_min": 1280,
+      "end_min": 1370,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4452-2026-11-17-1290",
+      "film_id": "4452",
+      "date": "2026-11-17",
+      "start_min": 1290,
+      "end_min": 1381,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4413-2026-11-17-1300",
+      "film_id": "4413",
+      "date": "2026-11-17",
+      "start_min": 1300,
+      "end_min": 1409,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4432-2026-11-18-0660",
+      "film_id": "4432",
+      "date": "2026-11-18",
+      "start_min": 660,
+      "end_min": 773,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4426-2026-11-18-0660",
+      "film_id": "4426",
+      "date": "2026-11-18",
+      "start_min": 660,
+      "end_min": 770,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4492-2026-11-18-0700",
+      "film_id": "4492",
+      "date": "2026-11-18",
+      "start_min": 700,
+      "end_min": 793,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4463-2026-11-18-0780",
+      "film_id": "4463",
+      "date": "2026-11-18",
+      "start_min": 780,
+      "end_min": 872,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4408-2026-11-18-0810",
+      "film_id": "4408",
+      "date": "2026-11-18",
+      "start_min": 810,
+      "end_min": 921,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4439-2026-11-18-0840",
+      "film_id": "4439",
+      "date": "2026-11-18",
+      "start_min": 840,
+      "end_min": 931,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4501-2026-11-18-0850",
+      "film_id": "4501",
+      "date": "2026-11-18",
+      "start_min": 850,
+      "end_min": 952,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "e913-1sxz7hl-2026-11-18-0900",
+      "film_id": "e913-1sxz7hl",
+      "date": "2026-11-18",
+      "start_min": 900,
+      "end_min": 960,
+      "venue_name": "15廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4545-2026-11-18-0910",
+      "film_id": "4545",
+      "date": "2026-11-18",
+      "start_min": 910,
+      "end_min": 1005,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4442-2026-11-18-0950",
+      "film_id": "4442",
+      "date": "2026-11-18",
+      "start_min": 950,
+      "end_min": 1058,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4535-2026-11-18-0960",
+      "film_id": "4535",
+      "date": "2026-11-18",
+      "start_min": 960,
+      "end_min": 1088,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4424-2026-11-18-0980",
+      "film_id": "4424",
+      "date": "2026-11-18",
+      "start_min": 980,
+      "end_min": 1079,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4504-2026-11-18-0980",
+      "film_id": "4504",
+      "date": "2026-11-18",
+      "start_min": 980,
+      "end_min": 1077,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "e913-1sxz7hm-2026-11-18-0990",
+      "film_id": "e913-1sxz7hm",
+      "date": "2026-11-18",
+      "start_min": 990,
+      "end_min": 1050,
+      "venue_name": "15廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4468-2026-11-18-1110",
+      "film_id": "4468",
+      "date": "2026-11-18",
+      "start_min": 1110,
+      "end_min": 1238,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4510-2026-11-18-1110",
+      "film_id": "4510",
+      "date": "2026-11-18",
+      "start_min": 1110,
+      "end_min": 1227,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4460-2026-11-18-1130",
+      "film_id": "4460",
+      "date": "2026-11-18",
+      "start_min": 1130,
+      "end_min": 1222,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4476-2026-11-18-1140",
+      "film_id": "4476",
+      "date": "2026-11-18",
+      "start_min": 1140,
+      "end_min": 1255,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "e910-1bu4ux4-2026-11-18-1140",
+      "film_id": "e910-1bu4ux4",
+      "date": "2026-11-18",
+      "start_min": 1140,
+      "end_min": 1235,
+      "venue_name": "12廳",
+      "marks": [
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4451-2026-11-18-1270",
+      "film_id": "4451",
+      "date": "2026-11-18",
+      "start_min": 1270,
+      "end_min": 1359,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4474-2026-11-18-1280",
+      "film_id": "4474",
+      "date": "2026-11-18",
+      "start_min": 1280,
+      "end_min": 1375,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4457-2026-11-18-1290",
+      "film_id": "4457",
+      "date": "2026-11-18",
+      "start_min": 1290,
+      "end_min": 1387,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4520-2026-11-18-1310",
+      "film_id": "4520",
+      "date": "2026-11-18",
+      "start_min": 1310,
+      "end_min": 1390,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4471-2026-11-19-0650",
+      "film_id": "4471",
+      "date": "2026-11-19",
+      "start_min": 650,
+      "end_min": 800,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4508-2026-11-19-0670",
+      "film_id": "4508",
+      "date": "2026-11-19",
+      "start_min": 670,
+      "end_min": 771,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4416-2026-11-19-0680",
+      "film_id": "4416",
+      "date": "2026-11-19",
+      "start_min": 680,
+      "end_min": 825,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4500-2026-11-19-0680",
+      "film_id": "4500",
+      "date": "2026-11-19",
+      "start_min": 680,
+      "end_min": 802,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4576-2026-11-19-0790",
+      "film_id": "4576",
+      "date": "2026-11-19",
+      "start_min": 790,
+      "end_min": 913,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4468-2026-11-19-0800",
+      "film_id": "4468",
+      "date": "2026-11-19",
+      "start_min": 800,
+      "end_min": 928,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4441-2026-11-19-0830",
+      "film_id": "4441",
+      "date": "2026-11-19",
+      "start_min": 830,
+      "end_min": 930,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4537-2026-11-19-0830",
+      "film_id": "4537",
+      "date": "2026-11-19",
+      "start_min": 830,
+      "end_min": 951,
+      "venue_name": "12廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4433-2026-11-19-0860",
+      "film_id": "4433",
+      "date": "2026-11-19",
+      "start_min": 860,
+      "end_min": 966,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4411-2026-11-19-0950",
+      "film_id": "4411",
+      "date": "2026-11-19",
+      "start_min": 950,
+      "end_min": 1066,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4513-2026-11-19-0960",
+      "film_id": "4513",
+      "date": "2026-11-19",
+      "start_min": 960,
+      "end_min": 1079,
+      "venue_name": "11廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4542-2026-11-19-0980",
+      "film_id": "4542",
+      "date": "2026-11-19",
+      "start_min": 980,
+      "end_min": 1049,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4464-2026-11-19-0980",
+      "film_id": "4464",
+      "date": "2026-11-19",
+      "start_min": 980,
+      "end_min": 1077,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4581-2026-11-19-1000",
+      "film_id": "4581",
+      "date": "2026-11-19",
+      "start_min": 1000,
+      "end_min": 1087,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4528-2026-11-19-1110",
+      "film_id": "4528",
+      "date": "2026-11-19",
+      "start_min": 1110,
+      "end_min": 1231,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4413-2026-11-19-1120",
+      "film_id": "4413",
+      "date": "2026-11-19",
+      "start_min": 1120,
+      "end_min": 1229,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4505-2026-11-19-1120",
+      "film_id": "4505",
+      "date": "2026-11-19",
+      "start_min": 1120,
+      "end_min": 1221,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4434-2026-11-19-1250",
+      "film_id": "4434",
+      "date": "2026-11-19",
+      "start_min": 1250,
+      "end_min": 1355,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4417-2026-11-19-1260",
+      "film_id": "4417",
+      "date": "2026-11-19",
+      "start_min": 1260,
+      "end_min": 1368,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4414-2026-11-19-1260",
+      "film_id": "4414",
+      "date": "2026-11-19",
+      "start_min": 1260,
+      "end_min": 1384,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4573-2026-11-20-0650",
+      "film_id": "4573",
+      "date": "2026-11-20",
+      "start_min": 650,
+      "end_min": 786,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4456-2026-11-20-0800",
+      "film_id": "4456",
+      "date": "2026-11-20",
+      "start_min": 800,
+      "end_min": 930,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4562-2026-11-20-0820",
+      "film_id": "4562",
+      "date": "2026-11-20",
+      "start_min": 820,
+      "end_min": 934,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4494-2026-11-20-0890",
+      "film_id": "4494",
+      "date": "2026-11-20",
+      "start_min": 890,
+      "end_min": 993,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4523-2026-11-20-0960",
+      "film_id": "4523",
+      "date": "2026-11-20",
+      "start_min": 960,
+      "end_min": 1110,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4556-2026-11-20-0970",
+      "film_id": "4556",
+      "date": "2026-11-20",
+      "start_min": 970,
+      "end_min": 1055,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4516-2026-11-20-0990",
+      "film_id": "4516",
+      "date": "2026-11-20",
+      "start_min": 990,
+      "end_min": 1077,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4554-2026-11-20-1020",
+      "film_id": "4554",
+      "date": "2026-11-20",
+      "start_min": 1020,
+      "end_min": 1116,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4464-2026-11-20-1080",
+      "film_id": "4464",
+      "date": "2026-11-20",
+      "start_min": 1080,
+      "end_min": 1177,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4432-2026-11-20-1110",
+      "film_id": "4432",
+      "date": "2026-11-20",
+      "start_min": 1110,
+      "end_min": 1223,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4424-2026-11-20-1130",
+      "film_id": "4424",
+      "date": "2026-11-20",
+      "start_min": 1130,
+      "end_min": 1229,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4441-2026-11-20-1140",
+      "film_id": "4441",
+      "date": "2026-11-20",
+      "start_min": 1140,
+      "end_min": 1240,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4553-2026-11-20-1170",
+      "film_id": "4553",
+      "date": "2026-11-20",
+      "start_min": 1170,
+      "end_min": 1237,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4521-2026-11-20-1230",
+      "film_id": "4521",
+      "date": "2026-11-20",
+      "start_min": 1230,
+      "end_min": 1387,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4551-2026-11-20-1280",
+      "film_id": "4551",
+      "date": "2026-11-20",
+      "start_min": 1280,
+      "end_min": 1364,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4426-2026-11-20-1280",
+      "film_id": "4426",
+      "date": "2026-11-20",
+      "start_min": 1280,
+      "end_min": 1390,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4565-2026-11-20-1300",
+      "film_id": "4565",
+      "date": "2026-11-20",
+      "start_min": 1300,
+      "end_min": 1356,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4558-2026-11-20-1300",
+      "film_id": "4558",
+      "date": "2026-11-20",
+      "start_min": 1300,
+      "end_min": 1346,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4526-2026-11-21-0610",
+      "film_id": "4526",
+      "date": "2026-11-21",
+      "start_min": 610,
+      "end_min": 739,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4548-2026-11-21-0620",
+      "film_id": "4548",
+      "date": "2026-11-21",
+      "start_min": 620,
+      "end_min": 729,
+      "venue_name": "13廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    },
+    {
+      "session_id": "4423-2026-11-21-0760",
+      "film_id": "4423",
+      "date": "2026-11-21",
+      "start_min": 760,
+      "end_min": 895,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4422-2026-11-21-0760",
+      "film_id": "4422",
+      "date": "2026-11-21",
+      "start_min": 760,
+      "end_min": 853,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4438-2026-11-21-0770",
+      "film_id": "4438",
+      "date": "2026-11-21",
+      "start_min": 770,
+      "end_min": 904,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4454-2026-11-21-0780",
+      "film_id": "4454",
+      "date": "2026-11-21",
+      "start_min": 780,
+      "end_min": 899,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4572-2026-11-21-0810",
+      "film_id": "4572",
+      "date": "2026-11-21",
+      "start_min": 810,
+      "end_min": 900,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4542-2026-11-21-0880",
+      "film_id": "4542",
+      "date": "2026-11-21",
+      "start_min": 880,
+      "end_min": 949,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4551-2026-11-21-0930",
+      "film_id": "4551",
+      "date": "2026-11-21",
+      "start_min": 930,
+      "end_min": 1014,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4562-2026-11-21-0930",
+      "film_id": "4562",
+      "date": "2026-11-21",
+      "start_min": 930,
+      "end_min": 1044,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4516-2026-11-21-0940",
+      "film_id": "4516",
+      "date": "2026-11-21",
+      "start_min": 940,
+      "end_min": 1027,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4486-2026-11-21-0950",
+      "film_id": "4486",
+      "date": "2026-11-21",
+      "start_min": 950,
+      "end_min": 1078,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4514-2026-11-21-1010",
+      "film_id": "4514",
+      "date": "2026-11-21",
+      "start_min": 1010,
+      "end_min": 1097,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4412-2026-11-21-1060",
+      "film_id": "4412",
+      "date": "2026-11-21",
+      "start_min": 1060,
+      "end_min": 1190,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4444-2026-11-21-1090",
+      "film_id": "4444",
+      "date": "2026-11-21",
+      "start_min": 1090,
+      "end_min": 1192,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4554-2026-11-21-1100",
+      "film_id": "4554",
+      "date": "2026-11-21",
+      "start_min": 1100,
+      "end_min": 1196,
+      "venue_name": "12廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4471-2026-11-21-1110",
+      "film_id": "4471",
+      "date": "2026-11-21",
+      "start_min": 1110,
+      "end_min": 1260,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4556-2026-11-21-1160",
+      "film_id": "4556",
+      "date": "2026-11-21",
+      "start_min": 1160,
+      "end_min": 1245,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4420-2026-11-21-1250",
+      "film_id": "4420",
+      "date": "2026-11-21",
+      "start_min": 1250,
+      "end_min": 1378,
+      "venue_name": "10廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "e912-aeyw6c-2026-11-21-1260",
+      "film_id": "e912-aeyw6c",
+      "date": "2026-11-21",
+      "start_min": 1260,
+      "end_min": 1300,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4437-2026-11-21-1260",
+      "film_id": "4437",
+      "date": "2026-11-21",
+      "start_min": 1260,
+      "end_min": 1382,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4436-2026-11-21-1290",
+      "film_id": "4436",
+      "date": "2026-11-21",
+      "start_min": 1290,
+      "end_min": 1376,
+      "venue_name": "13廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4577-2026-11-21-1330",
+      "film_id": "4577",
+      "date": "2026-11-21",
+      "start_min": 1330,
+      "end_min": 1391,
+      "venue_name": "11廳",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "4467-2026-11-22-0630",
+      "film_id": "4467",
+      "date": "2026-11-22",
+      "start_min": 630,
+      "end_min": 753,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4444-2026-11-22-0630",
+      "film_id": "4444",
+      "date": "2026-11-22",
+      "start_min": 630,
+      "end_min": 732,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4518-2026-11-22-0630",
+      "film_id": "4518",
+      "date": "2026-11-22",
+      "start_min": 630,
+      "end_min": 750,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending"
+      ]
+    },
+    {
+      "session_id": "e911-eunhzu-2026-11-22-0750",
+      "film_id": "e911-eunhzu",
+      "date": "2026-11-22",
+      "start_min": 750,
+      "end_min": 810,
+      "venue_name": "TITAN",
+      "marks": [
+        "guest_attending",
+        "non_ticketed"
+      ]
+    },
+    {
+      "session_id": "4531-2026-11-22-0760",
+      "film_id": "4531",
+      "date": "2026-11-22",
+      "start_min": 760,
+      "end_min": 862,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4521-2026-11-22-0780",
+      "film_id": "4521",
+      "date": "2026-11-22",
+      "start_min": 780,
+      "end_min": 937,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4411-2026-11-22-0850",
+      "film_id": "4411",
+      "date": "2026-11-22",
+      "start_min": 850,
+      "end_min": 966,
+      "venue_name": "TITAN",
+      "marks": []
+    },
+    {
+      "session_id": "4585-2026-11-22-0880",
+      "film_id": "4585",
+      "date": "2026-11-22",
+      "start_min": 880,
+      "end_min": 991,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4512-2026-11-22-0900",
+      "film_id": "4512",
+      "date": "2026-11-22",
+      "start_min": 900,
+      "end_min": 1002,
+      "venue_name": "13廳",
+      "marks": []
+    },
+    {
+      "session_id": "4481-2026-11-22-0970",
+      "film_id": "4481",
+      "date": "2026-11-22",
+      "start_min": 970,
+      "end_min": 1099,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4475-2026-11-22-0970",
+      "film_id": "4475",
+      "date": "2026-11-22",
+      "start_min": 970,
+      "end_min": 1082,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4501-2026-11-22-1030",
+      "film_id": "4501",
+      "date": "2026-11-22",
+      "start_min": 1030,
+      "end_min": 1132,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4504-2026-11-22-1120",
+      "film_id": "4504",
+      "date": "2026-11-22",
+      "start_min": 1120,
+      "end_min": 1217,
+      "venue_name": "12廳",
+      "marks": []
+    },
+    {
+      "session_id": "4488-2026-11-22-1130",
+      "film_id": "4488",
+      "date": "2026-11-22",
+      "start_min": 1130,
+      "end_min": 1225,
+      "venue_name": "11廳",
+      "marks": []
+    },
+    {
+      "session_id": "4440-2026-11-22-1170",
+      "film_id": "4440",
+      "date": "2026-11-22",
+      "start_min": 1170,
+      "end_min": 1246,
+      "venue_name": "10廳",
+      "marks": []
+    },
+    {
+      "session_id": "4513-2026-11-22-1260",
+      "film_id": "4513",
+      "date": "2026-11-22",
+      "start_min": 1260,
+      "end_min": 1379,
+      "venue_name": "11廳",
+      "marks": [
+        "no_english_subtitle"
+      ]
+    }
+  ]
+}

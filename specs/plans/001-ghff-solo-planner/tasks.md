@@ -305,8 +305,8 @@
 **Test Scope**:
 - `specs/truth/features/scraper/場次解析/官網場次頁解析.feature`（project：scraper）
 
-- [ ] T140 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T141 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T140 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T141 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4A2: 產生場次快照
 
@@ -319,7 +319,7 @@
 **Boundary**:
 - 不改 truth；遇到未驗證項與樣本不符時，回報差異並補 HTML 樣本，不自行改 feature。
 
-- [ ] T142 執行 `npm run scrape` 產出快照，回報場次數、影片數、影廳→影城對照、各標記數量，並人工抽樣 20 筆與官網比對（SC-007）
+- [x] T142 執行 `npm run scrape` 產出快照，回報場次數、影片數、影廳→影城對照、各標記數量，並人工抽樣 20 筆與官網比對（SC-007）
 
 ## Phase 4B: ADD Feature File - planner/可看判定/場次可看判定.feature
 
@@ -339,8 +339,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/可看判定/場次可看判定.feature`（project：planner）
 
-- [ ] T143 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T144 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T143 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T144 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4C: ADD Feature File - planner/轉場相容/轉場緩衝與相容判定.feature
 
@@ -360,8 +360,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/轉場相容/轉場緩衝與相容判定.feature`（project：planner）
 
-- [ ] T145 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T146 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T145 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T146 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4D: ADD Feature File - planner/最佳行程/行程不衝堂與排列.feature
 
@@ -381,8 +381,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/最佳行程/行程不衝堂與排列.feature`（project：planner）
 
-- [ ] T147 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T148 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T147 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T148 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4E: ADD Feature File - planner/最佳行程/行程範圍.feature
 
@@ -402,8 +402,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/最佳行程/行程範圍.feature`（project：planner）
 
-- [ ] T149 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T150 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T149 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T150 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4F: ADD Feature File - planner/最佳行程/排程目標優先序.feature
 
@@ -423,8 +423,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/最佳行程/排程目標優先序.feature`（project：planner）
 
-- [ ] T151 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T152 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T151 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T152 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4G: ADD Feature File - planner/最佳行程/每日上限.feature
 
@@ -444,8 +444,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/最佳行程/每日上限.feature`（project：planner）
 
-- [ ] T153 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T154 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T153 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T154 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4H: ADD Feature File - planner/最佳行程/最佳性與可重現.feature
 
@@ -465,8 +465,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/最佳行程/最佳性與可重現.feature`（project：planner）
 
-- [ ] T155 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T156 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T155 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T156 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4I: ADD Feature File - planner/未排入原因/未排入必看片原因.feature
 
@@ -486,8 +486,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/未排入原因/未排入必看片原因.feature`（project：planner）
 
-- [ ] T157 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T158 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T157 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T158 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4J: ADD Feature File - planner/搶票順序與備案/搶票順序.feature
 
@@ -507,8 +507,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票順序與備案/搶票順序.feature`（project：planner）
 
-- [ ] T159 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T160 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T159 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T160 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4K: ADD Feature File - planner/搶票順序與備案/備案場次.feature
 
@@ -528,8 +528,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票順序與備案/備案場次.feature`（project：planner）
 
-- [ ] T161 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T162 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T161 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T162 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4L: ADD Feature File - planner/搶票切換/標記搶到與沒搶到.feature
 
@@ -549,8 +549,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票切換/標記搶到與沒搶到.feature`（project：planner）
 
-- [ ] T163 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T164 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T163 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T164 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4M: ADD Feature File - planner/搶票切換/重新排程保留搶到結果.feature
 
@@ -570,8 +570,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票切換/重新排程保留搶到結果.feature`（project：planner）
 
-- [ ] T165 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T166 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T165 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T166 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4N: ADD Feature File - web/選片/選片頁瀏覽.feature
 

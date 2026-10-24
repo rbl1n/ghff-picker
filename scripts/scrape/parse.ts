@@ -1,4 +1,5 @@
-import type { Film, Session, Venue } from "../../src/domain/types";
+import * as cheerio from "cheerio";
+import type { CinemaId, Film, Session, SessionMark, Venue } from "../../src/domain/types";
 
 export interface ParsedSchedule {
   films: Film[];
@@ -6,7 +7,96 @@ export interface ParsedSchedule {
   sessions: Session[];
 }
 
+/** 官網表頭 → 影城（MUVIE 表頭屬於松仁威秀，含 TITAN） */
+const CINEMA_BY_HEADER: Record<string, CinemaId> = {
+  台北信義威秀: "xinyi_vieshow",
+  MUVIE: "songren_muvie",
+};
+
+/** 依 title 屬性原文（關鍵字）對應標記；◆ 原文尚未在樣本出現，以「華語」關鍵字預留 */
+const MARK_BY_TITLE: Array<[RegExp, SessionMark]> = [
+  [/影人出席/, "guest_attending"],
+  [/華語/, "mandarin_no_subtitle"],
+  [/非英語/, "no_english_subtitle"],
+  [/非售票/, "non_ticketed"],
+  [/優先特映/, "priority_screening"],
+];
+
+export function cinemaOfHeader(header: string): CinemaId {
+  return CINEMA_BY_HEADER[header.trim()] ?? "unknown";
+}
+
+function shortHash(text: string): string {
+  let h = 0;
+  for (const ch of text) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  return h.toString(36);
+}
+
+function hhmmToMin(hhmm: string): number {
+  const [h, m] = hhmm.trim().split(":").map(Number);
+  return h * 60 + m;
+}
+
 /** 解析官網某日場次頁 HTML（date = YYYY-MM-DD） */
-export function parseSchedulePage(_html: string, _date: string): ParsedSchedule {
-  throw new Error("not implemented");
+export function parseSchedulePage(html: string, date: string): ParsedSchedule {
+  const $ = cheerio.load(html);
+  const films = new Map<string, Film>();
+  const venues = new Map<string, Venue>();
+  const sessions: Session[] = [];
+
+  $("table.show-list").each((_, table) => {
+    const header = $(table).find("th").first().text().trim();
+    const cinema = cinemaOfHeader(header);
+    let venueName = "";
+    $(table)
+      .find("tr.text-center")
+      .each((_, tr) => {
+        const row = $(tr);
+        const room = row.find("td.room span").first().text().trim();
+        // 已知影城沿用官網影廳原文；未知影城（如高雄、台中威秀）的影廳名會與信義重名，改冠上表頭
+        if (room) venueName = cinema === "unknown" ? `${header}${room}` : room;
+        // 影片連 films/detail/<id>；非售票活動（⊚）連 notesevents/events/detail/<id>，同一活動編號可含多個標題
+        const link = row.find("td.data .film_url a, td.data .program_url a").first();
+        const href = link.attr("href") ?? "";
+        const filmNo = /films\/detail\/(\d+)/.exec(href)?.[1];
+        const eventNo = /events\/detail\/(\d+)/.exec(href)?.[1];
+        const filmId = filmNo ?? (eventNo ? `e${eventNo}-${shortHash(link.text().trim())}` : undefined);
+        if (!filmId || !venueName) return;
+
+        const detail = row.find("td.data .text-light").first();
+        const runtime = Number(/(\d+)\s*分/.exec(detail.text())?.[1]);
+        const rating = detail.find(".txt_rating_y").first().text().trim();
+        const startMin = hhmmToMin(row.find("td.time").first().text());
+
+        if (!films.has(filmId)) {
+          films.set(filmId, { film_id: filmId, title: link.text().trim(), runtime_min: runtime, rating });
+        }
+        if (!venues.has(venueName)) venues.set(venueName, { venue_name: venueName, cinema });
+
+        const marks: SessionMark[] = [];
+        detail.find("span[title]").each((_, sp) => {
+          if (!$(sp).text().trim()) return; // 無符號 = 此提示未啟用
+          const title = $(sp).attr("title") ?? "";
+          const hit = MARK_BY_TITLE.find(([re]) => re.test(title));
+          if (hit && !marks.includes(hit[1])) marks.push(hit[1]);
+        });
+
+        sessions.push({
+          session_id: `${filmId}-${date}-${String(startMin).padStart(4, "0")}`,
+          film_id: filmId,
+          date,
+          start_min: startMin,
+          end_min: startMin + runtime,
+          venue_name: venueName,
+          marks,
+        });
+      });
+  });
+
+  // 同片同時間在不同影廳同步放映時，session_id 加上影廳以保持唯一且可重現
+  const idCount = new Map<string, number>();
+  for (const s of sessions) idCount.set(s.session_id, (idCount.get(s.session_id) ?? 0) + 1);
+  for (const s of sessions) if (idCount.get(s.session_id)! > 1) s.session_id += `-${s.venue_name}`;
+
+  return { films: [...films.values()], venues: [...venues.values()], sessions };
 }
