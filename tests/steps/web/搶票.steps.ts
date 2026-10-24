@@ -251,7 +251,7 @@ Then("行程頁中 {string} 排在 {string}", async ({ page, world }, title: str
   await expect(item).toContainText(time);
   await expect(page.getByRole("heading", { name: dayLabel(date) })).toBeVisible();
   // 權威狀態：已搶到的場次保持不變（保存的 got 標記含此場次，且引擎行程也排在此場次）
-  const eng = await engineOf(page, world);
+  const eng = await engineOf(page, world, { replanned: true });
   const fid = filmIdOf(world, title);
   const entry = eng.itinerary.find((e) => eng.sessionById(e.session_id).film_id === fid);
   expect(entry && sessionSpecOf(eng.sessionById(entry.session_id)), `${title} 引擎行程場次`).toBe(canon(session));

@@ -257,12 +257,17 @@ export async function applyManualOrder(page: Page, world: WebWorld, titles: stri
 
 
 // ---------------------------------------------------------------- 排程引擎對照（權威狀態）
-/** 以目前保存的使用者狀態呼叫 src/domain，算出行程與搶票清單，供 Then 比對畫面 */
-export async function engineOf(page: Page, world: WebWorld) {
+/**
+ * 以目前保存的使用者狀態呼叫 src/domain，算出行程與搶票清單，供 Then 比對畫面。
+ * 搶票當下（FR-020）清單建立在排程當時的行程上，搶票標記只用來切換備案；
+ * 只有「依搶到結果重新排程」後（FR-021）行程才納入標記，此時傳 replanned: true。
+ */
+export async function engineOf(page: Page, world: WebWorld, opts: { replanned?: boolean } = {}) {
   const state = await storedOrDefault(page);
   const catalog = world.catalog;
   if (!catalog) throw new Error("缺少場次快照");
-  const { itinerary, unscheduled } = buildItinerary(catalog, state);
+  const planState = opts.replanned ? state : { ...state, ticket_marks: [] };
+  const { itinerary, unscheduled } = buildItinerary(catalog, planState);
   const tickets = buildTicketList(catalog, state, itinerary);
   const sessionById = (id: string) => {
     const s = catalog.sessions.find((x) => x.session_id === id);

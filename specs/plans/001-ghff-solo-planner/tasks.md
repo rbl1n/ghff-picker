@@ -592,8 +592,8 @@
 **Test Scope**:
 - `specs/truth/features/web/選片/選片頁瀏覽.feature`（project：web-desktop、web-mobile）
 
-- [ ] T167 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T168 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T167 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T168 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4O: ADD Feature File - web/選片/影片分層.feature
 
@@ -614,8 +614,8 @@
 **Test Scope**:
 - `specs/truth/features/web/選片/影片分層.feature`（project：web-desktop、web-mobile）
 
-- [ ] T169 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T170 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T169 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T170 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4P: ADD Feature File - web/時段/不可看時段設定.feature
 
@@ -636,8 +636,8 @@
 **Test Scope**:
 - `specs/truth/features/web/時段/不可看時段設定.feature`（project：web-desktop、web-mobile）
 
-- [ ] T171 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T172 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T171 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T172 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4Q: ADD Feature File - web/時段/不可看場次標示.feature
 
@@ -658,8 +658,8 @@
 **Test Scope**:
 - `specs/truth/features/web/時段/不可看場次標示.feature`（project：web-desktop、web-mobile）
 
-- [ ] T173 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T174 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T173 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T174 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4R: ADD Feature File - web/行程/行程呈現.feature
 
@@ -680,8 +680,8 @@
 **Test Scope**:
 - `specs/truth/features/web/行程/行程呈現.feature`（project：web-desktop、web-mobile）
 
-- [ ] T175 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T176 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T175 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T176 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4S: ADD Feature File - web/行程/未排入必看片.feature
 
@@ -702,8 +702,8 @@
 **Test Scope**:
 - `specs/truth/features/web/行程/未排入必看片.feature`（project：web-desktop、web-mobile）
 
-- [ ] T177 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T178 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T177 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T178 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4T: ADD Feature File - web/搶票/搶票清單呈現.feature
 
@@ -724,8 +724,8 @@
 **Test Scope**:
 - `specs/truth/features/web/搶票/搶票清單呈現.feature`（project：web-desktop、web-mobile）
 
-- [ ] T179 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T180 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T179 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T180 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4U: ADD Feature File - web/搶票/搶票標記與切換備案.feature
 
@@ -746,8 +746,8 @@
 **Test Scope**:
 - `specs/truth/features/web/搶票/搶票標記與切換備案.feature`（project：web-desktop、web-mobile）
 
-- [ ] T181 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T182 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T181 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T182 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4V: ADD Feature File - web/分享與保存/設定保存.feature
 
@@ -769,8 +769,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/設定保存.feature`（project：web-desktop、web-mobile）
 
-- [ ] T183 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T184 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T183 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T184 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4W: ADD Feature File - web/分享與保存/跨裝置分享.feature
 
@@ -792,8 +792,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/跨裝置分享.feature`（project：web-desktop、web-mobile）
 
-- [ ] T185 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T186 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T185 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T186 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4Y: research quality gate
 

@@ -3,14 +3,43 @@ import type { UserState } from "../domain/types";
 export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY = "ghff-picker:user-state";
 
-export function loadState(): UserState | null {
-  throw new Error("not implemented");
+/** 判斷未知資料是否為可用的 UserState（localStorage 與分享連結共用） */
+export function isUserState(value: unknown): value is UserState {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    v.schema_version === SCHEMA_VERSION &&
+    (v.daily_limit === null || (typeof v.daily_limit === "number" && Number.isInteger(v.daily_limit) && v.daily_limit >= 0)) &&
+    (v.manual_order === null || (Array.isArray(v.manual_order) && v.manual_order.every((x) => typeof x === "string"))) &&
+    Array.isArray(v.film_preferences) &&
+    Array.isArray(v.unavailable_slots) &&
+    Array.isArray(v.ticket_marks)
+  );
 }
 
-export function saveState(_state: UserState): void {
-  throw new Error("not implemented");
+export function loadState(): UserState | null {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return isUserState(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveState(state: UserState): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // 儲存空間不可用（隱私模式等）時，本次操作仍在記憶體內有效
+  }
 }
 
 export function clearState(): void {
-  throw new Error("not implemented");
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // 忽略
+  }
 }
