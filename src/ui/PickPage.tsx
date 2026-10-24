@@ -21,6 +21,7 @@ import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalList
 import { CSS } from "@dnd-kit/utilities";
 import { appendToTier, moveFilmTo, removeFromTier, tierOrder } from "../domain/order";
 import { sessionStartAbs } from "../domain/time";
+import { isTheatrical, type TheatricalEntry, type TheatricalMap } from "../domain/theatrical";
 import { CatalogGate } from "./CatalogGate";
 import { CatNo } from "./CatNo";
 import { filmDetailUrl } from "./links";
@@ -30,13 +31,16 @@ import { runSchedule, setSessionMark, updateUser, useStore } from "./store";
 const NO_NOTES: Record<string, string> = {};
 const NO_AVAILABILITY: DayAvailability[] = [];
 const NO_MARKS: Record<string, SessionPref> = {};
+const NO_OVERRIDES: Record<string, boolean> = {};
+const NO_IDS: ReadonlySet<string> = new Set();
 
-type Filter = "all" | "marked" | "none" | "skipped";
+type Filter = "all" | "marked" | "none" | "skipped" | "theatrical";
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "全部" },
   { key: "marked", label: "已標記" },
   { key: "none", label: "未標記" },
   { key: "skipped", label: "不看" },
+  { key: "theatrical", label: "院線" },
 ];
 
 export function PickPage() {
@@ -86,6 +90,17 @@ function setNote(filmId: string, text: string): void {
   });
 }
 
+/** 院線標記：手動切換寫入 theatrical_overrides；回到預設值時移除該筆，沒有任何筆時整個欄位移除 */
+function setTheatrical(filmId: string, on: boolean, defaultOn: boolean): void {
+  updateUser((s) => {
+    const { theatrical_overrides: prev, ...rest } = s;
+    const map = { ...(prev ?? {}) };
+    if (on === defaultOn) delete map[filmId];
+    else map[filmId] = on;
+    return Object.keys(map).length ? { ...rest, theatrical_overrides: map } : rest;
+  });
+}
+
 /** 熱門屬於已分層的片；未標記的片被標熱門時以「想看」排在該層最後建立紀錄 */
 function setHot(filmId: string, hot: boolean): void {
   updateUser((s) => {
@@ -122,7 +137,7 @@ const A11Y = {
   },
 };
 
-function OrderRow({ id, tier, rank, title, catNo, note, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; note?: string; overlay?: boolean }) {
+function OrderRow({ id, tier, rank, title, catNo, note, theatrical, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; note?: string; theatrical?: boolean; overlay?: boolean }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = overlay ? undefined : { transform: CSS.Transform.toString(transform), transition };
   return (
@@ -148,6 +163,7 @@ function OrderRow({ id, tier, rank, title, catNo, note, overlay }: { id: string;
       <span className="ttl">
         <CatNo no={catNo} />
         <span data-testid="film-title">{title}</span>
+        {theatrical && <span className="tag tag-theatrical" data-testid="order-theatrical">院線</span>}
         {note && <span className="onote" data-testid="order-note">{note}</span>}
       </span>
       {!overlay && (
@@ -166,7 +182,7 @@ function OrderRow({ id, tier, rank, title, catNo, note, overlay }: { id: string;
   );
 }
 
-function TierGroup({ tier, ids, filmOf, notes, dragging }: { tier: Tier; ids: string[]; filmOf: Map<string, Film>; notes: Record<string, string>; dragging: boolean }) {
+function TierGroup({ tier, ids, filmOf, notes, theatricalIds, dragging }: { tier: Tier; ids: string[]; filmOf: Map<string, Film>; notes: Record<string, string>; theatricalIds: ReadonlySet<string>; dragging: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id: CONTAINER + tier });
   return (
     <div className="tgroup" data-testid="tier-order-group" data-tier={tier}>
@@ -176,7 +192,7 @@ function TierGroup({ tier, ids, filmOf, notes, dragging }: { tier: Tier; ids: st
       <div ref={setNodeRef} data-testid={ids.length === 0 ? "tier-drop-zone" : undefined} className={`dropzone${ids.length === 0 ? " empty" : ""}${isOver && dragging ? " over" : ""}`}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           {ids.map((id, i) => (
-            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} note={notes[id]} />
+            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} note={notes[id]} theatrical={theatricalIds.has(id)} />
           ))}
         </SortableContext>
         {ids.length === 0 && (
@@ -188,7 +204,7 @@ function TierGroup({ tier, ids, filmOf, notes, dragging }: { tier: Tier; ids: st
 }
 
 /** 層內順序檢視：拖曳 ⋮⋮ 把手調整順序，也能放進別層（觸控、滑鼠、鍵盤皆可；兩人模式也只調整自己的） */
-function TierOrderView({ catalog, prefs, notes }: { catalog: Catalog; prefs: FilmPreference[]; notes: Record<string, string> }) {
+function TierOrderView({ catalog, prefs, notes, theatricalIds }: { catalog: Catalog; prefs: FilmPreference[]; notes: Record<string, string>; theatricalIds: ReadonlySet<string> }) {
   const filmOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
   const [draft, setDraft] = useState<Lists | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -282,11 +298,11 @@ function TierOrderView({ catalog, prefs, notes }: { catalog: Catalog; prefs: Fil
         onDragCancel={onDragCancel}
       >
         {TIERS.map((t) => (
-          <TierGroup key={t} tier={t} ids={lists[t]} filmOf={filmOf} notes={notes} dragging={activeId !== null} />
+          <TierGroup key={t} tier={t} ids={lists[t]} filmOf={filmOf} notes={notes} theatricalIds={theatricalIds} dragging={activeId !== null} />
         ))}
         <DragOverlay>
           {activeId ? (
-            <OrderRow id={activeId} tier={TIERS.find((t) => lists[t].includes(activeId)) ?? "must"} rank={(TIERS.map((t) => lists[t].indexOf(activeId)).find((i) => i >= 0) ?? 0) + 1} title={filmOf.get(activeId)?.title ?? activeId} catNo={filmOf.get(activeId)?.catalog_no} note={notes[activeId]} overlay />
+            <OrderRow id={activeId} tier={TIERS.find((t) => lists[t].includes(activeId)) ?? "must"} rank={(TIERS.map((t) => lists[t].indexOf(activeId)).find((i) => i >= 0) ?? 0) + 1} title={filmOf.get(activeId)?.title ?? activeId} catNo={filmOf.get(activeId)?.catalog_no} note={notes[activeId]} theatrical={theatricalIds.has(activeId)} overlay />
           ) : null}
         </DragOverlay>
       </DndContext>
@@ -305,7 +321,7 @@ function matchesQuery(f: Film, q: string, note: string | undefined): boolean {
 }
 
 function PickContent({ catalog }: { catalog: Catalog }) {
-  const { user } = useStore();
+  const { user, theatrical } = useStore();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -323,6 +339,12 @@ function PickContent({ catalog }: { catalog: Catalog }) {
   const prefOf = useMemo(() => new Map(user.film_preferences.map((p) => [p.film_id, p])), [user.film_preferences]);
   const notes = user.film_notes ?? NO_NOTES;
   const skipped = useMemo(() => new Set(user.skipped_film_ids ?? []), [user.skipped_film_ids]);
+  const overrides = user.theatrical_overrides ?? NO_OVERRIDES;
+  const theatricalIds = useMemo(
+    () => (theatrical.size === 0 && Object.keys(overrides).length === 0 ? NO_IDS : new Set(catalog.films.filter((f) => isTheatrical(f.film_id, overrides, theatrical)).map((f) => f.film_id))),
+    [catalog, theatrical, overrides],
+  );
+  const guestIds = useMemo(() => new Set(catalog.sessions.filter((s) => s.marks.includes("guest_attending")).map((s) => s.film_id)), [catalog]);
   const counts = TIERS.map((t) => user.film_preferences.filter((p) => p.tier === t).length);
   const q = query.trim();
   const shown = catalog.films.filter((f) => {
@@ -330,6 +352,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
     const isSkipped = skipped.has(f.film_id);
     if (filter === "skipped") return isSkipped;
     if (isSkipped) return false; // 不看的片只在「不看」篩選列出
+    if (filter === "theatrical") return theatricalIds.has(f.film_id);
     const marked = prefOf.has(f.film_id);
     return filter === "all" || (filter === "marked" ? marked : !marked);
   });
@@ -358,7 +381,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           ))}
         </ul>
       </details>
-      <TierOrderView catalog={catalog} prefs={user.film_preferences} notes={user.film_notes ?? NO_NOTES} />
+      <TierOrderView catalog={catalog} prefs={user.film_preferences} notes={user.film_notes ?? NO_NOTES} theatricalIds={theatricalIds} />
       <input
         className="input"
         type="search"
@@ -385,6 +408,9 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           note={notes[f.film_id]}
           availability={user.availability ?? NO_AVAILABILITY}
           marks={user.session_marks ?? NO_MARKS}
+          theatricalOn={theatricalIds.has(f.film_id)}
+          theatricalInfo={theatrical.get(f.film_id)}
+          hasGuest={guestIds.has(f.film_id)}
         />
       ))}
       {shown.length === 0 && <p className="empty">沒有符合的影片</p>}
@@ -403,8 +429,11 @@ const FilmCard = memo(function FilmCard(props: {
   note: string | undefined;
   availability: DayAvailability[];
   marks: Record<string, SessionPref>;
+  theatricalOn: boolean;
+  theatricalInfo: TheatricalEntry | undefined;
+  hasGuest: boolean;
 }) {
-  const { film, sessions, pref, skipped, note, availability, marks } = props;
+  const { film, sessions, pref, skipped, note, availability, marks, theatricalOn, theatricalInfo, hasGuest } = props;
   const hint = markHint(sessions, marks);
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
@@ -442,6 +471,7 @@ const FilmCard = memo(function FilmCard(props: {
         </p>
       )}
       <NoteBlock filmId={film.film_id} note={note} />
+      <TheatricalRow filmId={film.film_id} on={theatricalOn} info={theatricalInfo} hasGuest={hasGuest} />
       <div className="tiers" role="group" aria-label={`${film.title} 的層級`}>
         {TIERS.map((t) => (
           <button
@@ -475,6 +505,41 @@ const FilmCard = memo(function FilmCard(props: {
     </article>
   );
 });
+
+/** 院線：切換鈕（開 = 實心）、有影人場提醒、片商／上映日提示；只影響顯示，不影響排程 */
+function TheatricalRow({ filmId, on, info, hasGuest }: { filmId: string; on: boolean; info: TheatricalEntry | undefined; hasGuest: boolean }) {
+  const defaultOn = info?.status === "upcoming";
+  let hint = "";
+  if (info?.status === "upcoming") hint = `院線 ${info.release_date ?? info.release_note ?? "即將上映"}`;
+  else if (info?.status === "released") hint = `已於 ${info.release_date ?? "先前"} 在台上映`;
+  else if (!on && info?.status === "likely" && info.distributor) hint = `台灣片商：${info.distributor}`;
+  else if (info?.status === "not_theatrical") hint = info.release_note ? `非院線（${info.release_note}）` : "非院線";
+  return (
+    <div className="theatrow">
+      <button type="button" className="theatchip" data-testid="theatrical-toggle" aria-pressed={on} onClick={() => setTheatrical(filmId, !on, defaultOn)}>
+        院線
+      </button>
+      {hasGuest && (
+        <span className="guestnote" data-testid="guest-note">
+          有影人場
+        </span>
+      )}
+      {hint && (
+        <span className="hint theathint" data-testid="theatrical-hint">
+          {hint}
+          {info?.source && /^https?:/.test(info.source) && (
+            <>
+              {" "}
+              <a className="offlink" data-testid="theatrical-source" href={info.source} target="_blank" rel="noopener noreferrer">
+                來源
+              </a>
+            </>
+          )}
+        </span>
+      )}
+    </div>
+  );
+}
 
 /** 備註：片名下方的灰色小字（預設兩行，點擊展開）；「備註」按鈕開啟輸入框，按確定或離開輸入框儲存，清空即刪除 */
 function NoteBlock({ filmId, note }: { filmId: string; note: string | undefined }) {

@@ -8,6 +8,7 @@ import {
   Then,
   Given,
   dateDisp,
+  effectiveTheatrical,
   expect,
   expandCard,
   expectFilterTitles,
@@ -429,4 +430,86 @@ Then("選片頁 {string} 沒有短片清單", async ({ page, world }, title: str
   await openTab(page, world, "選片");
   await expect(filmCard(page, title)).toBeVisible();
   await expect(filmCard(page, title).getByTestId("film-shorts")).toHaveCount(0);
+});
+
+/* ------------------------------ 院線標記 ------------------------------ */
+
+const THEATRICAL_STATUS: Record<string, string> = { 即將上映: "upcoming", 已上映: "released", 疑似: "likely", 非院線: "not_theatrical", 不明: "unknown" };
+
+Given("院線資料無法載入", async ({ world }) => {
+  world.failTheatrical = true;
+});
+
+Given("台灣院線資料如下：", async ({ world }, table: DataTable) => {
+  world.theatrical = table.hashes().map((r) => ({
+    film_id: filmIdOf(world, r["片名"]),
+    status: THEATRICAL_STATUS[r["狀態"]],
+    ...(r["片商"]?.trim() ? { distributor: r["片商"].trim() } : {}),
+    ...(r["上映日"]?.trim() ? { release_date: r["上映日"].trim() } : {}),
+    ...(r["備註"]?.trim() ? { release_note: r["備註"].trim() } : {}),
+    ...(r["來源"]?.trim() ? { source: r["來源"].trim() } : {}),
+  }));
+});
+
+const theatToggle = (page: Page, title: string) => filmCard(page, title).getByTestId("theatrical-toggle");
+
+When("觀眾切換 {string} 的院線標記", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const btn = theatToggle(page, title);
+  const before = await btn.getAttribute("aria-pressed");
+  await btn.click();
+  await expect(btn).not.toHaveAttribute("aria-pressed", before ?? "false");
+  const fid = filmIdOf(world, title);
+  const want = before !== "true";
+  await expect.poll(async () => effectiveTheatrical(world, fid, (await storedOrDefault(page)).theatrical_overrides)).toBe(want);
+});
+
+Then("選片頁 {string} 的院線標記為 {string}", async ({ page, world }, title: string, state: string) => {
+  await openTab(page, world, "選片");
+  const on = state === "開";
+  const check = async () => {
+    const btn = theatToggle(page, title);
+    await expect(btn).toHaveAttribute("aria-pressed", on ? "true" : "false");
+    expect((await btn.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  };
+  await check();
+  const fid = filmIdOf(world, title);
+  expect(effectiveTheatrical(world, fid, (await storedOrDefault(page)).theatrical_overrides)).toBe(on);
+  await page.reload();
+  await check();
+});
+
+Then("選片頁 {string} 顯示院線提示 {string}", async ({ page }, title: string, text: string) => {
+  await expect(filmCard(page, title).getByTestId("theatrical-hint")).toContainText(text);
+  expect(norm(await filmCard(page, title).getByTestId("theatrical-hint").textContent()).replace(/ 來源$/, "")).toBe(text);
+});
+
+Then("選片頁 {string} 的院線提示附來源連結 {string}", async ({ page }, title: string, url: string) => {
+  const a = filmCard(page, title).getByTestId("theatrical-source");
+  await expect(a).toHaveAttribute("href", url);
+  await expect(a).toHaveAttribute("target", "_blank");
+  expect(await a.getAttribute("rel")).toContain("noopener");
+});
+
+Then("選片頁 {string} 沒有院線提示", async ({ page }, title: string) => {
+  await expect(filmCard(page, title)).toBeVisible();
+  await expect(filmCard(page, title).getByTestId("theatrical-hint")).toHaveCount(0);
+});
+
+Then("選片頁 {string} 顯示有影人場提示", async ({ page }, title: string) => {
+  await expect(filmCard(page, title).getByTestId("guest-note")).toHaveText("有影人場");
+});
+
+Then("選片頁 {string} 沒有影人場提示", async ({ page }, title: string) => {
+  await expect(filmCard(page, title)).toBeVisible();
+  await expect(filmCard(page, title).getByTestId("guest-note")).toHaveCount(0);
+});
+
+Then("層內順序檢視中 {string} 顯示院線標籤", async ({ page }, title: string) => {
+  await expect(tierItemOf(page, title).getByTestId("order-theatrical")).toHaveText("院線");
+});
+
+Then("層內順序檢視中 {string} 沒有院線標籤", async ({ page }, title: string) => {
+  await expect(tierItemOf(page, title)).toBeVisible();
+  await expect(tierItemOf(page, title).getByTestId("order-theatrical")).toHaveCount(0);
 });

@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { buildShareUrl, qrDataUrl } from "../state/share";
 import { OFFICIAL_LINKS } from "./links";
-import { useStore } from "./store";
+import { hasPreviousState, restorePreviousState, useStore } from "./store";
 
 export function SharePage() {
   const { user } = useStore();
   const url = buildShareUrl(user, `${window.location.origin}${import.meta.env.BASE_URL}`);
   const [qr, setQr] = useState<{ url: string; src: string } | "failed" | null>(null);
   const [toast, setToast] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -65,6 +66,36 @@ export function SharePage() {
       <div className="toast" role="status">
         {toast}
       </div>
+    </section>
+    <section className="card" aria-label="復原設定">
+      <button className="btn btn-block" disabled={!hasPreviousState()} onClick={() => setConfirming(true)}>
+        復原上一版設定
+      </button>
+      <p className="hint" style={{ margin: "6px 0 0" }}>
+        不小心被別的分頁或匯入蓋掉設定時，可以換回上一次保存的版本。
+      </p>
+      {confirming && (
+        <div className="dlg" role="dialog" aria-modal="true" aria-labelledby="restore-title" style={{ marginTop: 10 }}>
+          <h2 id="restore-title">要復原上一版設定嗎？</h2>
+          <p className="hint" style={{ margin: 0 }}>
+            目前的設定會換成上一次保存的版本。
+          </p>
+          <div className="acts2">
+            <button className="btn" onClick={() => setConfirming(false)}>
+              取消
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                restorePreviousState();
+                setConfirming(false);
+              }}
+            >
+              確認
+            </button>
+          </div>
+        </div>
+      )}
     </section>
     <section className="card" data-testid="official-links" aria-label="官方連結">
       <h2 style={{ margin: "0 0 8px", fontSize: 16 }}>官方連結</h2>

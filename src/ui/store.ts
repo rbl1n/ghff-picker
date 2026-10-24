@@ -4,8 +4,9 @@ import type { Catalog, DuoItineraryEntry, FilmPreference, ItineraryEntry, Partne
 import type { Tradeoff } from "../domain/tradeoff";
 import { computePlan, type PlanResult } from "../domain/plan";
 import { initTierRanks } from "../domain/order";
+import { parseTheatrical, type TheatricalMap } from "../domain/theatrical";
 import { migrateToV3 } from "../state/migrate";
-import { SCHEMA_VERSION, loadState, saveState } from "../state/storage";
+import { SCHEMA_VERSION, STORAGE_KEY, loadPreviousState, loadState, saveState } from "../state/storage";
 
 export type CatalogState =
   | { status: "loading" }
@@ -27,6 +28,8 @@ export interface Schedule {
 interface Snapshot {
   user: UserState;
   catalog: CatalogState;
+  /** 院線資料（film_id → 資訊）；缺檔或失敗 = 空 */
+  theatrical: TheatricalMap;
   schedule: Schedule | null;
   scheduling: boolean;
 }
@@ -48,12 +51,15 @@ const stored = loadState();
 const storedLegacy = stored !== null && stored.schema_version < SCHEMA_VERSION;
 /** 開啟時本機是否已有保存的設定（第一次使用的判斷） */
 export const hadStoredState = stored !== null;
+/** 本分頁上次讀到或寫入的保存版次；保存內容的版次不同 = 別的分頁已寫入較新的內容 */
+let loadedRev = stored?.revision ?? 0;
 let pendingSelfRanks = storedLegacy;
 let pendingPartnerRanks = storedLegacy && !!stored?.partner;
 
 let snap: Snapshot = {
   user: stored ? migrateToV3(stored) : emptyUserState(),
   catalog: { status: "loading" },
+  theatrical: new Map(),
   schedule: null,
   scheduling: false,
 };
@@ -98,30 +104,77 @@ function withPendingRanks(user: UserState): UserState {
 }
 
 function commit(next: UserState, patch: Partial<Snapshot> = {}): void {
-  const done = withPendingRanks(next);
+  const done = { ...withPendingRanks(next), revision: loadedRev + 1 };
   saveState(done);
+  loadedRev = done.revision;
   set({ user: done, ...patch });
 }
 
+/** 保存內容比本分頁記憶體新（別的分頁寫過）就改用保存內容；回傳是否有更新 */
+export function syncFromStorage(): boolean {
+  const s = loadState();
+  if (!s || (s.revision ?? 0) === loadedRev) return false;
+  loadedRev = s.revision ?? 0;
+  if (s.schema_version < SCHEMA_VERSION) {
+    pendingSelfRanks = true;
+    pendingPartnerRanks = !!s.partner;
+  }
+  set({ user: withPendingRanks(migrateToV3(s)) });
+  return true;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === STORAGE_KEY || e.key === null) syncFromStorage();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") syncFromStorage();
+  });
+}
+
+/** 修改一律先讀最新保存再套用這次的單一修改，不會用過期的整份快照覆蓋別的分頁 */
 export function updateUser(change: (s: UserState) => UserState): void {
+  syncFromStorage();
   commit({ ...change(snap.user), updated_at: new Date().toISOString() });
+}
+
+/** 是否有可復原的上一版設定 */
+export function hasPreviousState(): boolean {
+  return loadPreviousState() !== null;
+}
+
+/** 把備份的上一版換回為目前設定（目前這版成為新的備份） */
+export function restorePreviousState(): boolean {
+  const prev = loadPreviousState();
+  if (!prev) return false;
+  syncFromStorage();
+  const legacy = prev.schema_version < SCHEMA_VERSION;
+  pendingSelfRanks = legacy;
+  pendingPartnerRanks = legacy && !!prev.partner;
+  commit({ ...migrateToV3(prev), updated_at: new Date().toISOString() }, { schedule: null, scheduling: false });
+  return true;
 }
 
 /** 以另一台裝置分享來的設定取代本機設定；legacy = 連結是 1、2 版（名次待初始化） */
 export function replaceUser(next: UserState, legacy = false): void {
+  syncFromStorage();
   pendingSelfRanks = legacy;
   pendingPartnerRanks = legacy && !!next.partner;
   commit(next, { schedule: null, scheduling: false });
 }
 
 /** 加入／取代同伴：同伴資料另存，自己的設定一律不動 */
+/** selfName 空白 = 沿用最新保存裡自己的名稱（沒有則「我」） */
 export function setPartner(partner: PartnerData, selfName: string, legacy = false): void {
+  syncFromStorage();
+  selfName = selfName || snap.user.self_name || "我";
   pendingPartnerRanks = legacy;
   commit({ ...snap.user, self_name: selfName, partner, updated_at: new Date().toISOString() }, { schedule: null, scheduling: false });
 }
 
 /** 移除同伴：清除同伴與兩人名稱；自己的設定與搶票標記保留 */
 export function removePartner(): void {
+  syncFromStorage();
   pendingPartnerRanks = false;
   // 取捨決定只在兩人模式有意義：一併清除自己的（005，FR-516）
   const { pinned_choices: _pins, ...rest } = snap.user;
@@ -177,19 +230,30 @@ export function useItineraryFilter(): [ItineraryFilter, (f: ItineraryFilter) => 
 
 /* ------------------------------ 場次快照 ------------------------------ */
 
+/** 院線資料：缺檔、格式不對或請求失敗一律當作沒有資料（所有影片 unknown），不出錯 */
+async function loadTheatrical(): Promise<TheatricalMap> {
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}data/theatrical.json`);
+    if (!res.ok) return new Map();
+    return new Map(parseTheatrical(await res.json()).map((e) => [e.film_id, e]));
+  } catch {
+    return new Map();
+  }
+}
+
 export async function loadCatalog(): Promise<void> {
   set({ catalog: { status: "loading" } });
   try {
+    const theatricalP = loadTheatrical();
     const res = await fetch(`${import.meta.env.BASE_URL}data/sessions.json`);
     if (!res.ok) throw new Error("bad status");
     const data = (await res.json()) as Catalog;
     if (!Array.isArray(data.films) || !Array.isArray(data.sessions)) throw new Error("bad shape");
-    set({ catalog: { status: "ready", catalog: { ...data, films: sortFilmsByCatalogOrder(data.films) } } });
+    const theatrical = await theatricalP;
+    set({ theatrical, catalog: { status: "ready", catalog: { ...data, films: sortFilmsByCatalogOrder(data.films) } } });
     if (pendingSelfRanks || pendingPartnerRanks) {
       // 名次初始化完成後，把轉成 3 的內容寫回（測試與搶票頁都以保存內容為準）
-      const done = withPendingRanks(snap.user);
-      saveState(done);
-      set({ user: done });
+      commit(snap.user);
     }
     if (wantSchedule) compute();
   } catch {

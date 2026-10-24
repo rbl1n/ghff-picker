@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "scrape": "tsx scripts/scrape/scrape.ts",
     "scrape:catalog": "tsx scripts/scrape/apply-catalog.ts",
+    "data:theatrical": "tsx scripts/data/apply-theatrical.ts",
     "test": "bddgen && playwright test"
   },
   "dependencies": {

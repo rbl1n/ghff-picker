@@ -1,0 +1,882 @@
+[
+  {
+    "film_id": "4430",
+    "status": "upcoming",
+    "distributor": "興揚電影（未證實）",
+    "release_note": "2026年底（未定日）",
+    "source": "https://www.stheadline.com/film-drama/3596041"
+  },
+  {
+    "film_id": "4444",
+    "status": "likely",
+    "distributor": "烈日影像製作有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4444"
+  },
+  {
+    "film_id": "4410",
+    "status": "released",
+    "distributor": "英傑哆影業（製作/版權）",
+    "release_date": "2026-04-24",
+    "source": "https://newtalk.tw/news/view/2026-03-04/1022533"
+  },
+  {
+    "film_id": "4414",
+    "status": "released",
+    "distributor": "華文創（未於報導中證實）",
+    "release_date": "2025-10-31",
+    "source": "https://www.marieclaire.com.tw/entertainment/movie/81656"
+  },
+  {
+    "film_id": "4417",
+    "status": "upcoming",
+    "distributor": "氧氣電影（未證實）",
+    "release_note": "2026下半年",
+    "source": "https://n.yam.com/Article/20260319142898"
+  },
+  {
+    "film_id": "4420",
+    "status": "released",
+    "distributor": "未明（官網版權欄：高先電影）",
+    "release_date": "2026-10-02",
+    "source": "https://vocus.cc/user/@totorojack"
+  },
+  {
+    "film_id": "4424",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4424"
+  },
+  {
+    "film_id": "4427",
+    "status": "released",
+    "distributor": "麻吉砥加電影",
+    "release_date": "2026-02-13",
+    "source": "https://www.bella.tw/articles/movies&culture/55928/kungfu"
+  },
+  {
+    "film_id": "4432",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4432"
+  },
+  {
+    "film_id": "4436",
+    "status": "likely",
+    "distributor": "悠悠製作有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4436"
+  },
+  {
+    "film_id": "4441",
+    "status": "released",
+    "distributor": "甲上娛樂（宣傳素材來源；官網版權欄為大元娛樂，發行商未直接證實）",
+    "release_date": "2026-10-16",
+    "source": "https://www.mirrormedia.mg/external/setn_1916676"
+  },
+  {
+    "film_id": "4408",
+    "status": "released",
+    "distributor": "未明（官網版權欄：天予電影）",
+    "release_date": "2025-10-09",
+    "source": "https://en.wikipedia.org/wiki/Mudborn"
+  },
+  {
+    "film_id": "4412",
+    "status": "released",
+    "distributor": "水花電影",
+    "release_date": "2026-02-17",
+    "source": "https://www.tatlerasia.com/lifestyle/entertainment/movie-double-happiness-comments-zh-hant"
+  },
+  {
+    "film_id": "4426",
+    "status": "likely",
+    "distributor": "三點子映畫",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4426"
+  },
+  {
+    "film_id": "4438",
+    "status": "released",
+    "distributor": "未明（官網版權欄：星光佳世）",
+    "release_date": "2025-12",
+    "source": "https://www.worldjournal.com/wj/story/121369/9394210"
+  },
+  {
+    "film_id": "4464",
+    "status": "upcoming",
+    "distributor": "未明（官網版權欄：菲與飛工作室）",
+    "release_date": "2026-11-20",
+    "source": "https://www.bella.tw/articles/movies&culture/60651/we-are-born-good-chung-suet-ying-yeung-wai-lun"
+  },
+  {
+    "film_id": "4480",
+    "status": "released",
+    "distributor": "瀚草文創",
+    "release_date": "2025-12-24",
+    "source": "https://www.taiwannews.com.tw/zh/news/6248514"
+  },
+  {
+    "film_id": "4499",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4499"
+  },
+  {
+    "film_id": "4508",
+    "status": "likely",
+    "distributor": "青山電影有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4508"
+  },
+  {
+    "film_id": "4516",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4516"
+  },
+  {
+    "film_id": "4521",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4521"
+  },
+  {
+    "film_id": "4530",
+    "status": "likely",
+    "distributor": "秝米有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4530"
+  },
+  {
+    "film_id": "4547",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4547"
+  },
+  {
+    "film_id": "4551",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4551"
+  },
+  {
+    "film_id": "4552",
+    "status": "likely",
+    "distributor": "秋分映象有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4552"
+  },
+  {
+    "film_id": "4554",
+    "status": "likely",
+    "distributor": "高先電影有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4554"
+  },
+  {
+    "film_id": "4555",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4555"
+  },
+  {
+    "film_id": "4556",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4556"
+  },
+  {
+    "film_id": "4557",
+    "status": "upcoming",
+    "distributor": "未明（官網版權欄：深空天體）",
+    "release_date": "2026-10-31",
+    "source": "https://www.bella.tw/articles/movies&culture/59115/dolly"
+  },
+  {
+    "film_id": "4562",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4562"
+  },
+  {
+    "film_id": "4565",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4565"
+  },
+  {
+    "film_id": "4577",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4577"
+  },
+  {
+    "film_id": "4540",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4540"
+  },
+  {
+    "film_id": "4553",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4553"
+  },
+  {
+    "film_id": "4558",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4558"
+  },
+  {
+    "film_id": "4496",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4496"
+  },
+  {
+    "film_id": "4534",
+    "status": "likely",
+    "distributor": "群龍國際影視娛樂有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4534"
+  },
+  {
+    "film_id": "4543",
+    "status": "likely",
+    "distributor": "龍祥育樂多媒體（股）有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4543"
+  },
+  {
+    "film_id": "4445",
+    "status": "likely",
+    "distributor": "花生映社有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4445"
+  },
+  {
+    "film_id": "4451",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4451"
+  },
+  {
+    "film_id": "4455",
+    "status": "likely",
+    "distributor": "日映影像有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4455"
+  },
+  {
+    "film_id": "4460",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4460"
+  },
+  {
+    "film_id": "4466",
+    "status": "likely",
+    "distributor": "飛望影像有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4466"
+  },
+  {
+    "film_id": "4470",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4470"
+  },
+  {
+    "film_id": "4478",
+    "status": "not_theatrical",
+    "distributor": "米神國際（製作）",
+    "release_note": "電視劇改編",
+    "source": "https://www.bella.tw/articles/movies&culture/60567/taiwanese-drama-our-blues"
+  },
+  {
+    "film_id": "4484",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4484"
+  },
+  {
+    "film_id": "4497",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4497"
+  },
+  {
+    "film_id": "4514",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4514"
+  },
+  {
+    "film_id": "4542",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4542"
+  },
+  {
+    "film_id": "4409",
+    "status": "likely",
+    "distributor": "光年映畫有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4409"
+  },
+  {
+    "film_id": "4411",
+    "status": "likely",
+    "distributor": "台灣華特迪士尼/Searchlight（未證實）",
+    "source": "https://www.mirrormedia.mg/story/20260923-144ins-161542"
+  },
+  {
+    "film_id": "4413",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4413"
+  },
+  {
+    "film_id": "4416",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4416"
+  },
+  {
+    "film_id": "4418",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4418"
+  },
+  {
+    "film_id": "4421",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4421"
+  },
+  {
+    "film_id": "4422",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4422"
+  },
+  {
+    "film_id": "4429",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4429"
+  },
+  {
+    "film_id": "4435",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4435"
+  },
+  {
+    "film_id": "4415",
+    "status": "likely",
+    "distributor": "可樂藝術文創股份有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4415"
+  },
+  {
+    "film_id": "4419",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4419"
+  },
+  {
+    "film_id": "4423",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4423"
+  },
+  {
+    "film_id": "4428",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4428"
+  },
+  {
+    "film_id": "4437",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4437"
+  },
+  {
+    "film_id": "4443",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4443"
+  },
+  {
+    "film_id": "4449",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4449"
+  },
+  {
+    "film_id": "4456",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4456"
+  },
+  {
+    "film_id": "4469",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4469"
+  },
+  {
+    "film_id": "4477",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4477"
+  },
+  {
+    "film_id": "4483",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4483"
+  },
+  {
+    "film_id": "4491",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4491"
+  },
+  {
+    "film_id": "4501",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4501"
+  },
+  {
+    "film_id": "4505",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4505"
+  },
+  {
+    "film_id": "4512",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4512"
+  },
+  {
+    "film_id": "4517",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4517"
+  },
+  {
+    "film_id": "4525",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4525"
+  },
+  {
+    "film_id": "4528",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4528"
+  },
+  {
+    "film_id": "4538",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4538"
+  },
+  {
+    "film_id": "4431",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4431"
+  },
+  {
+    "film_id": "4450",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4450"
+  },
+  {
+    "film_id": "4462",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4462"
+  },
+  {
+    "film_id": "4473",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4473"
+  },
+  {
+    "film_id": "4489",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4489"
+  },
+  {
+    "film_id": "4442",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4442"
+  },
+  {
+    "film_id": "4448",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4448"
+  },
+  {
+    "film_id": "4454",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4454"
+  },
+  {
+    "film_id": "4457",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4457"
+  },
+  {
+    "film_id": "4461",
+    "status": "likely",
+    "distributor": "頂智有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4461"
+  },
+  {
+    "film_id": "4468",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4468"
+  },
+  {
+    "film_id": "4474",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4474"
+  },
+  {
+    "film_id": "4476",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4476"
+  },
+  {
+    "film_id": "4507",
+    "status": "likely",
+    "distributor": "海鵬影業有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4507"
+  },
+  {
+    "film_id": "4519",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4519"
+  },
+  {
+    "film_id": "4523",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4523"
+  },
+  {
+    "film_id": "4535",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4535"
+  },
+  {
+    "film_id": "4545",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4545"
+  },
+  {
+    "film_id": "4548",
+    "status": "likely",
+    "distributor": "天馬行空數位有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4548"
+  },
+  {
+    "film_id": "4482",
+    "status": "likely",
+    "distributor": "高二電影股份有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4482"
+  },
+  {
+    "film_id": "4487",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4487"
+  },
+  {
+    "film_id": "4490",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4490"
+  },
+  {
+    "film_id": "4498",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4498"
+  },
+  {
+    "film_id": "4503",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4503"
+  },
+  {
+    "film_id": "4506",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4506"
+  },
+  {
+    "film_id": "4433",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4433"
+  },
+  {
+    "film_id": "4439",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4439"
+  },
+  {
+    "film_id": "4446",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4446"
+  },
+  {
+    "film_id": "4453",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4453"
+  },
+  {
+    "film_id": "4494",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4494"
+  },
+  {
+    "film_id": "4500",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4500"
+  },
+  {
+    "film_id": "4504",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4504"
+  },
+  {
+    "film_id": "4509",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4509"
+  },
+  {
+    "film_id": "4515",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4515"
+  },
+  {
+    "film_id": "4520",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4520"
+  },
+  {
+    "film_id": "4531",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4531"
+  },
+  {
+    "film_id": "4583",
+    "status": "not_theatrical",
+    "distributor": "Disney+（台灣華特迪士尼）",
+    "release_note": "Disney+ 串流",
+    "source": "https://www.thenewslens.com/article/207180"
+  },
+  {
+    "film_id": "4584",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4584"
+  },
+  {
+    "film_id": "4586",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4586"
+  },
+  {
+    "film_id": "4585",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4585"
+  },
+  {
+    "film_id": "4434",
+    "status": "likely",
+    "distributor": "壹壹喜喜電影股份有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4434"
+  },
+  {
+    "film_id": "4440",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4440"
+  },
+  {
+    "film_id": "4452",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4452"
+  },
+  {
+    "film_id": "4463",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4463"
+  },
+  {
+    "film_id": "4475",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4475"
+  },
+  {
+    "film_id": "4481",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4481"
+  },
+  {
+    "film_id": "4488",
+    "status": "likely",
+    "distributor": "可樂藝術文創股份有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4488"
+  },
+  {
+    "film_id": "4492",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4492"
+  },
+  {
+    "film_id": "4563",
+    "status": "likely",
+    "distributor": "東昊影業有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4563"
+  },
+  {
+    "film_id": "4568",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4568"
+  },
+  {
+    "film_id": "4572",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4572"
+  },
+  {
+    "film_id": "4573",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4573"
+  },
+  {
+    "film_id": "4576",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4576"
+  },
+  {
+    "film_id": "4581",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4581"
+  },
+  {
+    "film_id": "4582",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4582"
+  },
+  {
+    "film_id": "4560",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4560"
+  },
+  {
+    "film_id": "4570",
+    "status": "likely",
+    "distributor": "海鵬影業有限公司",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4570"
+  },
+  {
+    "film_id": "4574",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4574"
+  },
+  {
+    "film_id": "4579",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4579"
+  },
+  {
+    "film_id": "4580",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4580"
+  },
+  {
+    "film_id": "4458",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4458"
+  },
+  {
+    "film_id": "4467",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4467"
+  },
+  {
+    "film_id": "4471",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4471"
+  },
+  {
+    "film_id": "4486",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4486"
+  },
+  {
+    "film_id": "4493",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4493"
+  },
+  {
+    "film_id": "4495",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4495"
+  },
+  {
+    "film_id": "4510",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4510"
+  },
+  {
+    "film_id": "4513",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4513"
+  },
+  {
+    "film_id": "4518",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4518"
+  },
+  {
+    "film_id": "4526",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4526"
+  },
+  {
+    "film_id": "4527",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4527"
+  },
+  {
+    "film_id": "4533",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4533"
+  },
+  {
+    "film_id": "4537",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/4537"
+  },
+  {
+    "film_id": "4541",
+    "status": "released",
+    "distributor": "索尼影業（鏡週刊稱「索尼提供」）",
+    "release_date": "2026-05-08",
+    "source": "https://www.mirrormedia.mg/story/20260508inf002"
+  },
+  {
+    "film_id": "e913-1yxsqxw",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e913-1yxsqxw"
+  },
+  {
+    "film_id": "e912-agz1ov",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e912-agz1ov"
+  },
+  {
+    "film_id": "e911-15owkem",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e911-15owkem"
+  },
+  {
+    "film_id": "e912-131lvh4",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e912-131lvh4"
+  },
+  {
+    "film_id": "e912-18wp69t",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e912-18wp69t"
+  },
+  {
+    "film_id": "e913-19m7rwm",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e913-19m7rwm"
+  },
+  {
+    "film_id": "e911-x1b0sh",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e911-x1b0sh"
+  },
+  {
+    "film_id": "e911-1g6spiz",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e911-1g6spiz"
+  },
+  {
+    "film_id": "e913-1sxz7hk",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e913-1sxz7hk"
+  },
+  {
+    "film_id": "e910-1bu4ux4",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e910-1bu4ux4"
+  },
+  {
+    "film_id": "e913-1sxz7hl",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e913-1sxz7hl"
+  },
+  {
+    "film_id": "e913-1sxz7hm",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e913-1sxz7hm"
+  },
+  {
+    "film_id": "e912-aeyw6c",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e912-aeyw6c"
+  },
+  {
+    "film_id": "e911-eunhzu",
+    "status": "unknown",
+    "source": "https://www.goldenhorse.org.tw/film/programme/films/detail/e911-eunhzu"
+  }
+]

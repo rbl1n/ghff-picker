@@ -25,6 +25,9 @@ export interface WebWorld {
   /** Given 場次快照；null 代表空快照 */
   catalog: Catalog | null;
   failSessions: boolean;
+  /** 院線資料（theatrical.json 的內容）；預設空，不讓真實檔案影響測試 */
+  theatrical: Record<string, unknown>[];
+  failTheatrical: boolean;
   prefs: { title: string; tier: Tier; is_hot: boolean }[];
   slots: { date: string; start_min: number | null; end_min: number | null }[];
   dailyLimit: number | null;
@@ -48,6 +51,8 @@ export function createWebWorld(): WebWorld {
   return {
     catalog: null,
     failSessions: false,
+    theatrical: [],
+    failTheatrical: false,
     prefs: [],
     slots: [],
     dailyLimit: null,
@@ -238,10 +243,8 @@ export function sameState(a: UserState, b: UserState): boolean {
 export const TAB_HASH = { 選片: "pick", 時段: "slots", 行程: "itinerary", 搶票: "tickets", 分享: "share" } as const;
 export type TabLabel = keyof typeof TAB_HASH;
 
-/** 第一次開啟前：攔截場次快照、預載使用者狀態（僅在 localStorage 尚無資料時寫入，重新載入不會蓋掉操作結果） */
-async function prepare(page: Page, world: WebWorld): Promise<void> {
-  if (world.routesReady) return;
-  world.routesReady = true;
+/** 攔截場次快照與院線資料（同一個 world 的每個頁面都要裝） */
+export async function installRoutes(page: Page, world: WebWorld): Promise<void> {
   await page.route("**/data/sessions.json", (route) =>
     world.failSessions
       ? route.abort()
@@ -251,6 +254,18 @@ async function prepare(page: Page, world: WebWorld): Promise<void> {
           body: JSON.stringify(world.catalog ?? emptyCatalog()),
         }),
   );
+  await page.route("**/data/theatrical.json", (route) =>
+    world.failTheatrical
+      ? route.abort()
+      : route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(world.theatrical) }),
+  );
+}
+
+/** 第一次開啟前：攔截場次快照、預載使用者狀態（僅在 localStorage 尚無資料時寫入，重新載入不會蓋掉操作結果） */
+async function prepare(page: Page, world: WebWorld): Promise<void> {
+  if (world.routesReady) return;
+  world.routesReady = true;
+  await installRoutes(page, world);
   const hasState =
     world.prefs.length > 0 || world.skipped.length > 0 || world.notes.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0 || world.sessionMarks.length > 0 || world.pins.length > 0;
   if (hasState) {
@@ -338,7 +353,7 @@ export { TIER_LABEL_TO_ENUM };
 
 /** 004：切到選片頁的篩選 chip，回傳目前列出的片名（依畫面順序） */
 export async function titlesUnderFilter(page: Page, filter: string): Promise<string[]> {
-  const chip = page.getByRole("button", { name: filter, exact: true }).filter({ has: page.locator("xpath=self::*[contains(@class,'chip')]") });
+  const chip = page.locator("button.chip").filter({ hasText: new RegExp(`^${filter}$`) });
   await chip.click();
   await expect(chip).toHaveAttribute("aria-pressed", "true");
   // 等清單穩定：兩次讀取一致
@@ -354,6 +369,13 @@ export async function titlesUnderFilter(page: Page, filter: string): Promise<str
   return page.getByTestId("film-card").evaluateAll((els) => els.map((e) => e.getAttribute("data-title") ?? ""));
 }
 
+/** 有效院線旗標（與 UI 規則一致）：手動值優先，否則 upcoming 為開 */
+export function effectiveTheatrical(world: WebWorld, filmId: string, overrides: Record<string, boolean> | undefined): boolean {
+  const o = overrides?.[filmId];
+  if (typeof o === "boolean") return o;
+  return !world.failTheatrical && world.theatrical.some((e) => e.film_id === filmId && e.status === "upcoming");
+}
+
 /** 004：驗證某篩選列出的片名、與保存的 skipped_film_ids 一致；重新載入後再驗一次 */
 export async function expectFilterTitles(page: Page, world: WebWorld, filter: string, expected: string[]): Promise<void> {
   const check = async () => {
@@ -367,6 +389,7 @@ export async function expectFilterTitles(page: Page, world: WebWorld, filter: st
       .filter((f) => {
         if (filter === "不看") return skipped.has(f.film_id);
         if (skipped.has(f.film_id)) return false;
+        if (filter === "院線") return effectiveTheatrical(world, f.film_id, st.theatrical_overrides);
         return filter === "全部" || (filter === "已標記" ? prefIds.has(f.film_id) : !prefIds.has(f.film_id));
       })
       .map((f) => f.title);

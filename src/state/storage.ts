@@ -6,6 +6,8 @@ export const SCHEMA_VERSION = 3;
 export const SCHEMA_VERSION_V3 = 3;
 const READABLE_VERSIONS = [1, 2, 3];
 export const STORAGE_KEY = "ghff-picker:user-state";
+/** 每次寫入前把前一版保存另存於此（只留一份），供「復原上一版設定」 */
+export const PREV_KEY = "ghff-picker:state:prev";
 
 function isAvailability(value: unknown): value is DayAvailability[] {
   return (
@@ -53,6 +55,11 @@ function isPinnedChoices(value: unknown): boolean {
   return isRecordOf(value, (x) => x === "prefer_session");
 }
 
+/** 院線標記：film_id → boolean */
+function isTheatricalOverrides(value: unknown): boolean {
+  return isRecordOf(value, (x) => typeof x === "boolean");
+}
+
 function isPartnerData(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const p = value as Record<string, unknown>;
@@ -84,6 +91,8 @@ export function isUserState(value: unknown): value is UserState {
     isNotes(v.film_notes) &&
     isSessionMarks(v.session_marks) &&
     isPinnedChoices(v.pinned_choices) &&
+    isTheatricalOverrides(v.theatrical_overrides) &&
+    (v.revision === undefined || (typeof v.revision === "number" && Number.isInteger(v.revision) && v.revision >= 0)) &&
     Array.isArray(v.ticket_marks)
   );
 }
@@ -114,9 +123,24 @@ export function loadState(): UserState | null {
 
 export function saveState(state: UserState): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStored(state)));
+    const json = JSON.stringify(toStored(state));
+    const prev = window.localStorage.getItem(STORAGE_KEY);
+    if (prev !== null && prev !== json) window.localStorage.setItem(PREV_KEY, prev);
+    window.localStorage.setItem(STORAGE_KEY, json);
   } catch {
     // 儲存空間不可用（隱私模式等）時，本次操作仍在記憶體內有效
+  }
+}
+
+/** 讀出備份的上一版保存（沒有或損毀 = null） */
+export function loadPreviousState(): UserState | null {
+  try {
+    const raw = window.localStorage.getItem(PREV_KEY);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return isUserState(parsed) ? parsed : null;
+  } catch {
+    return null;
   }
 }
 

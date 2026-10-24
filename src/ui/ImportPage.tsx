@@ -91,7 +91,7 @@ function PersonalDialog({ decoded }: { decoded: DecodedShare }) {
     finish();
   };
   const confirmReplace = () => {
-    setPartner(partnerOf(decoded.senderName ?? DEFAULT_PARTNER), user.self_name || DEFAULT_SELF, decoded.legacy);
+    setPartner(partnerOf(decoded.senderName ?? DEFAULT_PARTNER), "", decoded.legacy);
     finish();
   };
 

@@ -96,6 +96,7 @@ Table user_state {
   film_notes "map<film_id, text>" [null, note: '影片備註（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → 自己寫的備註文字，空字串等於刪除（不保存空值）；只屬於自己，包含在分享連結裡（取代我的設定時帶過去），但當作同伴加入時同伴連結裡的 film_notes 一律丟棄，不寫入 partner 也不顯示']
   session_marks "map<session_id, prefer|only>" [null, note: '場次偏好（005，選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：prefer = 優先（軟偏好）、only = 只看這場（硬限制）；沒有標記的場次不保存、沒有任何標記時不寫欄位；包含在分享連結，當作同伴加入時帶入 partner.session_marks（同伴的標記用於排程，不是私人資料）']
   pinned_choices "map<film_id, prefer_session>" [null, note: '取捨決定（005，選填）：film_id → prefer_session = 該人的這部片限定在自己的「優先」場次（效果等同只看這場）；由行程頁取捨卡片寫入、「改回一起看」移除；沒有優先標記的片，決定不生效；移除同伴時一併清除；包含在分享連結']
+  theatrical_overrides "map<film_id, boolean>" [null, note: '院線標記（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → true／false，使用者手動切換選片卡片上的「院線」後寫入；有效院線旗標 = 此欄位有值就用它，否則只有 theatrical.status = confirmed 為開。只影響顯示與篩選，不影響排程與搶票；包含在分享連結，當作同伴加入時丟棄']
   updated_at timestamp
 
   Note: '''
@@ -123,6 +124,26 @@ Table partner {
   加入同伴 = 寫入 partner 與其子表（partner_film_preferences、partner_day_availability、partner_available_intervals）；移除同伴 = 刪除這一列、子表全部列與 user_state.self_name，ticket_marks 保留（FR-204、邊界情況）。
   同伴資料來自同伴的個人分享連結（share_kind = personal）；之後只能靠重新加入同伴連結更新。
   '''
+}
+
+Table theatrical {
+  film_id varchar [pk]
+  status theatrical_status
+  distributor varchar [null, note: '台灣片商／版權公司']
+  release_date date [null, note: '台灣院線上映日（已知才有）']
+  source varchar [null, note: '資料來源網址或頁面']
+
+  Note: '''
+  台灣院線上映資訊（公開靜態檔 public/data/theatrical.json，陣列；由 `npm run data:theatrical -- <研究檔>` 轉換產生）。
+  缺檔、載入失敗或沒有該片的列 = unknown，不顯示錯誤。只供顯示，不影響排程與搶票。
+  '''
+}
+
+Enum theatrical_status {
+  confirmed       // 已確認台灣院線上映：預設院線旗標為開
+  likely          // 疑似（已有台灣片商）：預設關，顯示片商提示
+  not_theatrical  // 確認不會上院線
+  unknown         // 不明
 }
 
 Table film_preferences {

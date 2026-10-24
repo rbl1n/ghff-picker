@@ -259,3 +259,11 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 .tradeoff .opt ul{margin:4px 0 0;padding-left:18px;font-size:14px}
 .tradeoff .giveup{display:block;font-size:13px;color:var(--muted)}
 .tradeoff .btn{width:100%}
+
+.theatrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+.theatchip{min-height:44px;min-width:56px;padding:0 14px;border-radius:22px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-weight:700}
+.theatchip[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
+.theatchip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.guestnote{font-size:12px;font-weight:700;color:var(--gold)}
+.theathint{margin:0}
+.tag-theatrical{border-color:var(--gold);color:var(--gold);margin-left:6px}

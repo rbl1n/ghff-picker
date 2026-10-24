@@ -138,6 +138,10 @@ export interface UserState {
   session_marks?: Record<string, SessionPref>;
   /** 取捨決定（005）：film_id → 看自己的優先場；等同該片「只看這場」限定在優先場。選填 */
   pinned_choices?: Record<string, PinnedChoice>;
+  /** 院線標記：film_id → 使用者手動設定的旗標（選填）；沒有值時依 theatrical.json 的 status。只影響顯示與篩選；分享連結帶著，當作同伴加入時丟棄 */
+  theatrical_overrides?: Record<string, boolean>;
+  /** 保存版次：每次寫入 +1，用來偵測別的分頁已寫入較新的內容（舊資料沒有 = 0）；不進分享連結 */
+  revision?: number;
   ticket_marks: TicketMark[];
 }
 

@@ -19,7 +19,7 @@ export interface DecodedShare {
 
 /** 兩人模式產生 merged、個人模式產生 personal（sender_name 取自己的名稱） */
 export function sharePayloadOf(state: UserState): SharePayload {
-  const full = toStored(state);
+  const { revision: _rev, ...full } = toStored(state);
   if (state.partner) return { kind: "merged", schema_version: SCHEMA_VERSION, state: full };
   return { kind: "personal", schema_version: SCHEMA_VERSION, sender_name: state.self_name ?? null, state: full };
 }
