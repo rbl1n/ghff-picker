@@ -1,12 +1,14 @@
 // 紙本手冊目次表的片號（catalog_no）：讀 catalog-numbers.json 套到影片上，並依手冊順序排列。
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { Film } from "../../src/domain/types";
+import type { Film, FilmShort } from "../../src/domain/types";
 
 export interface CatalogNumberEntry {
   film_id: string;
   catalog_no: string;
   title: string;
+  /** 短片單元：每部短片自己的頁碼；單元的 catalog_no = 其中最小的頁碼 */
+  shorts?: FilmShort[];
 }
 
 export const CATALOG_NUMBERS_FILE = resolve(process.cwd(), "scripts/scrape/catalog-numbers.json");
@@ -27,7 +29,16 @@ export function applyCatalogNumbers(films: Film[], entries: CatalogNumberEntry[]
     .map((f, i) => {
       const { catalog_no: _drop, ...rest } = f;
       const n = no.get(f.film_id);
-      return { film: n === undefined ? (rest as Film) : { ...rest, catalog_no: n }, i };
+      const out: Film = n === undefined ? (rest as Film) : { ...rest, catalog_no: n };
+      const shortNos = entries.find((e) => e.film_id === f.film_id)?.shorts;
+      if (f.shorts && shortNos) {
+        // 短片頁碼依片名對應；同單元內片名不重複
+        out.shorts = f.shorts.map((s) => {
+          const hit = shortNos.find((x) => x.title === s.title);
+          return hit?.catalog_no ? { title: s.title, catalog_no: hit.catalog_no } : { title: s.title };
+        });
+      }
+      return { film: out, i };
     })
     .sort((a, b) => {
       const pa = pos.get(a.film.film_id);

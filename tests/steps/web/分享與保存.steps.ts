@@ -1,3 +1,4 @@
+import type { UserState } from "../../../src/domain/types";
 import type { Page } from "@playwright/test";
 import { createBdd, type DataTable } from "playwright-bdd";
 import { Given, When, Then, expect, expectFilterTitles, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
@@ -587,4 +588,26 @@ Then("分享頁的官方連結如下：", async ({ page }, table: DataTable) => 
     await expect(a).toHaveAttribute("target", "_blank");
     await expect(a).toHaveAttribute("rel", /noopener/);
   }
+});
+
+// 影片備註
+Then("手機的選片頁 {string} 備註顯示為 {string}", async ({ page, world }, title: string, note: string) => {
+  const phone = phoneOf(page);
+  const fid = world.catalog!.films.find((f) => f.title === title)!.film_id;
+  const check = async () => {
+    await navLink(phone, "選片").click();
+    await expect(filmCard(phone, title).getByTestId("film-note")).toHaveText(note);
+    expect((await storedOrDefault(phone)).film_notes?.[fid], "手機本機保存的備註").toBe(note);
+    expect((bState(page).desktopState as UserState).film_notes?.[fid], "與電腦一致").toBe(note);
+  };
+  await check();
+  await phone.reload();
+  await check();
+});
+
+Then("手機的選片頁 {string} 沒有備註", async ({ page }, title: string) => {
+  const phone = phoneOf(page);
+  await navLink(phone, "選片").click();
+  await expect(filmCard(phone, title)).toBeVisible();
+  await expect(filmCard(phone, title).getByTestId("film-note")).toHaveCount(0);
 });

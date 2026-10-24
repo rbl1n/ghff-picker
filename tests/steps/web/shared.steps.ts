@@ -68,6 +68,12 @@ Given("觀眾已把以下影片標為不看：", async ({ page, world }, table: 
   await reapplyState(page, world, "選片");
 });
 
+// 影片備註：寫入預載狀態的 film_notes
+Given("觀眾已為影片加上備註如下：", async ({ page, world }, table: DataTable) => {
+  for (const r of table.hashes()) world.notes.push({ title: r["片名"], note: r["備註"] });
+  await reapplyState(page, world, "選片");
+});
+
 // T037（003）：不可看時段從有空時段扣除（同日期多列逐列累加）；由 buildState 依 world.slots 推導有空時段
 Given("觀眾已設定不可看時段如下：", async ({ page, world }, table: DataTable) => {
   for (const r of table.hashes()) {

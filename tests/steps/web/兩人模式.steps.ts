@@ -1,5 +1,6 @@
 // web/兩人模式 stepdefs（specs/truth/features/web/兩人模式/dsl.md）
 import type { DataTable } from "playwright-bdd";
+import { STORAGE_KEY } from "../../../src/state/storage";
 import {
   Given,
   When,
@@ -287,4 +288,23 @@ Then("已保存的搶票標記如下：", async ({ page, world }, table: DataTab
   await expect
     .poll(async () => (await storedOrDefault(page)).ticket_marks.map((m) => `${m.session_id}|${m.result}`).sort())
     .toEqual(expected);
+});
+
+// 影片備註：同伴連結裡的備註一律丟棄
+Given("同伴傳來的個人分享連結帶有備註如下：", async ({ world }, table: DataTable) => {
+  for (const r of table.hashes()) duoOf(world).partnerNotes.push({ title: r["片名"], note: r["備註"] });
+});
+
+Then("同伴的備註 {string} 與 {string} 沒有存進本機保存，也沒有出現在畫面上", async ({ page }, a: string, b: string) => {
+  const raw = await page.evaluate((k) => window.localStorage.getItem(k), STORAGE_KEY);
+  expect(raw, "本機保存存在").not.toBeNull();
+  expect(raw).not.toContain(a);
+  expect(raw).not.toContain(b);
+  expect(JSON.parse(raw!).partner?.film_notes, "partner 沒有 film_notes").toBeUndefined();
+  for (const tab of ["選片", "行程", "搶票"] as const) {
+    await navLink(page, tab).click();
+    const text = await page.locator("main").innerText();
+    expect(text, `${tab}頁`).not.toContain(a);
+    expect(text, `${tab}頁`).not.toContain(b);
+  }
 });

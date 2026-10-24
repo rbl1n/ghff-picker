@@ -293,3 +293,88 @@ Then("選片頁 {string} 沒有官網介紹連結", async ({ page, world }, titl
   await expect(filmCard(page, title)).toBeVisible();
   await expect(filmCard(page, title).getByTestId("film-official-link")).toHaveCount(0);
 });
+
+// 影片備註
+async function openNoteEditor(page: Page, title: string) {
+  const card = filmCard(page, title);
+  await card.getByRole("button", { name: /^(編輯)?備註$/ }).click();
+  const box = card.getByRole("textbox", { name: "備註內容" });
+  await expect(box).toBeVisible();
+  return { card, box };
+}
+
+When("觀眾為 {string} 寫下備註 {string}", async ({ page, world }, title: string, note: string) => {
+  await openTab(page, world, "選片");
+  const { card, box } = await openNoteEditor(page, title);
+  await box.fill(note);
+  await card.getByRole("button", { name: "確定", exact: true }).click();
+  await expect(box).toHaveCount(0);
+  await expect(card.getByTestId("film-note")).toHaveText(note);
+});
+
+When("觀眾清空 {string} 的備註", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const { card, box } = await openNoteEditor(page, title);
+  await box.fill("");
+  await card.getByRole("button", { name: "確定", exact: true }).click();
+  await expect(card.getByTestId("film-note")).toHaveCount(0);
+});
+
+When("觀眾展開 {string} 的備註", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  await filmCard(page, title).getByTestId("film-note").click();
+});
+
+Then("選片頁 {string} 的備註顯示為 {string}", async ({ page, world }, title: string, note: string) => {
+  await openTab(page, world, "選片");
+  const fid = filmIdOf(world, title);
+  const check = async () => {
+    await expect(filmCard(page, title).getByTestId("film-note")).toHaveText(note);
+    await expect.poll(async () => (await storedOrDefault(page)).film_notes?.[fid]).toBe(note);
+  };
+  await check();
+  await page.reload();
+  await check();
+});
+
+Then("選片頁 {string} 沒有備註", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const card = filmCard(page, title);
+  await expect(card).toBeVisible();
+  await expect(card.getByTestId("film-note")).toHaveCount(0);
+  await expect(card.getByRole("button", { name: "備註", exact: true })).toBeVisible();
+  const fid = filmIdOf(world, title);
+  expect((await storedOrDefault(page)).film_notes?.[fid]).toBeUndefined();
+});
+
+Then("選片頁 {string} 的備註預設只顯示兩行", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const note = filmCard(page, title).getByTestId("film-note");
+  await expect(note).toBeVisible();
+  const { clamp, clipped } = await note.evaluate((e) => ({
+    clamp: getComputedStyle(e).webkitLineClamp,
+    clipped: e.scrollHeight > e.clientHeight,
+  }));
+  expect(clamp, "最多 2 行").toBe("2");
+  expect(clipped, "內容超過兩行而被截斷").toBe(true);
+});
+
+Then("選片頁 {string} 的備註顯示全文", async ({ page, world }, title: string) => {
+  const note = filmCard(page, title).getByTestId("film-note");
+  const full = (await storedOrDefault(page)).film_notes?.[filmIdOf(world, title)];
+  await expect(note).toHaveText(full!);
+  expect(await note.evaluate((e) => e.scrollHeight <= e.clientHeight), "沒有被截斷").toBe(true);
+});
+
+// 短片單元
+Then("選片頁 {string} 的短片顯示為 {string}", async ({ page, world }, title: string, list: string) => {
+  await openTab(page, world, "選片");
+  const text = (await filmCard(page, title).getByTestId("film-shorts").innerText()).replace(/\s+/g, " ").trim();
+  expect(text).toBe(list.split("、").join("・"));
+});
+
+Then("選片頁 {string} 沒有短片清單", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  await expect(filmCard(page, title)).toBeVisible();
+  await expect(filmCard(page, title).getByTestId("film-shorts")).toHaveCount(0);
+});

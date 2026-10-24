@@ -1,7 +1,7 @@
 {
   "festival_year": 2026,
   "source_url": "https://www.goldenhorse.org.tw/film/programme/schedule/",
-  "fetched_at": "2026-10-24T09:30:36.331Z",
+  "fetched_at": "2026-10-24T16:03:59.632Z",
   "films": [
     {
       "film_id": "4430",
@@ -215,37 +215,107 @@
     },
     {
       "film_id": "4565",
-      "title": "果",
+      "title": "金馬獎入圍劇情短片A",
       "runtime_min": 56,
       "rating": "18+",
+      "shorts": [
+        {
+          "title": "果",
+          "catalog_no": "118"
+        },
+        {
+          "title": "她說",
+          "catalog_no": "119"
+        },
+        {
+          "title": "末代殭屍",
+          "catalog_no": "119"
+        }
+      ],
       "catalog_no": "118"
     },
     {
       "film_id": "4577",
-      "title": "三隻小豬",
+      "title": "金馬獎入圍劇情短片B",
       "runtime_min": 61,
       "rating": "6+",
+      "shorts": [
+        {
+          "title": "三隻小豬",
+          "catalog_no": "120"
+        },
+        {
+          "title": "爬坡",
+          "catalog_no": "120"
+        }
+      ],
       "catalog_no": "120"
     },
     {
       "film_id": "4540",
-      "title": "月亮上的業餘者",
+      "title": "金馬獎入圍紀錄短片A",
       "runtime_min": 72,
       "rating": "0+",
+      "shorts": [
+        {
+          "title": "月亮上的業餘者",
+          "catalog_no": "121"
+        },
+        {
+          "title": "緬甸女孩",
+          "catalog_no": "122"
+        },
+        {
+          "title": "屋舍上的葉仔花",
+          "catalog_no": "122"
+        }
+      ],
       "catalog_no": "121"
     },
     {
       "film_id": "4553",
-      "title": "嘉翠麗",
+      "title": "金馬獎入圍紀錄短片B",
       "runtime_min": 67,
       "rating": "0+",
+      "shorts": [
+        {
+          "title": "嘉翠麗",
+          "catalog_no": "123"
+        },
+        {
+          "title": "夜行",
+          "catalog_no": "123"
+        }
+      ],
       "catalog_no": "123"
     },
     {
       "film_id": "4558",
-      "title": "你不在這個蛋糕裡",
+      "title": "金馬獎入圍動畫短片",
       "runtime_min": 46,
       "rating": "12+",
+      "shorts": [
+        {
+          "title": "你不在這個蛋糕裡",
+          "catalog_no": "124"
+        },
+        {
+          "title": "蝴蝶結",
+          "catalog_no": "125"
+        },
+        {
+          "title": "我朋友的故事",
+          "catalog_no": "125"
+        },
+        {
+          "title": "深水區",
+          "catalog_no": "126"
+        },
+        {
+          "title": "埋葬的孩子",
+          "catalog_no": "126"
+        }
+      ],
       "catalog_no": "124"
     },
     {
@@ -327,23 +397,73 @@
     },
     {
       "film_id": "4497",
-      "title": "刺水",
+      "title": "短片A：未來未來",
       "runtime_min": 63,
       "rating": "6+",
+      "shorts": [
+        {
+          "title": "刺水",
+          "catalog_no": "140"
+        },
+        {
+          "title": "緬甸女孩",
+          "catalog_no": "141"
+        },
+        {
+          "title": "她沒說的事",
+          "catalog_no": "141"
+        }
+      ],
       "catalog_no": "140"
     },
     {
       "film_id": "4514",
-      "title": "不軌劇場",
+      "title": "短片B：假以時日",
       "runtime_min": 87,
       "rating": "6+",
+      "shorts": [
+        {
+          "title": "不軌劇場",
+          "catalog_no": "142"
+        },
+        {
+          "title": "魚羊花",
+          "catalog_no": "142"
+        },
+        {
+          "title": "上蓋大",
+          "catalog_no": "143"
+        },
+        {
+          "title": "低頭閉眼",
+          "catalog_no": "143"
+        }
+      ],
       "catalog_no": "142"
     },
     {
       "film_id": "4542",
-      "title": "和我說話",
+      "title": "短片C：她年她月",
       "runtime_min": 69,
       "rating": "6+",
+      "shorts": [
+        {
+          "title": "和我說話",
+          "catalog_no": "144"
+        },
+        {
+          "title": "朝日凋零",
+          "catalog_no": "144"
+        },
+        {
+          "title": "渺小的死亡",
+          "catalog_no": "145"
+        },
+        {
+          "title": "燈火蘭珊處",
+          "catalog_no": "145"
+        }
+      ],
       "catalog_no": "144"
     },
     {
@@ -740,9 +860,31 @@
     },
     {
       "film_id": "4453",
-      "title": "雲朵上的點點名",
+      "title": "新世代短片集",
       "runtime_min": 80,
       "rating": "0+",
+      "shorts": [
+        {
+          "title": "雲朵上的點點名",
+          "catalog_no": "210"
+        },
+        {
+          "title": "乘浪濤去",
+          "catalog_no": "211"
+        },
+        {
+          "title": "馬背上的夏天",
+          "catalog_no": "211"
+        },
+        {
+          "title": "抓耙仔",
+          "catalog_no": "212"
+        },
+        {
+          "title": "你吹Do，我吹Si",
+          "catalog_no": "212"
+        }
+      ],
       "catalog_no": "210"
     },
     {

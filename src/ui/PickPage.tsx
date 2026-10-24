@@ -9,6 +9,7 @@ import { filmDetailUrl } from "./links";
 import { LEGEND, MARK_LABEL, TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime } from "./format";
 import { runSchedule, updateUser, useStore } from "./store";
 
+const NO_NOTES: Record<string, string> = {};
 const NO_AVAILABILITY: DayAvailability[] = [];
 
 type Filter = "all" | "marked" | "none" | "skipped";
@@ -51,6 +52,18 @@ function setSkipped(filmId: string, skip: boolean): void {
       film_preferences: removeFromTier(s.film_preferences, filmId),
       skipped_film_ids: ids.includes(filmId) ? ids : [...ids, filmId],
     };
+  });
+}
+
+/** 寫入或清除某部片的備註（空白 = 刪除；沒有任何備註時整個欄位移除） */
+function setNote(filmId: string, text: string): void {
+  updateUser((s) => {
+    const { film_notes: prev, ...rest } = s;
+    const notes = { ...(prev ?? {}) };
+    const value = text.trim();
+    if (value) notes[filmId] = value;
+    else delete notes[filmId];
+    return Object.keys(notes).length ? { ...rest, film_notes: notes } : rest;
   });
 }
 
@@ -108,6 +121,16 @@ function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPrefer
   );
 }
 
+/** 搜尋：片名、片號、備註，短片單元另含每部短片的片名與頁碼（包含即符合） */
+function matchesQuery(f: Film, q: string, note: string | undefined): boolean {
+  return (
+    f.title.includes(q) ||
+    (f.catalog_no ?? "").includes(q) ||
+    (note ?? "").includes(q) ||
+    (f.shorts ?? []).some((s) => s.title.includes(q) || (s.catalog_no ?? "").includes(q))
+  );
+}
+
 function PickContent({ catalog }: { catalog: Catalog }) {
   const { user } = useStore();
   const [query, setQuery] = useState("");
@@ -125,11 +148,12 @@ function PickContent({ catalog }: { catalog: Catalog }) {
   }, [catalog]);
 
   const prefOf = useMemo(() => new Map(user.film_preferences.map((p) => [p.film_id, p])), [user.film_preferences]);
+  const notes = user.film_notes ?? NO_NOTES;
   const skipped = useMemo(() => new Set(user.skipped_film_ids ?? []), [user.skipped_film_ids]);
   const counts = TIERS.map((t) => user.film_preferences.filter((p) => p.tier === t).length);
   const q = query.trim();
   const shown = catalog.films.filter((f) => {
-    if (q && !f.title.includes(q) && !(f.catalog_no ?? "").includes(q)) return false;
+    if (q && !matchesQuery(f, q, notes[f.film_id])) return false;
     const isSkipped = skipped.has(f.film_id);
     if (filter === "skipped") return isSkipped;
     if (isSkipped) return false; // 不看的片只在「不看」篩選列出
@@ -165,8 +189,8 @@ function PickContent({ catalog }: { catalog: Catalog }) {
       <input
         className="input"
         type="search"
-        placeholder="搜尋片名"
-        aria-label="搜尋片名"
+        placeholder="搜尋片名、片號或備註"
+        aria-label="搜尋片名、片號或備註"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{ marginBottom: 12 }}
@@ -185,6 +209,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           sessions={sessionsByFilm.get(f.film_id) ?? []}
           pref={prefOf.get(f.film_id)}
           skipped={skipped.has(f.film_id)}
+          note={notes[f.film_id]}
           availability={user.availability ?? NO_AVAILABILITY}
         />
       ))}
@@ -201,9 +226,10 @@ const FilmCard = memo(function FilmCard(props: {
   sessions: Session[];
   pref: FilmPreference | undefined;
   skipped: boolean;
+  note: string | undefined;
   availability: DayAvailability[];
 }) {
-  const { film, sessions, pref, skipped, availability } = props;
+  const { film, sessions, pref, skipped, note, availability } = props;
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
       <div className="row">
@@ -223,6 +249,18 @@ const FilmCard = memo(function FilmCard(props: {
         )}
         <span className="hint">{sessions.length} 場</span>
       </div>
+      {film.shorts && film.shorts.length > 0 && (
+        <p className="shorts hint" data-testid="film-shorts">
+          {film.shorts.map((s, i) => (
+            <span key={`${i}-${s.title}`}>
+              {i > 0 && "・"}
+              {s.catalog_no && <span className="mono">{s.catalog_no} </span>}
+              {s.title}
+            </span>
+          ))}
+        </p>
+      )}
+      <NoteBlock filmId={film.film_id} note={note} />
       <div className="tiers" role="group" aria-label={`${film.title} 的層級`}>
         {TIERS.map((t) => (
           <button
@@ -256,6 +294,53 @@ const FilmCard = memo(function FilmCard(props: {
     </article>
   );
 });
+
+/** 備註：片名下方的灰色小字（預設兩行，點擊展開）；「備註」按鈕開啟輸入框，按確定或離開輸入框儲存，清空即刪除 */
+function NoteBlock({ filmId, note }: { filmId: string; note: string | undefined }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [open, setOpen] = useState(false);
+  const save = () => {
+    setNote(filmId, draft);
+    setEditing(false);
+  };
+  if (editing) {
+    return (
+      <div className="noteedit">
+        <textarea
+          className="input"
+          aria-label="備註內容"
+          rows={3}
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={save}
+        />
+        <button className="btn" onMouseDown={(e) => e.preventDefault()} onClick={save}>
+          確定
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="noterow">
+      {note && (
+        <button className="note" data-testid="film-note" aria-expanded={open} data-expanded={open} onClick={() => setOpen(!open)}>
+          {note}
+        </button>
+      )}
+      <button
+        className="noteadd"
+        onClick={() => {
+          setDraft(note ?? "");
+          setEditing(true);
+        }}
+      >
+        {note ? "編輯備註" : "備註"}
+      </button>
+    </div>
+  );
+}
 
 function SessionRow({ session, runtime, watchable }: { session: Session; runtime: number; watchable: boolean }) {
   return (

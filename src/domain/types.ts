@@ -18,6 +18,14 @@ export interface Film {
   rating: string;
   /** 紙本手冊目次表的頁碼（使用者口中的片號，如 "089"）；沒有對照到者未設 */
   catalog_no?: string;
+  /** 短片單元（官網以【單元名】一列放映多部短片）：片名 = 單元名，shorts = 包含的短片（含各自的手冊頁碼）；一般影片沒有此欄位 */
+  shorts?: FilmShort[];
+}
+
+export interface FilmShort {
+  title: string;
+  /** 這部短片自己的手冊頁碼；沒有對照到者未設 */
+  catalog_no?: string;
 }
 
 export interface Venue {
@@ -116,6 +124,8 @@ export interface UserState {
   availability?: DayAvailability[];
   /** 不看（004）：選填；與 film_preferences 互斥；沒有欄位或空陣列 = 沒有不看。不排程、不進搶票清單 */
   skipped_film_ids?: string[];
+  /** 影片備註：film_id → 自己寫的文字；選填、空字串不保存。只屬於自己：分享連結帶著，但當作同伴加入時一律丟棄 */
+  film_notes?: Record<string, string>;
   ticket_marks: TicketMark[];
 }
 

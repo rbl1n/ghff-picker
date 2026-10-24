@@ -10,7 +10,7 @@ import {
   MARK_LABEL,
   type PageRow,
 } from "../../support/scraper-helpers";
-import type { ScraperWorld } from "../../support/scraper-world";
+import { loadFixtureHtml, type ScraperWorld } from "../../support/scraper-world";
 
 const { Given, When, Then } = createBdd(test);
 
@@ -104,4 +104,21 @@ Then("影片 {string} 有 {int} 個場次", async ({ world }, title: string, cou
   const films = p.films.filter((f) => f.title === title);
   expect(films, `影片 ${title} 應只有一份紀錄`).toHaveLength(1);
   expect(p.sessions.filter((s) => s.film_id === films[0].film_id)).toHaveLength(count);
+});
+
+// 短片單元
+Given("官網 {string} 的存檔場次頁", async ({ world }, date: string) => {
+  world.date = parseDate(date);
+  world.html = loadFixtureHtml(world.date);
+  world.parsed = null;
+});
+
+Then("短片單元 {string} 的短片依序為 {string}", async ({ world }, unit: string, list: string) => {
+  const films = parsedOf(world).films.filter((f) => f.title === unit);
+  expect(films, `單元 ${unit} 應只有一份紀錄`).toHaveLength(1);
+  expect(films[0].shorts?.map((s) => s.title)).toEqual(list.split("、"));
+});
+
+Then("解析結果沒有名為 {string} 的影片", async ({ world }, title: string) => {
+  expect(parsedOf(world).films.map((f) => f.title)).not.toContain(title);
 });

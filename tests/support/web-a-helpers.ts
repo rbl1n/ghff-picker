@@ -24,6 +24,8 @@ export interface WebWorld {
   dailyLimit: number | null;
   /** 不看的片名（004） */
   skipped: string[];
+  /** 影片備註（片名 → 備註） */
+  notes: { title: string; note: string }[];
   marks: PendingMark[];
   /** 是否已經開啟過網站（之後 Given 要直接寫 localStorage 並重新載入） */
   opened: boolean;
@@ -40,6 +42,7 @@ export function createWebWorld(): WebWorld {
     slots: [],
     dailyLimit: null,
     skipped: [],
+    notes: [],
     marks: [],
     opened: false,
     routesReady: false,
@@ -101,6 +104,15 @@ export function buildCatalog(rows: Row[]): Catalog {
         runtime_min: Number(r["片長"]),
         rating: r["分級"] || "普",
         ...(r["片號"]?.trim() ? { catalog_no: r["片號"].trim() } : {}),
+        // 短片單元：「頁碼 片名」以「、」連接
+        ...(r["短片"]?.trim()
+          ? {
+              shorts: r["短片"].split("、").map((x) => {
+                const m = /^(\d{3})\s+(.+)$/.exec(x.trim());
+                return m ? { title: m[2], catalog_no: m[1] } : { title: x.trim() };
+              }),
+            }
+          : {}),
       });
     }
     const venue = r["影廳"];
@@ -171,6 +183,7 @@ export function buildState(world: WebWorld): UserState {
   s.film_preferences = ranked(world.prefs.map((p) => ({ film_id: filmIdOf(world, p.title), tier: p.tier, is_hot: p.is_hot })));
   s.availability = availFromSlots(world.slots);
   if (world.skipped.length) s.skipped_film_ids = world.skipped.map((t) => filmIdOf(world, t));
+  if (world.notes.length) s.film_notes = Object.fromEntries(world.notes.map((n) => [filmIdOf(world, n.title), n.note]));
   s.ticket_marks = world.marks.map((m) => ({
     session_id: sessionOf(world, m.title, m.sessionText).session_id,
     result: m.result,
@@ -223,7 +236,7 @@ async function prepare(page: Page, world: WebWorld): Promise<void> {
         }),
   );
   const hasState =
-    world.prefs.length > 0 || world.skipped.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
+    world.prefs.length > 0 || world.skipped.length > 0 || world.notes.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
   if (hasState) {
     const json = JSON.stringify(storageStateOf(world));
     await page.addInitScript(

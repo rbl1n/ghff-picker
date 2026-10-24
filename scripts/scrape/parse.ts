@@ -60,7 +60,11 @@ export function parseSchedulePage(html: string, date: string): ParsedSchedule {
         // 已知影城沿用官網影廳原文；未知影城（如高雄、台中威秀）的影廳名會與信義重名，改冠上表頭
         if (room) venueName = cinema === "unknown" ? `${header}${room}` : room;
         // 影片連 films/detail/<id>；非售票活動（⊚）連 notesevents/events/detail/<id>，同一活動編號可含多個標題
-        const link = row.find("td.data .film_url a, td.data .program_url a").first();
+        const links = row.find("td.data .film_url a, td.data .program_url a");
+        const link = links.first();
+        // 短片單元：標題列是【單元名】（沒有連結），後面接多部短片的連結；片名 = 單元名，film_id 沿用第一部短片的編號（保持穩定）
+        const unitName = row.find("td.data .h4.title").first().clone().children().remove().end().text().trim();
+        const programme = links.length > 1 && /^【.+】$/.test(unitName) ? unitName.slice(1, -1).trim() : null;
         const href = link.attr("href") ?? "";
         const filmNo = /films\/detail\/(\d+)/.exec(href)?.[1];
         const eventNo = /events\/detail\/(\d+)/.exec(href)?.[1];
@@ -73,7 +77,9 @@ export function parseSchedulePage(html: string, date: string): ParsedSchedule {
         const startMin = hhmmToMin(row.find("td.time").first().text());
 
         if (!films.has(filmId)) {
-          films.set(filmId, { film_id: filmId, title: link.text().trim(), runtime_min: runtime, rating });
+          const film: Film = { film_id: filmId, title: programme ?? link.text().trim(), runtime_min: runtime, rating };
+          if (programme) film.shorts = links.map((_, a) => ({ title: $(a).text().trim() })).get();
+          films.set(filmId, film);
         }
         if (!venues.has(venueName)) venues.set(venueName, { venue_name: venueName, cinema });
 

@@ -32,6 +32,13 @@ function isSkipped(value: unknown): boolean {
   return value === undefined || (Array.isArray(value) && value.every((x) => typeof x === "string"));
 }
 
+function isNotes(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every((x) => typeof x === "string"))
+  );
+}
+
 function isPartnerData(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const p = value as Record<string, unknown>;
@@ -58,6 +65,7 @@ export function isUserState(value: unknown): value is UserState {
     Array.isArray(v.film_preferences) &&
     hasTimeSettings(v) &&
     isSkipped(v.skipped_film_ids) &&
+    isNotes(v.film_notes) &&
     Array.isArray(v.ticket_marks)
   );
 }

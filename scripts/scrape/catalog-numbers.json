@@ -1,5 +1,5 @@
 {
-  "_comment": "影片 film_id -> 紙本手冊目次表的頁碼（使用者口中的片號）。陣列順序 = 目次表出現順序（同號時的決勝）。片單改版或重抓後由 scraper 套用；未列在此的影片沒有片號、排在最後。",
+  "_comment": "影片 film_id -> 紙本手冊目次表的頁碼（使用者口中的片號）。陣列順序 = 目次表出現順序（同號時的決勝）。片單改版或重抓後由 scraper 套用；未列在此的影片沒有片號、排在最後。 短片單元的項目另有 shorts（每部短片自己的頁碼）；單元的 catalog_no = 其中最小的頁碼。",
   "films": [
     {
       "film_id": "4430",
@@ -154,27 +154,97 @@
     {
       "film_id": "4565",
       "catalog_no": "118",
-      "title": "果"
+      "title": "金馬獎入圍劇情短片A",
+      "shorts": [
+        {
+          "title": "果",
+          "catalog_no": "118"
+        },
+        {
+          "title": "她說",
+          "catalog_no": "119"
+        },
+        {
+          "title": "末代殭屍",
+          "catalog_no": "119"
+        }
+      ]
     },
     {
       "film_id": "4577",
       "catalog_no": "120",
-      "title": "三隻小豬"
+      "title": "金馬獎入圍劇情短片B",
+      "shorts": [
+        {
+          "title": "三隻小豬",
+          "catalog_no": "120"
+        },
+        {
+          "title": "爬坡",
+          "catalog_no": "120"
+        }
+      ]
     },
     {
       "film_id": "4540",
       "catalog_no": "121",
-      "title": "月亮上的業餘者"
+      "title": "金馬獎入圍紀錄短片A",
+      "shorts": [
+        {
+          "title": "月亮上的業餘者",
+          "catalog_no": "121"
+        },
+        {
+          "title": "緬甸女孩",
+          "catalog_no": "122"
+        },
+        {
+          "title": "屋舍上的葉仔花",
+          "catalog_no": "122"
+        }
+      ]
     },
     {
       "film_id": "4553",
       "catalog_no": "123",
-      "title": "嘉翠麗"
+      "title": "金馬獎入圍紀錄短片B",
+      "shorts": [
+        {
+          "title": "嘉翠麗",
+          "catalog_no": "123"
+        },
+        {
+          "title": "夜行",
+          "catalog_no": "123"
+        }
+      ]
     },
     {
       "film_id": "4558",
       "catalog_no": "124",
-      "title": "你不在這個蛋糕裡"
+      "title": "金馬獎入圍動畫短片",
+      "shorts": [
+        {
+          "title": "你不在這個蛋糕裡",
+          "catalog_no": "124"
+        },
+        {
+          "title": "蝴蝶結",
+          "catalog_no": "125"
+        },
+        {
+          "title": "我朋友的故事",
+          "catalog_no": "125"
+        },
+        {
+          "title": "深水區",
+          "catalog_no": "126"
+        },
+        {
+          "title": "埋葬的孩子",
+          "catalog_no": "126"
+        }
+      ]
     },
     {
       "film_id": "4496",
@@ -234,17 +304,67 @@
     {
       "film_id": "4497",
       "catalog_no": "140",
-      "title": "刺水"
+      "title": "短片A：未來未來",
+      "shorts": [
+        {
+          "title": "刺水",
+          "catalog_no": "140"
+        },
+        {
+          "title": "緬甸女孩",
+          "catalog_no": "141"
+        },
+        {
+          "title": "她沒說的事",
+          "catalog_no": "141"
+        }
+      ]
     },
     {
       "film_id": "4514",
       "catalog_no": "142",
-      "title": "不軌劇場"
+      "title": "短片B：假以時日",
+      "shorts": [
+        {
+          "title": "不軌劇場",
+          "catalog_no": "142"
+        },
+        {
+          "title": "魚羊花",
+          "catalog_no": "142"
+        },
+        {
+          "title": "上蓋大",
+          "catalog_no": "143"
+        },
+        {
+          "title": "低頭閉眼",
+          "catalog_no": "143"
+        }
+      ]
     },
     {
       "film_id": "4542",
       "catalog_no": "144",
-      "title": "和我說話"
+      "title": "短片C：她年她月",
+      "shorts": [
+        {
+          "title": "和我說話",
+          "catalog_no": "144"
+        },
+        {
+          "title": "朝日凋零",
+          "catalog_no": "144"
+        },
+        {
+          "title": "渺小的死亡",
+          "catalog_no": "145"
+        },
+        {
+          "title": "燈火蘭珊處",
+          "catalog_no": "145"
+        }
+      ]
     },
     {
       "film_id": "4409",
@@ -529,7 +649,29 @@
     {
       "film_id": "4453",
       "catalog_no": "210",
-      "title": "雲朵上的點點名"
+      "title": "新世代短片集",
+      "shorts": [
+        {
+          "title": "雲朵上的點點名",
+          "catalog_no": "210"
+        },
+        {
+          "title": "乘浪濤去",
+          "catalog_no": "211"
+        },
+        {
+          "title": "馬背上的夏天",
+          "catalog_no": "211"
+        },
+        {
+          "title": "抓耙仔",
+          "catalog_no": "212"
+        },
+        {
+          "title": "你吹Do，我吹Si",
+          "catalog_no": "212"
+        }
+      ]
     },
     {
       "film_id": "4494",

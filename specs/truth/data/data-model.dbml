@@ -41,6 +41,7 @@ Table films {
   title varchar
   runtime_min int [note: '片長（分）']
   rating varchar [note: '分級，例：普、12+、15+']
+  shorts "{title, catalog_no?}[]" [null, note: '短片單元（官網一列放映多部短片，標題列為【單元名】）才有：片名 = 單元名（不含括號），film_id 沿用第一部短片的編號，shorts = 依官網順序的短片 {title, catalog_no?}，每部短片帶自己的手冊頁碼；單元的 catalog_no = 其中最小的頁碼。一般影片沒有此欄位']
   catalog_no varchar [null, note: '紙本手冊目次表的頁碼（片號），三位數字字串，例：089；使用者以此稱呼影片。由 scripts/scrape/catalog-numbers.json 對照產生，沒有對照到者為空。films 陣列依手冊順序排列：片號由小到大、同號依目次表位置、沒有片號者接在最後（保持原順序）；所有「影片順序」（同分決勝、層內名次初始化）都以此順序為準。']
 
   Note: '影片；擁有一或多個場次。短片單元在官網以第一部短片的片名上架，片號取該單元的起始頁。使用者以影片為單位分層（FR-002、FR-004）。'
@@ -92,6 +93,7 @@ Table user_state {
   daily_limit int [null, note: 'null = 不設上限（CL-005）；這是「自己」的上限，只約束自己的行程（FR-306）；同伴的上限在 partner']
   manual_order "film_id[]" [null, note: '使用者手動調整的搶票順序；重新排程前保留（FR-015）；003 起作用在「自己的搶票清單」（只含自己行程中的場次，FR-312）']
   self_name varchar [null, note: '自己的顯示名稱；null = 個人模式且從未設定。進入兩人模式時必填（預設「我」，FR-209）；移除同伴時與 partner 一併清除']
+  film_notes "map<film_id, text>" [null, note: '影片備註（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → 自己寫的備註文字，空字串等於刪除（不保存空值）；只屬於自己，包含在分享連結裡（取代我的設定時帶過去），但當作同伴加入時同伴連結裡的 film_notes 一律丟棄，不寫入 partner 也不顯示']
   updated_at timestamp
 
   Note: '''

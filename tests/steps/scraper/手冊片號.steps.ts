@@ -31,3 +31,23 @@ Then("影片順序與片號如下：", async ({ world }, table: DataTable) => {
   expect(got).toEqual(table.hashes().map((r) => ({ 片名: r["片名"], 片號: r["片號"] ?? "" })));
   for (const f of world.numbered ?? []) if (!f.catalog_no) expect("catalog_no" in f).toBe(false);
 });
+
+// 短片單元
+Given("官網短片單元 {string} 依序包含 {string}、{string}、{string}", async ({ world }, unit: string, a: string, b: string, c: string) => {
+  world.films = [
+    { film_id: "200", title: unit, runtime_min: 46, rating: "12+", shorts: [a, b, c].map((title) => ({ title })) },
+  ];
+});
+
+Given("手冊短片頁碼對照如下：", async ({ world }, table: DataTable) => {
+  const unit = world.films[0];
+  const shorts = table.hashes().map((r) => ({ title: r["短片"], catalog_no: r["片號"] }));
+  const min = shorts.map((s) => s.catalog_no).sort()[0];
+  world.numbers = [{ film_id: unit.film_id, catalog_no: min, title: unit.title, shorts }];
+});
+
+Then("短片單元 {string} 的片號為 {string}，短片片號依序為 {string}", async ({ world }, unit: string, no: string, list: string) => {
+  const film = (world.numbered ?? []).find((f) => f.title === unit);
+  expect(film?.catalog_no).toBe(no);
+  expect(film?.shorts?.map((s) => `${s.catalog_no} ${s.title}`)).toEqual(list.split("、"));
+});

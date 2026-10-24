@@ -35,6 +35,8 @@ export interface PendingLink {
 }
 
 export interface DuoCtx {
+  /** 同伴連結裡夾帶的備註（片名 → 備註） */
+  partnerNotes: { title: string; note: string }[];
   pending: PendingPartner;
   /** 觀眾已加入同伴 預載的資料 */
   preloaded: PartnerData | null;
@@ -51,6 +53,7 @@ export function duoOf(world: WebWorld): DuoCtx {
   let c = ctxs.get(world);
   if (!c) {
     c = {
+      partnerNotes: [],
       pending: { prefs: [], slots: [], dailyLimit: null },
       preloaded: null,
       selfName: null,
@@ -185,6 +188,9 @@ export function buildPersonalLink(world: WebWorld, senderName: string | null): s
     updated_at: "2026-10-24T00:00:00+08:00",
     film_preferences: p.film_preferences,
     availability: p.availability,
+    ...(duoOf(world).partnerNotes.length
+      ? { film_notes: Object.fromEntries(duoOf(world).partnerNotes.map((n) => [partnerFilmId(world, n.title), n.note])) }
+      : {}),
     ticket_marks: [],
   };
   return `/${SHARE_HASH_PREFIX}${encodePayload({ kind: "personal", schema_version: 3, sender_name: senderName, state })}`;

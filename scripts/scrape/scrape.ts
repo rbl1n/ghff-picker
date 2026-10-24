@@ -33,10 +33,15 @@ export function parseAvailableDates(html: string): string[] {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** 抓取並合併指定日期（空陣列 = 由日期選單自動取得），寫出 public/data/sessions.json */
-export async function scrapeAll(dates: string[], outFile = resolve(process.cwd(), "public/data/sessions.json")): Promise<Catalog> {
+export async function scrapeAll(
+  dates: string[],
+  outFile = resolve(process.cwd(), "public/data/sessions.json"),
+  /** 取得某日頁面的方式；預設連官網，離線重建時傳入讀存檔的函式 */
+  getHtml: (date: string) => Promise<string> = fetchScheduleHtml,
+): Promise<Catalog> {
   const pages = new Map<string, string>();
   if (dates.length === 0) {
-    const first = await fetchScheduleHtml(`${FESTIVAL_YEAR}-11-06`);
+    const first = await getHtml(`${FESTIVAL_YEAR}-11-06`);
     dates = parseAvailableDates(first);
     pages.set(`${FESTIVAL_YEAR}-11-06`, first);
   }
@@ -50,7 +55,7 @@ export async function scrapeAll(dates: string[], outFile = resolve(process.cwd()
     let html = pages.get(date);
     if (html === undefined) {
       if (i > 0) await sleep(DELAY_MS);
-      html = await fetchScheduleHtml(date);
+      html = await getHtml(date);
     }
     const parsed = parseSchedulePage(html, date);
     console.error(`${date}: ${parsed.sessions.length} sessions`);
