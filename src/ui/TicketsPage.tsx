@@ -3,7 +3,7 @@ import type { Catalog, Session, Tier, TicketListItem, UserState } from "../domai
 import { buildTicketList, clearMark, markSession } from "../domain/tickets";
 import { CatalogGate } from "./CatalogGate";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
-import { effectiveUser, ensureSchedule, runSchedule, updateUser, useStore } from "./store";
+import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
 
 type RowState = "pending" | "got" | "dead";
 
@@ -23,10 +23,19 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
-  const eff = useMemo(() => effectiveUser(catalog, user), [catalog, user]);
+  // 兩人模式只列自己行程中的場次；一起看買 2 張、自己看買 1 張（張數與備案由 domain 推導）
   const items = useMemo(
-    () => (schedule ? buildTicketList(catalog, eff, schedule.itinerary, user.partner ? 2 : undefined) : []),
-    [catalog, eff, user.partner, schedule],
+    () =>
+      schedule
+        ? buildTicketList(
+            catalog,
+            user,
+            schedule.itinerary,
+            undefined,
+            schedule.duo && user.partner ? { entries: schedule.duo, partner: user.partner } : undefined,
+          )
+        : [],
+    [catalog, user, schedule],
   );
 
   if (!schedule) {
@@ -37,8 +46,8 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
     );
   }
 
-  const tierOf = new Map<string, Tier>(eff.film_preferences.map((p) => [p.film_id, p.tier]));
-  const hotOf = new Map(eff.film_preferences.map((p) => [p.film_id, p.is_hot]));
+  const tierOf = new Map<string, Tier>(user.film_preferences.map((p) => [p.film_id, p.tier]));
+  const hotOf = new Map(user.film_preferences.map((p) => [p.film_id, p.is_hot]));
   const gotSessionOf = (filmId: string): string | undefined =>
     user.ticket_marks.find((m) => m.result === "got" && sessionById.get(m.session_id)?.film_id === filmId)?.session_id;
   const stateOf = (it: TicketListItem): RowState => (gotSessionOf(it.film_id) ? "got" : it.exhausted ? "dead" : "pending");

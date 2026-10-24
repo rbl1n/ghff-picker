@@ -1,6 +1,4 @@
 import { expect } from "@playwright/test";
-import { buildItinerary } from "../../../src/domain/schedule";
-import { buildTicketList } from "../../../src/domain/tickets";
 import {
   Given,
   When,
@@ -17,8 +15,14 @@ import {
   sessionMatches,
   describeSession,
 } from "../../support/planner-a-helpers";
-import { effectiveState } from "../../support/planner-world";
-import { ensurePartner, partnerFilmIdOf } from "../../support/planner-duo-helpers";
+import {
+  computeSchedule,
+  computeTicketList,
+  ensurePartner,
+  partnerFilmIdOf,
+  subtractAvailability,
+  upsertPreference,
+} from "../../support/planner-duo-helpers";
 
 // 影展場次表如下：
 Given("影展場次表如下：", async ({}, dataTable: { hashes(): Record<string, string>[] }) => {
@@ -39,16 +43,18 @@ Given("觀眾的分層如下：", async ({}, dataTable: { hashes(): Record<strin
     if (!tier) throw new Error(`未知層級: ${r["層級"]}`);
     const film_id = filmIdOf(r["片名"]);
     const is_hot = (r["熱門"] ?? "").trim() === "是";
-    state.film_preferences = state.film_preferences.filter((p) => p.film_id !== film_id);
-    state.film_preferences.push({ film_id, tier, is_hot });
+    // 層內名次：同層依表格列順序，後列者排在前列者之後
+    state.film_preferences = upsertPreference(state.film_preferences, film_id, tier, is_hot);
   }
 });
 
 // 觀眾已設定不可看時段如下：
 Given("觀眾已設定不可看時段如下：", async ({}, dataTable: { hashes(): Record<string, string>[] }) => {
   const state = ensureState();
+  // 不可看時段 = 從有空時段扣掉該區間（逐列累加，分鐘精度）
   for (const r of dataTable.hashes()) {
-    state.unavailable_slots.push(parseSlotText(r["日期"].trim(), r["時段"]));
+    const slot = parseSlotText(r["日期"].trim(), r["時段"]);
+    state.availability = subtractAvailability(state.availability ?? [], slot.date, slot.start_min ?? 0, slot.end_min ?? 1440);
   }
 });
 
@@ -65,8 +71,7 @@ Given("同伴的分層如下：", async ({}, dataTable: { hashes(): Record<strin
     if (!tier) throw new Error(`未知層級: ${r["層級"]}`);
     const film_id = partnerFilmIdOf(r["片名"]);
     const is_hot = (r["熱門"] ?? "").trim() === "是";
-    partner.film_preferences = partner.film_preferences.filter((p) => p.film_id !== film_id);
-    partner.film_preferences.push({ film_id, tier, is_hot });
+    partner.film_preferences = upsertPreference(partner.film_preferences, film_id, tier, is_hot);
   }
 });
 
@@ -74,7 +79,8 @@ Given("同伴的分層如下：", async ({}, dataTable: { hashes(): Record<strin
 Given("同伴已設定不可看時段如下：", async ({}, dataTable: { hashes(): Record<string, string>[] }) => {
   const partner = ensurePartner();
   for (const r of dataTable.hashes()) {
-    partner.unavailable_slots.push(parseSlotText(r["日期"].trim(), r["時段"]));
+    const slot = parseSlotText(r["日期"].trim(), r["時段"]);
+    partner.availability = subtractAvailability(partner.availability ?? [], slot.date, slot.start_min ?? 0, slot.end_min ?? 1440);
   }
 });
 
@@ -88,11 +94,11 @@ Given("觀眾已執行排程並開啟搶票清單", async () => {
   const ctx = getCtx();
   const catalog = requireCatalog();
   ensureState();
-  // 有同伴資料時，排程與清單的輸入先改為兩人合併結果
-  const input = effectiveState(ctx.world);
-  const result = buildItinerary(catalog, input);
+  // 有同伴資料時排出兩人行程；清單只由觀眾自己的行程（一起、觀眾自己）產生並帶購票張數
+  const { result, duo } = computeSchedule(ctx.world, catalog);
   ctx.world.lastResult = result;
-  ctx.ticketList = buildTicketList(catalog, input, result.itinerary);
+  ctx.world.lastDuo = duo;
+  ctx.ticketList = computeTicketList(ctx.world, catalog);
 });
 
 // 觀眾執行排程
@@ -102,11 +108,13 @@ When("觀眾執行排程", async () => {
   const state = ensureState();
   const before = JSON.stringify(state);
   const partnerBefore = JSON.stringify(ctx.world.partner);
+  ctx.world.baseline = JSON.stringify({ own: state, partner: ctx.world.partner });
   const t0 = performance.now();
-  // 有同伴資料時先推導合併結果再排程；沒有同伴時 effectiveState 原樣回傳自己的狀態
-  const result = buildItinerary(catalog, effectiveState(ctx.world));
+  // 有同伴資料時兩人各自以自己的設定同時排程；沒有同伴時與 001 相同
+  const { result, duo } = computeSchedule(ctx.world, catalog);
   ctx.world.elapsedMs = performance.now() - t0;
   ctx.world.lastResult = result;
+  ctx.world.lastDuo = duo;
   expect(JSON.stringify(state), "排程不得修改使用者狀態").toBe(before);
   expect(JSON.stringify(ctx.world.partner), "排程不得修改同伴資料").toBe(partnerBefore);
 });
@@ -123,29 +131,7 @@ Then("行程中 {string} 排在 {string}", async ({}, title: string, sessionSpec
   const s = sessionById(entries[0].session_id);
   expect(sessionMatches(s, sessionSpec), `排的是 ${describeSession(s)}，預期 ${sessionSpec}`).toBe(true);
   // 再讀確認：同輸入再排一次，場次不變
-  const again = buildItinerary(catalog, effectiveState(ctx.world));
+  const again = computeSchedule(ctx.world, catalog).result;
   const e2 = again.itinerary.filter((e) => sessionById(e.session_id).film_id === fid);
   expect(e2.map((e) => e.session_id)).toEqual(entries.map((e) => e.session_id));
-});
-
-// 行程中沒有 "{片名}"（上提自最佳行程，語意不變）
-Then("行程中沒有 {string}", async ({}, title: string) => {
-  const cat = requireCatalog();
-  const result = getCtx().world.lastResult;
-  expect(result, "尚未執行排程").not.toBeNull();
-  const film = cat.films.find((f) => f.title === title);
-  if (!film) return; // 片名不在場次表，行程自然沒有
-  expect(result!.itinerary.filter((e) => sessionById(e.session_id).film_id === film.film_id)).toHaveLength(0);
-});
-
-// 行程沒有任何場次（上提自最佳行程，語意不變；兩人模式以合併層級判斷必看）
-Then("行程沒有任何場次", async () => {
-  const world = getCtx().world;
-  const result = world.lastResult;
-  expect(result, "尚未執行排程").not.toBeNull();
-  expect(result!.itinerary).toHaveLength(0);
-  const mustIds = new Set(effectiveState(world).film_preferences.filter((p) => p.tier === "must").map((p) => p.film_id));
-  for (const u of result!.unscheduled) {
-    expect(mustIds.has(u.film_id), "未排入清單只能含必看片").toBe(true);
-  }
 });

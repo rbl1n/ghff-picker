@@ -1,6 +1,7 @@
 import { createBdd } from "playwright-bdd";
 import type {
   Catalog,
+  DayAvailability,
   Film,
   ItineraryEntry,
   Session,
@@ -12,6 +13,7 @@ import type {
 } from "../../src/domain/types";
 import { cinemaOfVenue, createPlannerWorld, type PlannerWorld } from "./planner-world";
 import { hhmmToMin, marksFromSymbols, TIER_LABEL_TO_ENUM } from "./tables";
+import { availableForSession } from "./availability-oracle";
 
 /**
  * planner 共用 context（module 層級單例，每個 scenario 的 Before 重置）。
@@ -62,6 +64,7 @@ export function emptyState(): UserState {
     updated_at: "2026-01-01T00:00:00.000Z",
     film_preferences: [],
     unavailable_slots: [],
+    availability: [],
     ticket_marks: [],
   };
 }
@@ -241,7 +244,14 @@ export function buildStressData(filmCount: number, sessionsPerFilm: number): { c
   }
   const catalog = buildCatalogFromRows(rows);
   const state = emptyState();
-  state.film_preferences = catalog.films.map((film, i) => ({ film_id: film.film_id, tier: tiers[i % 3], is_hot: false }));
+  // 層內名次依影片順序（每層 1 起連續）
+  const seen: Record<string, number> = { must: 0, want: 0, maybe: 0 };
+  state.film_preferences = catalog.films.map((film, i) => ({
+    film_id: film.film_id,
+    tier: tiers[i % 3],
+    is_hot: false,
+    tier_rank: ++seen[tiers[i % 3]],
+  }));
   return { catalog, state };
 }
 
@@ -259,17 +269,9 @@ export function oracleCompatible(a: Session, b: Session): boolean {
   return absMin(b.date, b.start_min) - absMin(a.date, a.end_min) >= oracleBuffer(a, b);
 }
 
-export function oracleWatchable(s: Session, slots: UnavailableSlot[]): boolean {
-  const st = absMin(s.date, s.start_min);
-  const en = absMin(s.date, s.end_min);
-  for (const sl of slots) {
-    const ss = sl.start_min === null || sl.end_min === null ? 0 : sl.start_min;
-    const se = sl.start_min === null || sl.end_min === null ? 1440 : sl.end_min;
-    const a = absMin(sl.date, ss);
-    const b = absMin(sl.date, se);
-    if (st < b && en > a) return false;
-  }
-  return true;
+/** 場次開演到散場每一分鐘都有空（獨立實作，以有空時段判斷） */
+export function oracleAvailable(s: Session, availability: DayAvailability[] | undefined): boolean {
+  return availableForSession(s, availability);
 }
 
 export function pairwiseCompatible(sessions: Session[]): boolean {
@@ -282,56 +284,98 @@ export function pairwiseCompatible(sessions: Session[]): boolean {
   return true;
 }
 
-export type Objective = [number, number, number, number];
-
-export function compareObjective(a: Objective, b: Objective): number {
-  for (let i = 0; i < 4; i++) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
+/** 排程目標（003）：必看／想看／有空再看數、各層排入影片的層內名次（由小到大）、★ 場次數 */
+export interface Objective {
+  counts: [number, number, number];
+  /** 依 must、want、maybe 各層把排入影片的名次由小到大排列 */
+  ranks: [number[], number[], number[]];
+  stars: number;
 }
 
-export function objectiveOf(entries: ItineraryEntry[], catalog: Catalog): Objective {
-  const o: Objective = [0, 0, 0, 0];
-  for (const e of entries) {
-    if (e.tier === "must") o[0]++;
-    else if (e.tier === "want") o[1]++;
-    else o[2]++;
-    const s = catalog.sessions.find((x) => x.session_id === e.session_id);
-    if (s?.marks.includes("guest_attending")) o[3]++;
+const TIERS: Tier[] = ["must", "want", "maybe"];
+
+export function emptyObjective(): Objective {
+  return { counts: [0, 0, 0], ranks: [[], [], []], stars: 0 };
+}
+
+/** 影片層內名次；沒帶名次 = 排在最後 */
+export function tierRankOf(state: { film_preferences: { film_id: string; tier_rank?: number }[] }, filmId: string): number {
+  return state.film_preferences.find((p) => p.film_id === filmId)?.tier_rank ?? Number.MAX_SAFE_INTEGER;
+}
+
+/** 由排入的 (層級, 名次, 是否 ★) 清單算出目標值 */
+export function objectiveFrom(chosen: { tier: Tier; rank: number; star: boolean }[]): Objective {
+  const o = emptyObjective();
+  for (const c of chosen) {
+    const i = TIERS.indexOf(c.tier);
+    o.counts[i]++;
+    o.ranks[i].push(c.rank);
+    if (c.star) o.stars++;
   }
+  for (const r of o.ranks) r.sort((x, y) => x - y);
   return o;
 }
 
-/** 窮舉所有可行組合，回傳最大目標值 */
-export function bruteForceBest(catalog: Catalog, state: UserState): Objective {
-  const prefs = state.film_preferences;
-  const slots = state.unavailable_slots;
-  const limit = state.daily_limit;
+/** 前三項字典序：>0 表示 a 較佳 */
+export function compareCounts(a: Objective, b: Objective): number {
+  for (let i = 0; i < 3; i++) if (a.counts[i] !== b.counts[i]) return a.counts[i] - b.counts[i];
+  return 0;
+}
+
+/** 層內名次（第 4 項）：依必看、想看、有空再看逐層逐一比較，名次較小者勝；>0 表示 a 較佳。需在前三項相同時使用 */
+export function compareRanks(a: Objective, b: Objective): number {
+  for (let t = 0; t < 3; t++) {
+    const n = Math.min(a.ranks[t].length, b.ranks[t].length);
+    for (let i = 0; i < n; i++) if (a.ranks[t][i] !== b.ranks[t][i]) return b.ranks[t][i] - a.ranks[t][i];
+  }
+  return 0;
+}
+
+/** 個人目標字典序：必看、想看、有空再看數 > 層內名次 > ★ 數；>0 表示 a 較佳 */
+export function compareObjective(a: Objective, b: Objective): number {
+  return compareCounts(a, b) || compareRanks(a, b) || a.stars - b.stars;
+}
+
+export function objectiveOf(entries: ItineraryEntry[], catalog: Catalog, state: UserState): Objective {
+  return objectiveFrom(
+    entries.map((e) => {
+      const s = catalog.sessions.find((x) => x.session_id === e.session_id)!;
+      return { tier: e.tier, rank: tierRankOf(state, s.film_id), star: s.marks.includes("guest_attending") };
+    }),
+  );
+}
+
+export interface FeasibleInput {
+  catalog: Catalog;
+  film_preferences: { film_id: string; tier: Tier; tier_rank?: number }[];
+  availability?: DayAvailability[];
+  daily_limit: number | null;
+}
+
+/** 窮舉單人所有可行組合（每片至多一場、兩兩相容、有空、符合每日上限）；回傳每個組合的場次與層級 */
+export function enumerateFeasible(input: FeasibleInput): { s: Session; tier: Tier; rank: number }[][] {
+  const { catalog, daily_limit: limit } = input;
+  const prefs = input.film_preferences.filter((p) => catalog.films.some((f) => f.film_id === p.film_id));
   const filmOptions = prefs.map((p) => ({
     tier: p.tier,
-    sessions: catalog.sessions.filter((s) => s.film_id === p.film_id && oracleWatchable(s, slots)),
+    rank: p.tier_rank ?? Number.MAX_SAFE_INTEGER,
+    sessions: catalog.sessions.filter((s) => s.film_id === p.film_id && oracleAvailable(s, input.availability)),
   }));
-  let best: Objective = [0, 0, 0, 0];
+  const out: { s: Session; tier: Tier; rank: number }[][] = [];
   let nodes = 0;
-  const chosen: { s: Session; tier: Tier }[] = [];
+  const chosen: { s: Session; tier: Tier; rank: number }[] = [];
   const perDay = new Map<string, number>();
   const dfs = (i: number) => {
     if (++nodes > 5_000_000) throw new Error("窮舉節點過多，測試資料超出 oracle 能力");
     if (i === filmOptions.length) {
-      const o: Objective = [0, 0, 0, 0];
-      for (const c of chosen) {
-        if (c.tier === "must") o[0]++;
-        else if (c.tier === "want") o[1]++;
-        else o[2]++;
-        if (c.s.marks.includes("guest_attending")) o[3]++;
-      }
-      if (compareObjective(o, best) > 0) best = o;
+      out.push([...chosen]);
       return;
     }
     dfs(i + 1); // 不排此片
     for (const s of filmOptions[i].sessions) {
       if (limit !== null && (perDay.get(s.date) ?? 0) >= limit) continue;
       if (!chosen.every((c) => (absMin(c.s.date, c.s.start_min) <= absMin(s.date, s.start_min) ? oracleCompatible(c.s, s) : oracleCompatible(s, c.s)))) continue;
-      chosen.push({ s, tier: filmOptions[i].tier });
+      chosen.push({ s, tier: filmOptions[i].tier, rank: filmOptions[i].rank });
       perDay.set(s.date, (perDay.get(s.date) ?? 0) + 1);
       dfs(i + 1);
       perDay.set(s.date, (perDay.get(s.date) ?? 0) - 1);
@@ -339,5 +383,20 @@ export function bruteForceBest(catalog: Catalog, state: UserState): Objective {
     }
   };
   dfs(0);
-  return best;
+  return out;
+}
+
+/** 窮舉所有可行組合，回傳最大目標值（含層內名次） */
+export function bruteForceBest(catalog: Catalog, state: UserState): Objective {
+  let best: Objective | null = null;
+  for (const combo of enumerateFeasible({
+    catalog,
+    film_preferences: state.film_preferences,
+    availability: state.availability,
+    daily_limit: state.daily_limit,
+  })) {
+    const o = objectiveFrom(combo.map((c) => ({ tier: c.tier, rank: c.rank, star: c.s.marks.includes("guest_attending") })));
+    if (!best || compareObjective(o, best) > 0) best = o;
+  }
+  return best ?? emptyObjective();
 }

@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from "react";
-import type { Catalog, ItineraryEntry, PartnerData, UnscheduledMustFilm, UserState } from "../domain/types";
+import type { Catalog, DuoItineraryEntry, FilmPreference, ItineraryEntry, PartnerData, UnscheduledMustFilm, UserState } from "../domain/types";
 import { buildItinerary } from "../domain/schedule";
-import { mergePartner } from "../domain/merge";
+import { scheduleDuo } from "../domain/duo";
+import { initTierRanks } from "../domain/order";
+import { migrateToV3 } from "../state/migrate";
 import { SCHEMA_VERSION, loadState, saveState } from "../state/storage";
 
 export type CatalogState =
@@ -12,7 +14,10 @@ export type CatalogState =
 export interface Schedule {
   /** 排程當下的輸入條件；與目前條件不同代表「條件已變更」 */
   sig: string;
+  /** 自己的行程（個人模式即整份行程；兩人模式 = 一起與自己看的場次） */
   itinerary: ItineraryEntry[];
+  /** 兩人模式的完整兩人行程；個人模式 = null */
+  duo: DuoItineraryEntry[] | null;
   unscheduled: UnscheduledMustFilm[];
 }
 
@@ -30,13 +35,19 @@ export function emptyUserState(): UserState {
     manual_order: null,
     updated_at: new Date().toISOString(),
     film_preferences: [],
-    unavailable_slots: [],
+    availability: [],
     ticket_marks: [],
   };
 }
 
+/** 讀到 1、2 版的保存：在記憶體轉成 3（不可看時段相減）；層內名次待場次表就緒後依影片順序初始化，下次保存才寫回 3 */
+const stored = loadState();
+const storedLegacy = stored !== null && stored.schema_version < SCHEMA_VERSION;
+let pendingSelfRanks = storedLegacy;
+let pendingPartnerRanks = storedLegacy && !!stored?.partner;
+
 let snap: Snapshot = {
-  user: loadState() ?? emptyUserState(),
+  user: stored ? migrateToV3(stored) : emptyUserState(),
   catalog: { status: "loading" },
   schedule: null,
   scheduling: false,
@@ -62,40 +73,73 @@ export function useStore(): Snapshot {
 
 /* ------------------------------ 使用者狀態 ------------------------------ */
 
-export function updateUser(change: (s: UserState) => UserState): void {
-  const next = { ...change(snap.user), updated_at: new Date().toISOString() };
-  saveState(next);
-  set({ user: next });
+function ranked(prefs: FilmPreference[], catalog: Catalog): FilmPreference[] {
+  return initTierRanks(
+    prefs,
+    catalog.films.map((f) => f.film_id),
+  );
 }
 
-/** 以另一台裝置分享來的設定取代本機設定 */
-export function replaceUser(next: UserState): void {
-  saveState(next);
-  set({ user: next, schedule: null, scheduling: false });
+/** 場次表就緒時，把尚待初始化的層內名次依場次表影片順序補上 */
+function withPendingRanks(user: UserState): UserState {
+  if (snap.catalog.status !== "ready" || (!pendingSelfRanks && !pendingPartnerRanks)) return user;
+  const { catalog } = snap.catalog;
+  const next: UserState = { ...user };
+  if (pendingSelfRanks) next.film_preferences = ranked(user.film_preferences, catalog);
+  if (pendingPartnerRanks && user.partner) next.partner = { ...user.partner, film_preferences: ranked(user.partner.film_preferences, catalog) };
+  pendingSelfRanks = false;
+  pendingPartnerRanks = false;
+  return next;
+}
+
+function commit(next: UserState, patch: Partial<Snapshot> = {}): void {
+  const done = withPendingRanks(next);
+  saveState(done);
+  set({ user: done, ...patch });
+}
+
+export function updateUser(change: (s: UserState) => UserState): void {
+  commit({ ...change(snap.user), updated_at: new Date().toISOString() });
+}
+
+/** 以另一台裝置分享來的設定取代本機設定；legacy = 連結是 1、2 版（名次待初始化） */
+export function replaceUser(next: UserState, legacy = false): void {
+  pendingSelfRanks = legacy;
+  pendingPartnerRanks = legacy && !!next.partner;
+  commit(next, { schedule: null, scheduling: false });
 }
 
 /** 加入／取代同伴：同伴資料另存，自己的設定一律不動 */
-export function setPartner(partner: PartnerData, selfName: string): void {
-  const next: UserState = { ...snap.user, self_name: selfName, partner, updated_at: new Date().toISOString() };
-  saveState(next);
-  set({ user: next, schedule: null, scheduling: false });
+export function setPartner(partner: PartnerData, selfName: string, legacy = false): void {
+  pendingPartnerRanks = legacy;
+  commit({ ...snap.user, self_name: selfName, partner, updated_at: new Date().toISOString() }, { schedule: null, scheduling: false });
 }
 
 /** 移除同伴：清除同伴與兩人名稱；自己的設定與搶票標記保留 */
 export function removePartner(): void {
-  const next: UserState = { ...snap.user, self_name: null, partner: null, updated_at: new Date().toISOString() };
-  saveState(next);
-  set({ user: next, schedule: null, scheduling: false });
+  pendingPartnerRanks = false;
+  commit({ ...snap.user, self_name: null, partner: null, updated_at: new Date().toISOString() }, { schedule: null, scheduling: false });
 }
 
-/**
- * 排程與搶票清單的輸入：沒有同伴時原樣回傳（與 001 相同）；
- * 有同伴時以合併結果取代分層、不可看時段與每日上限（手動順序與搶票標記仍是自己的）。
- */
-export function effectiveUser(catalog: Catalog, user: UserState): UserState {
-  if (!user.partner) return user;
-  const m = mergePartner(catalog, user, user.partner);
-  return { ...user, film_preferences: m.film_preferences, unavailable_slots: m.unavailable_slots, daily_limit: m.daily_limit };
+/** 行程頁的篩選（只是畫面狀態：不保存、不影響排程；離開頁面再回來仍維持，重新載入回到「全部」） */
+export type ItineraryFilter = "all" | "self" | "partner";
+let itineraryFilter: ItineraryFilter = "all";
+const filterListeners = new Set<() => void>();
+export function useItineraryFilter(): [ItineraryFilter, (f: ItineraryFilter) => void] {
+  const value = useSyncExternalStore(
+    (l) => {
+      filterListeners.add(l);
+      return () => filterListeners.delete(l);
+    },
+    () => itineraryFilter,
+  );
+  return [
+    value,
+    (f) => {
+      itineraryFilter = f;
+      filterListeners.forEach((l) => l());
+    },
+  ];
 }
 
 /* ------------------------------ 場次快照 ------------------------------ */
@@ -108,6 +152,12 @@ export async function loadCatalog(): Promise<void> {
     const data = (await res.json()) as Catalog;
     if (!Array.isArray(data.films) || !Array.isArray(data.sessions)) throw new Error("bad shape");
     set({ catalog: { status: "ready", catalog: data } });
+    if (pendingSelfRanks || pendingPartnerRanks) {
+      // 名次初始化完成後，把轉成 3 的內容寫回（測試與搶票頁都以保存內容為準）
+      const done = withPendingRanks(snap.user);
+      saveState(done);
+      set({ user: done });
+    }
     if (wantSchedule) compute();
   } catch {
     wantSchedule = false;
@@ -117,15 +167,14 @@ export async function loadCatalog(): Promise<void> {
 
 /* ------------------------------ 排程 ------------------------------ */
 
-/** 影響行程的輸入條件指紋（分層、不可看時段、每日上限）；搶票標記由搶票頁即時處理，不算條件變更 */
+/** 影響行程的輸入條件指紋（分層與層內名次、有空時段、每日上限）；搶票標記由搶票頁即時處理，不算條件變更 */
 export function scheduleSignature(u: UserState): string {
   const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
-  const own = (x: Pick<UserState, "film_preferences" | "unavailable_slots" | "daily_limit">) => [
-    x.film_preferences.map((p) => `${p.film_id}:${p.tier}`).sort(cmp),
-    x.unavailable_slots.map((s) => `${s.date}|${s.start_min}|${s.end_min}`).sort(cmp),
+  const own = (x: Pick<UserState, "film_preferences" | "availability" | "daily_limit">) => [
+    x.film_preferences.map((p) => `${p.film_id}:${p.tier}:${p.tier_rank ?? ""}`).sort(cmp),
+    (x.availability ?? []).map((d) => `${d.date}|${d.intervals.map((i) => `${i.start_min}-${i.end_min}`).join(",")}`).sort(cmp),
     x.daily_limit,
   ];
-  // 沒有同伴時與 001 的指紋完全相同
   return JSON.stringify(u.partner ? [...own(u), own(u.partner)] : own(u));
 }
 
@@ -133,10 +182,19 @@ function compute(): void {
   wantSchedule = false;
   if (snap.catalog.status !== "ready") return;
   const { catalog } = snap.catalog;
-  const user = effectiveUser(catalog, snap.user);
   // 一般排程只看分層、時段與上限；「依搶到結果重新排程」才把搶票標記納入
-  const result = buildItinerary(catalog, wantMarks ? user : { ...user, ticket_marks: [] });
+  const input = wantMarks ? snap.user : { ...snap.user, ticket_marks: [] };
   wantMarks = false;
+  let result: Pick<Schedule, "itinerary" | "duo" | "unscheduled">;
+  if (input.partner) {
+    const duo = scheduleDuo(catalog, input, input.partner);
+    const mine: ItineraryEntry[] = duo.entries
+      .filter((e) => e.participant !== "partner")
+      .map((e) => ({ session_id: e.session_id, tier: e.tier!, is_non_ticketed: e.is_non_ticketed, participant: e.participant, partner_tier: e.partner_tier }));
+    result = { itinerary: mine, duo: duo.entries, unscheduled: duo.unscheduled };
+  } else {
+    result = { ...buildItinerary(catalog, input), duo: null };
+  }
   set({ schedule: { sig: scheduleSignature(snap.user), ...result }, scheduling: false });
 }
 

@@ -38,7 +38,7 @@ export async function newOtherDevice(browser: Browser): Promise<{ context: Brows
 // ───────── 002 兩人模式 helper（只放容器與編碼，不放步驟語意） ─────────
 
 import LZString from "lz-string";
-import type { PartnerData, SharePayload } from "../../src/domain/types";
+import type { DayAvailability, FilmPreference, PartnerData, SharePayload, UnavailableSlot } from "../../src/domain/types";
 
 /** 分享連結的 hash 前綴（與 001 相同） */
 const SHARE_HASH_PREFIX = "#/import?d=";
@@ -108,4 +108,71 @@ export function buildV1State(base: UserState): UserState {
 export async function readSavedPartner(page: Page): Promise<PartnerData | null> {
   const s = await readUserState(page);
   return s?.partner ?? null;
+}
+
+// ───────── 003 helper（只放容器與編碼，不放步驟語意） ─────────
+
+/** 預載 schema_version 3 的 state fixture：帶有空時段與層內名次（沒有指定的欄位維持原值） */
+export function withV3State(
+  state: UserState,
+  opts: { availability?: DayAvailability[]; film_preferences?: FilmPreference[] } = {},
+): UserState {
+  const { unavailable_slots: _legacy, ...rest } = state;
+  return {
+    ...rest,
+    schema_version: 3,
+    availability: opts.availability ?? state.availability ?? [],
+    film_preferences: opts.film_preferences ?? state.film_preferences,
+    unavailable_slots: [],
+  } as UserState;
+}
+
+/** 002 格式的保存內容（schema_version 2、不可看時段清單、沒有層內名次與有空時段）：不經 003 寫入程式，預載進本機保存 */
+export function buildV2State(base: UserState, unavailable: UnavailableSlot[]): UserState {
+  const v2: UserState = { ...base, schema_version: 2, unavailable_slots: unavailable, film_preferences: base.film_preferences.map(stripRank) };
+  delete v2.availability;
+  return v2;
+}
+
+/** 001 格式的保存內容，含不可看時段清單（schema_version 1、沒有 self_name、partner、層內名次） */
+export function buildV1StateWithSlots(base: UserState, unavailable: UnavailableSlot[]): UserState {
+  const v1 = buildV1State({ ...base, unavailable_slots: unavailable, film_preferences: base.film_preferences.map(stripRank) });
+  delete v1.availability;
+  return v1;
+}
+
+function stripRank(p: FilmPreference): FilmPreference {
+  const { tier_rank: _rank, ...rest } = p;
+  return rest;
+}
+
+/** 001 版本格式的個人分享連結（含不可看時段清單；沒有 kind 欄位） */
+export function buildV1ShareLinkWithSlots(baseUrl: string, base: UserState, unavailable: UnavailableSlot[]): string {
+  return buildV1ShareLink(baseUrl, buildV1StateWithSlots(base, unavailable));
+}
+
+/** 版本號高於本工具支援的分享連結（schema_version 4） */
+export function buildFutureVersionShareLink(baseUrl: string, state: UserState, version = 4): string {
+  const payload = { kind: "personal", schema_version: version, state: { ...state, schema_version: version, partner: null } };
+  return `${baseUrl}${SHARE_HASH_PREFIX}${compress(payload)}`;
+}
+
+/** 讀取手機（或任一頁面）本機保存的有空時段；沒有保存 = null */
+export async function readSavedAvailability(page: Page): Promise<DayAvailability[] | null> {
+  const s = await readUserState(page);
+  return s ? (s.availability ?? []) : null;
+}
+
+/** 讀取本機保存的層內名次：層級 -> 依名次由小到大的 film_id（沒有保存 = null） */
+export async function readSavedTierOrder(page: Page): Promise<Record<"must" | "want" | "maybe", string[]> | null> {
+  const s = await readUserState(page);
+  if (!s) return null;
+  const out: Record<"must" | "want" | "maybe", string[]> = { must: [], want: [], maybe: [] };
+  for (const tier of ["must", "want", "maybe"] as const) {
+    out[tier] = s.film_preferences
+      .filter((p) => p.tier === tier)
+      .sort((a, b) => (a.tier_rank ?? Number.MAX_SAFE_INTEGER) - (b.tier_rank ?? Number.MAX_SAFE_INTEGER))
+      .map((p) => p.film_id);
+  }
+  return out;
 }

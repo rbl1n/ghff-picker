@@ -1,9 +1,8 @@
 import { useEffect, useMemo } from "react";
-import { singleSideCounts } from "../domain/merge";
-import type { Catalog, ItineraryEntry, Session, UnscheduledMustFilm } from "../domain/types";
+import type { Catalog, DuoItineraryEntry, ItineraryParticipant, Session, Tier, UnscheduledMustFilm } from "../domain/types";
 import { CatalogGate } from "./CatalogGate";
 import { TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
-import { effectiveUser, ensureSchedule, runSchedule, scheduleSignature, useStore } from "./store";
+import { ensureSchedule, runSchedule, scheduleSignature, useItineraryFilter, useStore, type ItineraryFilter } from "./store";
 
 const REASON_TEXT = {
   no_available_session: () => "沒有可看場次",
@@ -20,27 +19,35 @@ function reasonOf(u: UnscheduledMustFilm, titleOf: (id: string) => string): stri
   return REASON_TEXT[u.reason]();
 }
 
+const FILTERS: { key: ItineraryFilter; label: string }[] = [
+  { key: "all", label: "全部" },
+  { key: "self", label: "只看自己" },
+  { key: "partner", label: "只看同伴" },
+];
+
+/** 顯示用的一列：兩人模式帶參與者與「視角」層級，個人模式 participant = undefined */
+interface Row {
+  session: Session;
+  tier: Tier;
+  isNonTicketed: boolean;
+  participant?: ItineraryParticipant;
+}
+
 function ItineraryContent({ catalog }: { catalog: Catalog }) {
   const { user, schedule, scheduling } = useStore();
+  const [filter, setFilter] = useItineraryFilter();
   useEffect(ensureSchedule, [schedule, scheduling]);
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
-  const eff = useMemo(() => effectiveUser(catalog, user), [catalog, user]);
   const partner = user.partner;
-  const stats = partner ? singleSideCounts(catalog, user, partner) : null;
-  const statsEl = partner && stats && (
-    <p className="stat" data-testid="single-side-stats">
-      {`只有 ${user.self_name || "我"} 標記：${stats.self} 部、只有 ${partner.display_name} 標記：${stats.partner} 部（不排入）`}
-    </p>
-  );
+  const selfName = user.self_name || "我";
 
-  if (eff.film_preferences.length === 0 && !scheduling) {
+  if (user.film_preferences.length === 0 && (partner?.film_preferences.length ?? 0) === 0 && !scheduling) {
     return (
       <>
-        {statsEl}
         <p className="empty" data-testid="itinerary-empty">
-          {partner ? "兩人沒有共同標記的片，先到選片頁一起挑" : "先到選片頁標記想看的片"}
+          先到選片頁標記想看的片
         </p>
         <a className="btn btn-primary btn-block" href="#/pick">
           去選片
@@ -61,12 +68,28 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
 
   const stale = schedule.sig !== scheduleSignature(user);
   const titleOf = (id: string) => filmById.get(id)?.title ?? "";
-  const days = new Map<string, { entry: ItineraryEntry; session: Session }[]>();
-  for (const entry of schedule.itinerary) {
-    const session = sessionById.get(entry.session_id);
-    if (!session) continue;
-    days.set(session.date, [...(days.get(session.date) ?? []), { entry, session }]);
+  const nameOf = (owner: "self" | "partner" | undefined) => (owner === "partner" ? partner?.display_name ?? "" : selfName);
+
+  // 兩人模式依篩選取列，層級色塊顯示「視角」那個人的層級（預設自己；只看同伴為同伴；全部中同伴自己看的列為同伴）
+  const rows: Row[] = [];
+  if (schedule.duo) {
+    for (const e of schedule.duo as DuoItineraryEntry[]) {
+      if (filter === "self" && e.participant === "partner") continue;
+      if (filter === "partner" && e.participant === "self") continue;
+      const session = sessionById.get(e.session_id);
+      if (!session) continue;
+      const asPartner = filter === "partner" || (filter === "all" && e.participant === "partner");
+      const tier = (asPartner ? e.partner_tier ?? e.tier : e.tier) as Tier;
+      rows.push({ session, tier, isNonTicketed: e.is_non_ticketed, participant: e.participant });
+    }
+  } else {
+    for (const e of schedule.itinerary) {
+      const session = sessionById.get(e.session_id);
+      if (session) rows.push({ session, tier: e.tier, isNonTicketed: e.is_non_ticketed });
+    }
   }
+  const days = new Map<string, Row[]>();
+  for (const r of rows) days.set(r.session.date, [...(days.get(r.session.date) ?? []), r]);
 
   return (
     <>
@@ -80,10 +103,18 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           </div>
         </div>
       )}
-      {statsEl}
+      {partner && (
+        <div className="seg" role="radiogroup" aria-label="行程篩選" data-testid="itinerary-filter">
+          {FILTERS.map((f) => (
+            <button key={f.key} role="radio" aria-checked={filter === f.key} className="segbtn" onClick={() => setFilter(f.key)}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="sum">
         {TIERS.map((t) => {
-          const total = eff.film_preferences.filter((p) => p.tier === t).length;
+          const total = user.film_preferences.filter((p) => p.tier === t).length;
           const done = schedule.itinerary.filter((e) => e.tier === t).length;
           return (
             <div key={t} data-testid={`itinerary-summary-${t}`}>
@@ -100,8 +131,16 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           <h2>有 {schedule.unscheduled.length} 部必看排不進去</h2>
           <ul>
             {schedule.unscheduled.map((u) => (
-              <li key={u.film_id}>
+              <li key={`${u.owner ?? "self"}-${u.film_id}`}>
                 <b>{titleOf(u.film_id)}</b>：{reasonOf(u, titleOf)}
+                {partner && (
+                  <>
+                    {" "}
+                    <span className="tag tag-want" data-testid="unscheduled-owner">
+                      {nameOf(u.owner)}
+                    </span>
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -111,13 +150,13 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
         <section className="daygroup" key={date}>
           <h2>{dateLabel(date)}</h2>
           <ol className="tl">
-            {items.map(({ entry, session }) => (
+            {items.map(({ session, tier, isNonTicketed, participant }) => (
               <li
                 key={session.session_id}
-                className={entry.is_non_ticketed ? "it nosale" : "it"}
+                className={isNonTicketed ? "it nosale" : "it"}
                 data-testid="itinerary-entry"
                 data-date={date}
-                data-tier={entry.tier}
+                data-tier={tier}
               >
                 <div className="tm mono">
                   <b>{formatTime(session.start_min)}</b>
@@ -126,9 +165,14 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
                 <div className="info">
                   <div className="row">
                     <b className="nm">{titleOf(session.film_id)}</b>
-                    <span className={`tag ${TIER_TAG_CLASS[entry.tier]}`}>{TIER_LABEL[entry.tier]}</span>
+                    <span className={`tag ${TIER_TAG_CLASS[tier]}`}>{TIER_LABEL[tier]}</span>
+                    {participant && (
+                      <span className={participant === "together" ? "tag tag-together" : "tag"} data-testid="participant-tag">
+                        {participant === "together" ? "一起" : `${participant === "self" ? selfName : partner?.display_name ?? ""} 自己`}
+                      </span>
+                    )}
                     {isGuest(session) && <span className="tag tag-star">★</span>}
-                    {entry.is_non_ticketed && <span className="tag tag-nosale">非售票</span>}
+                    {isNonTicketed && <span className="tag tag-nosale">非售票</span>}
                   </div>
                   <div className="hint">{session.venue_name}</div>
                 </div>
@@ -137,7 +181,7 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           </ol>
         </section>
       ))}
-      {schedule.itinerary.length === 0 && <p className="empty">目前沒有可排入的場次</p>}
+      {rows.length === 0 && <p className="empty">目前沒有可排入的場次</p>}
       <a className="btn btn-primary btn-block" href="#/tickets" style={{ marginTop: 16 }}>
         看搶票清單
       </a>

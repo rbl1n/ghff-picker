@@ -4,10 +4,8 @@ import type { Catalog, UserState } from "../../src/domain/types";
 import { STORAGE_KEY } from "../../src/state/storage";
 import { interceptSessions } from "./web-fixtures";
 import { dateDisp, navLink, openTab, pressSchedule, storedOrDefault, type WebWorld } from "./web-a-helpers";
-import { buildItinerary } from "../../src/domain/schedule";
-import { buildTicketList } from "../../src/domain/tickets";
 import { minToHhmm } from "./tables";
-import { planStateOf } from "./web-duo-helpers";
+import { computePlan } from "./web-003-helpers";
 
 // ---------------------------------------------------------------- 每個測試一份的暫存（以 page 為 key）
 export interface TicketSnapshotRow {
@@ -240,12 +238,12 @@ export async function applyManualOrder(page: Page, world: WebWorld, titles: stri
       const state = raw
         ? JSON.parse(raw)
         : {
-            schema_version: 1,
+            schema_version: 3,
             daily_limit: null,
             manual_order: null,
             updated_at: new Date().toISOString(),
             film_preferences: [],
-            unavailable_slots: [],
+            availability: [],
             ticket_marks: [],
           };
       state.manual_order = order;
@@ -267,18 +265,14 @@ export async function engineOf(page: Page, world: WebWorld, opts: { replanned?: 
   const state = await storedOrDefault(page);
   const catalog = world.catalog;
   if (!catalog) throw new Error("缺少場次快照");
-  // 兩人模式：排程與搶票清單的輸入為合併結果；個人模式原樣（planStateOf 回傳同一物件）
-  const effective = planStateOf(catalog, state);
-  const planState = opts.replanned ? effective : { ...effective, ticket_marks: [] };
-  const { itinerary, unscheduled } = buildItinerary(catalog, planState);
-  const tickets = buildTicketList(catalog, effective, itinerary);
+  const plan = computePlan(catalog, state, Boolean(opts.replanned));
   const sessionById = (id: string) => {
     const s = catalog.sessions.find((x) => x.session_id === id);
     if (!s) throw new Error(`unknown session ${id}`);
     return s;
   };
   const titleOfFilm = (id: string) => catalog.films.find((f) => f.film_id === id)?.title ?? id;
-  return { state, itinerary, unscheduled, tickets, sessionById, titleOfFilm };
+  return { state, plan, itinerary: plan.itinerary, unscheduled: plan.unscheduled, tickets: plan.tickets, sessionById, titleOfFilm };
 }
 
 /** 場次 → `日期 開演[ ★]`（與 DSL「場次」字串格式相同） */

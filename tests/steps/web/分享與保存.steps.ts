@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { createBdd, type DataTable } from "playwright-bdd";
-import { Given, When, Then, buildState, expect, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
+import { Given, When, Then, expect, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
 import { TIER_LABEL_TO_ENUM } from "../../support/tables";
 import {
   applyManualOrder,
@@ -34,6 +34,19 @@ import {
 } from "../../support/web-duo-helpers";
 import type { Browser } from "@playwright/test";
 import type { WebWorld } from "../../support/web-a-helpers";
+import {
+  availFromSlots,
+  availOf,
+  complementLines,
+  encodeLink,
+  expectTierOrder,
+  legacyState,
+  prefsOf,
+  ranked,
+  readStateOrEmpty,
+  type SlotRow,
+} from "../../support/web-003-helpers";
+import { emptyCatalog, parseSlotText } from "../../support/web-a-helpers";
 
 const { After } = createBdd(test);
 
@@ -64,10 +77,7 @@ async function phoneImport(phone: Page, url: string) {
   await waitTicketRows(phone);
 }
 
-// T125
-Given("觀眾已排好行程", async ({ page, world }) => {
-  await arrangeItinerary(page, world);
-});
+// T041：「觀眾已排好行程」已上提到介面根（shared.steps.ts），語意不變
 
 // T126
 Given("觀眾已把搶票清單順序手動調整為 {string}", async ({ page, world }, order: string) => {
@@ -220,7 +230,7 @@ Then("手機畫面顯示確認 {string}", async ({ page }, text: string) => {
   ).toBe(true);
 });
 
-// T138
+// T062（003）：兩人模式另逐列比對張數（一起 2、自己 1）
 Then("手機的搶票清單與電腦完全相同（順序、排定場次、備案場次）", async ({ page }) => {
   const s = bState(page);
   const phone = phoneOf(page);
@@ -243,8 +253,9 @@ Then("手機的搶票清單與電腦完全相同（順序、排定場次、備�
     const ds = s.desktopState;
     const byId = <T extends { film_id: string }>(a: T[] | undefined) =>
       [...(a ?? [])].sort((x, y) => x.film_id.localeCompare(y.film_id));
-    expect(byId(ps.film_preferences), "分層與熱門").toEqual(byId(ds?.film_preferences));
-    expect(ps.unavailable_slots ?? [], "不可看時段").toEqual(ds?.unavailable_slots ?? []);
+    const byDate = <T extends { date: string }>(a: T[]) => [...a].sort((x, y) => x.date.localeCompare(y.date));
+    expect(byId(prefsOf(ps)), "分層、層內名次與熱門").toEqual(byId(prefsOf(ds)));
+    expect(byDate(availOf(ps)), "有空時段").toEqual(byDate(availOf(ds)));
     expect(ps.daily_limit ?? null, "每日上限").toEqual(ds?.daily_limit ?? null);
     expect(ps.manual_order ?? null, "手動順序").toEqual(ds?.manual_order ?? null);
   };
@@ -324,7 +335,8 @@ Given("手機已用合併結果連結取代並開啟", async ({ page }) => {
 
 // T060
 Given("裝置上保存的是 001 版本格式的設定，分層如下：", async ({ page, world }, dataTable: DataTable) => {
-  // 001 格式（schema_version 1、沒有自己名稱與同伴資料）：根 steps 的預載一律以 v1 格式寫入，不經 002 的寫入程式
+  // 001 格式（schema_version 1、沒有自己名稱與同伴資料）：預載一律以 v1 格式寫入，不經 003 的寫入程式
+  world.legacyFormat = 1;
   for (const r of dataTable.hashes()) {
     world.prefs.push({ title: r["片名"], tier: TIER_LABEL_TO_ENUM[r["層級"]], is_hot: false });
   }
@@ -334,7 +346,7 @@ Given("裝置上保存的是 001 版本格式的設定，分層如下：", async
 // T061
 Given("手機收到 001 版本格式的個人分享連結", async ({ page, world, browser, baseURL }: { page: Page; world: WebWorld; browser: Browser; baseURL: string | undefined }) => {
   const film = world.catalog!.films[0];
-  const v1 = buildState({ ...world, prefs: [{ title: film.title, tier: "must", is_hot: false }], slots: [], dailyLimit: null, marks: [] });
+  const v1 = legacyState(1, { prefs: [{ film_id: film.film_id, tier: "must", is_hot: false }], slots: [], dailyLimit: null });
   const url = new URL(buildV1Link(v1), baseURL ?? "http://127.0.0.1:4173").toString();
   const s = bState(page);
   s.shareUrl = url;
@@ -406,7 +418,7 @@ Then("手機進入兩人模式並顯示 {string}", async ({ page }, banner: stri
   await check();
 });
 
-// T067
+// T061（003）：逐列比對一起與自己標示
 Then("手機的行程與電腦完全相同", async ({ page }) => {
   const phone = phoneOf(page);
   const dd = desktopDuo(page);
@@ -418,6 +430,7 @@ Then("手機的行程與電腦完全相同", async ({ page }) => {
     dd.itinerary.forEach((row, i) => {
       expect(rows[i].date, `第 ${i + 1} 列日期`).toBe(row.date);
       expect(rows[i].tier, `第 ${i + 1} 列層級`).toBe(row.tier);
+      expect(rows[i].participant, `第 ${i + 1} 列一起／自己標示`).toBe(row.participant);
       expect(rows[i].text, `第 ${i + 1} 列內容`).toBe(row.text);
     });
     const ps = (await readState(phone))!;
@@ -438,4 +451,95 @@ Then("重新開啟後仍為兩人模式並顯示 {string}", async ({ page, world
   expect(st.self_name ?? null, "自己名稱").toBe(c.selfName);
   expect(st.partner, "同伴資料").toBeTruthy();
   samePartnerFields(st, { ...st, self_name: c.selfName, partner: c.preloaded }, "重新開啟前後的");
+});
+
+/* ------------------------- 003：舊版相容與有空時段／層內順序 ------------------------- */
+
+const UNSUPPORTED_VERSION = 4;
+
+async function phoneWithLink(page: Page, world: WebWorld, browser: Browser, baseURL: string | undefined, link: string): Promise<void> {
+  const url = new URL(link, baseURL ?? "http://127.0.0.1:4173").toString();
+  const s = bState(page);
+  s.shareUrl = url;
+  s.phoneUrl = url;
+  const phone = await createPhone(browser, baseURL, world.catalog ?? emptyCatalog());
+  s.phoneContext = phone.context;
+  s.phonePage = phone.page;
+  redirectPageTo(page, phone.page);
+}
+
+function slotRowsOf(dataTable: DataTable): SlotRow[] {
+  return dataTable.hashes().map((r) => ({ date: r["日期"], ...parseSlotText(r["時段"]) }));
+}
+
+// T063
+Given("裝置上保存的是 {int} 版本格式的設定，不可看時段如下：", async ({ page, world }, version: number, dataTable: DataTable) => {
+  expect(version).toBe(2);
+  // 002 格式（schema_version 2、不可看時段為獨立區間清單、沒有有空時段與層內名次）：預載時不經 003 的寫入程式
+  world.legacyFormat = 2;
+  for (const r of slotRowsOf(dataTable)) world.slots.push(r);
+  await reapplyState(page, world, "時段");
+});
+
+// T064
+Given("手機收到 {int} 版本格式的個人分享連結，不可看時段如下：", async ({ page, world, browser, baseURL }, version: number, dataTable: DataTable) => {
+  expect(version).toBe(1);
+  const film = world.catalog!.films[0];
+  // 001 版本的編碼方式：schema_version 1、不可看時段為獨立區間清單、沒有連結種類欄位
+  const v1 = legacyState(1, { prefs: [{ film_id: film.film_id, tier: "must", is_hot: false }], slots: slotRowsOf(dataTable), dailyLimit: null });
+  await phoneWithLink(page, world, browser, baseURL, encodeLink(v1, "/"));
+});
+
+// T065
+Given("分享連結的版本高於本工具支援的版本", async ({ page, world, browser, baseURL }) => {
+  // 內容結構完整（含有空時段與層內名次），但版本為 4（高於 3）
+  const film = world.catalog?.films[0];
+  const state = {
+    schema_version: UNSUPPORTED_VERSION,
+    daily_limit: null,
+    manual_order: null,
+    updated_at: "2026-10-24T00:00:00+08:00",
+    film_preferences: film ? ranked([{ film_id: film.film_id, tier: "must", is_hot: false }]) : [],
+    availability: availFromSlots([]),
+    ticket_marks: [],
+  };
+  await phoneWithLink(page, world, browser, baseURL, encodeLink({ kind: "personal", schema_version: UNSUPPORTED_VERSION, sender_name: null, state }, "/"));
+});
+
+// T066（003）：手機本機保存以 schema_version 3 寫入，有空時段取補集後與畫面一致
+Then("手機的時段頁顯示不可看時段如下：", async ({ page }, dataTable: DataTable) => {
+  const phone = phoneOf(page);
+  const expected = dataTable.hashes().map((r) => `${r["日期"]}|${r["時段"]}`).sort();
+  const check = async () => {
+    await navLink(phone, "時段").click();
+    const items = phone.getByTestId("slot-item");
+    await expect(items.first()).toBeVisible();
+    const shown = await items.evaluateAll((els) =>
+      els.map((e) => `${e.getAttribute("data-date")}|${(e.querySelector('[data-testid="slot-range"]') ?? e).textContent?.replace(/\s+/g, " ").trim()}`),
+    );
+    expect(shown.sort()).toEqual(expected);
+    const st = await readStateOrEmpty(phone);
+    expect(st.schema_version, "手機本機保存以 schema_version 3 寫入").toBe(3);
+    expect(complementLines(availOf(st)).sort()).toEqual(expected);
+  };
+  await check();
+  await phone.reload(); // 再讀確認
+  await check();
+});
+
+// T067（003）
+Then("手機的選片頁層內順序如下：", async ({ page, world }, dataTable: DataTable) => {
+  const phone = phoneOf(page);
+  const rows = dataTable.hashes() as { 層級: string; 順序: string }[];
+  const check = async () => {
+    await navLink(phone, "選片").click();
+    await expectTierOrder(phone, world.catalog, rows);
+    // 權威狀態：手機本機保存的層內名次與電腦一致
+    const ds = bState(page).desktopState;
+    const byId = <T extends { film_id: string }>(a: T[]) => [...a].sort((x, y) => x.film_id.localeCompare(y.film_id));
+    expect(byId(prefsOf(await readStateOrEmpty(phone))), "層內名次").toEqual(byId(prefsOf(ds)));
+  };
+  await check();
+  await phone.reload(); // 再讀確認
+  await check();
 });

@@ -1,10 +1,13 @@
 import { memo, useMemo, useState } from "react";
-import type { Catalog, Film, FilmPreference, Session, Tier, UnavailableSlot } from "../domain/types";
-import { isSessionWatchable } from "../domain/availability";
+import type { Catalog, DayAvailability, Film, FilmPreference, Session, Tier } from "../domain/types";
+import { isSessionAvailable } from "../domain/availability";
+import { appendToTier, moveWithinTier, removeFromTier, tierOrder } from "../domain/order";
 import { sessionStartAbs } from "../domain/time";
 import { CatalogGate } from "./CatalogGate";
-import { LEGEND, MARK_LABEL, TIERS, TIER_LABEL, dateLabel, formatTime } from "./format";
+import { LEGEND, MARK_LABEL, TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime } from "./format";
 import { runSchedule, updateUser, useStore } from "./store";
+
+const NO_AVAILABILITY: DayAvailability[] = [];
 
 type Filter = "all" | "marked" | "none";
 const FILTERS: { key: Filter; label: string }[] = [
@@ -17,23 +20,63 @@ export function PickPage() {
   return <CatalogGate>{(catalog) => <PickContent catalog={catalog} />}</CatalogGate>;
 }
 
+/** 新標記或改層的影片排在目標層最後，原層與取消標記後名次遞補（domain/order） */
 function setTier(filmId: string, tier: Tier | null): void {
-  updateUser((s) => {
-    const prev = s.film_preferences.find((p) => p.film_id === filmId);
-    const rest = s.film_preferences.filter((p) => p.film_id !== filmId);
-    if (tier === null) return { ...s, film_preferences: rest };
-    return { ...s, film_preferences: [...rest, { film_id: filmId, tier, is_hot: prev?.is_hot ?? false }] };
-  });
+  updateUser((s) => ({
+    ...s,
+    film_preferences: tier === null ? removeFromTier(s.film_preferences, filmId) : appendToTier(s.film_preferences, filmId, tier),
+  }));
 }
 
-/** 熱門屬於已分層的片；未標記的片被標熱門時以「想看」建立紀錄 */
+/** 熱門屬於已分層的片；未標記的片被標熱門時以「想看」排在該層最後建立紀錄 */
 function setHot(filmId: string, hot: boolean): void {
   updateUser((s) => {
     const prev = s.film_preferences.find((p) => p.film_id === filmId);
-    const rest = s.film_preferences.filter((p) => p.film_id !== filmId);
     if (!prev && !hot) return s;
-    return { ...s, film_preferences: [...rest, { film_id: filmId, tier: prev?.tier ?? "want", is_hot: hot }] };
+    const base = prev ? s.film_preferences : appendToTier(s.film_preferences, filmId, "want");
+    return { ...s, film_preferences: base.map((p) => (p.film_id === filmId ? { ...p, is_hot: hot } : p)) };
   });
+}
+
+function moveInTier(filmId: string, direction: -1 | 1): void {
+  updateUser((s) => ({ ...s, film_preferences: moveWithinTier(s.film_preferences, filmId, direction) }));
+}
+
+/** 層內順序檢視：依三層列出已標記影片，上移／下移調整自己的順序（兩人模式也只調整自己的） */
+function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPreference[] }) {
+  const titleOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f.title])), [catalog]);
+  if (prefs.length === 0) return null;
+  return (
+    <details className="card tierorder" open>
+      <summary>層內順序</summary>
+      <p className="hint" style={{ margin: "0 0 8px" }}>
+        同層影片排前面的優先排進行程
+      </p>
+      {TIERS.map((t) => {
+        const list = tierOrder(prefs, t);
+        return (
+          <div key={t} className="tgroup" data-testid="tier-order-group" data-tier={t}>
+            <h3>
+              <span className={`tag ${TIER_TAG_CLASS[t]}`}>{TIER_LABEL[t]}</span>
+            </h3>
+            {list.length === 0 && <p className="hint">這一層還沒有影片</p>}
+            {list.map((p, i) => (
+              <div key={p.film_id} className="oitem" data-testid="tier-order-item" data-title={titleOf.get(p.film_id) ?? p.film_id}>
+                <span className="rk mono">{i + 1}</span>
+                <span className="ttl">{titleOf.get(p.film_id) ?? p.film_id}</span>
+                <button className="mv" aria-label="上移" disabled={i === 0} onClick={() => moveInTier(p.film_id, -1)}>
+                  ↑
+                </button>
+                <button className="mv" aria-label="下移" disabled={i === list.length - 1} onClick={() => moveInTier(p.film_id, 1)}>
+                  ↓
+                </button>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </details>
+  );
 }
 
 function PickContent({ catalog }: { catalog: Catalog }) {
@@ -81,6 +124,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           ))}
         </ul>
       </details>
+      <TierOrderView catalog={catalog} prefs={user.film_preferences} />
       <input
         className="input"
         type="search"
@@ -103,7 +147,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           film={f}
           sessions={sessionsByFilm.get(f.film_id) ?? []}
           pref={prefOf.get(f.film_id)}
-          slots={user.unavailable_slots}
+          availability={user.availability ?? NO_AVAILABILITY}
         />
       ))}
       {shown.length === 0 && <p className="empty">沒有符合的影片</p>}
@@ -118,9 +162,9 @@ const FilmCard = memo(function FilmCard(props: {
   film: Film;
   sessions: Session[];
   pref: FilmPreference | undefined;
-  slots: UnavailableSlot[];
+  availability: DayAvailability[];
 }) {
-  const { film, sessions, pref, slots } = props;
+  const { film, sessions, pref, availability } = props;
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""}>
       <div className="row">
@@ -151,7 +195,7 @@ const FilmCard = memo(function FilmCard(props: {
         <summary>展開全部場次</summary>
         <ul className="sessions">
           {sessions.map((s) => (
-            <SessionRow key={s.session_id} session={s} runtime={film.runtime_min} watchable={isSessionWatchable(s, slots)} />
+            <SessionRow key={s.session_id} session={s} runtime={film.runtime_min} watchable={isSessionAvailable(s, availability)} />
           ))}
         </ul>
         <label className="hotrow">

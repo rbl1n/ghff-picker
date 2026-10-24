@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { applySlotToDates } from "../domain/availability";
+import { addInterval, complementOf, hourCellState, subtractInterval, toggleHour, type HourCellState } from "../domain/availability";
 import { formatTime, parseTime } from "../domain/time";
-import type { UnavailableSlot } from "../domain/types";
+import type { DayAvailability, UnavailableSlot } from "../domain/types";
 import { dateLabel, weekdayLabel } from "./format";
 import { runSchedule, updateUser, useStore } from "./store";
 
@@ -33,8 +33,33 @@ function parseClock(text: string): number | null {
 const slotLabel = (s: UnavailableSlot): string =>
   s.start_min === null || s.end_min === null ? "整天不可看" : `${formatTime(s.start_min)}–${formatTime(s.end_min)}`;
 
-const sameSlot = (a: UnavailableSlot, b: UnavailableSlot): boolean =>
-  a.date === b.date && a.start_min === b.start_min && a.end_min === b.end_min;
+const NONE: DayAvailability[] = [];
+
+const HOUR_TEXT: Record<HourCellState, string> = { available: "有空", unavailable: "沒空", partial: "部分沒空" };
+const HOUR_ATTR: Record<HourCellState, string> = { available: "free", unavailable: "busy", partial: "partial" };
+const HOURS = Array.from({ length: 24 }, (_, h) => h);
+
+/** 單日 24 小時格子：點擊切換有空／沒空（多日選取時同步各日同一小時），格子同時以文字標示狀態 */
+function HourGrid({ date, availability, onToggle }: { date: string; availability: DayAvailability[]; onToggle: (hour: number) => void }) {
+  return (
+    <div className="hourday">
+      <p className="hint" style={{ margin: "10px 0 6px" }}>
+        {dateLabel(date)}
+      </p>
+      <div className="hours" role="group" aria-label={`${dateLabel(date)} 小時格子`}>
+        {HOURS.map((h) => {
+          const st = hourCellState(availability, date, h);
+          return (
+            <button key={h} className="hour" data-testid="hour-cell" data-date={date} data-hour={h} data-state={HOUR_ATTR[st]} onClick={() => onToggle(h)}>
+              <b className="mono">{String(h).padStart(2, "0")}:00</b>
+              <span>{HOUR_TEXT[st]}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function SlotsPage() {
   const { user, catalog } = useStore();
@@ -49,9 +74,10 @@ export function SlotsPage() {
     [catalog],
   );
   const year = catalog.status === "ready" ? catalog.catalog.festival_year : new Date().getFullYear();
+  const availability = user.availability ?? NONE;
   const dates = useMemo(
-    () => festivalDates(year, [...sessionDates, ...user.unavailable_slots.map((s) => s.date)]),
-    [year, sessionDates, user.unavailable_slots],
+    () => festivalDates(year, [...sessionDates, ...availability.map((d) => d.date)]),
+    [year, sessionDates, availability],
   );
 
   const start = parseClock(startText);
@@ -62,21 +88,24 @@ export function SlotsPage() {
 
   const togglePicked = (d: string) => setPicked((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]));
 
-  const addSlots = (slot: { start_min: number | null; end_min: number | null }) => {
-    const added = applySlotToDates(slot, picked);
-    updateUser((s) => ({
-      ...s,
-      unavailable_slots: [...s.unavailable_slots, ...added.filter((a) => !s.unavailable_slots.some((x) => sameSlot(x, a)))],
-    }));
-  };
+  const setAvailability = (change: (a: DayAvailability[]) => DayAvailability[]) =>
+    updateUser((s) => ({ ...s, availability: change(s.availability ?? NONE) }));
+
+  /** 把不可看時段（分鐘精度）從已選日期的有空時段扣掉；null = 整天 */
+  const addSlots = (slot: { start_min: number | null; end_min: number | null }) =>
+    setAvailability((a) => picked.reduce((acc, d) => subtractInterval(acc, d, slot.start_min ?? 0, slot.end_min ?? 1440), a));
 
   const apply = () => {
     if (!canApply) return;
     addSlots({ start_min: start, end_min: end });
   };
 
+  /** 刪除不可看時段 = 把該區間還給有空時段 */
   const removeSlot = (slot: UnavailableSlot) =>
-    updateUser((s) => ({ ...s, unavailable_slots: s.unavailable_slots.filter((x) => !sameSlot(x, slot)) }));
+    setAvailability((a) => addInterval(a, slot.date, slot.start_min ?? 0, slot.end_min ?? 1440));
+
+  const pickedSorted = useMemo(() => [...picked].sort(), [picked]);
+  const toggleHourOnPicked = (hour: number) => setAvailability((a) => pickedSorted.reduce((acc, d) => toggleHour(acc, d, hour), a));
 
   const commitLimit = () => {
     const text = limitText.trim();
@@ -91,12 +120,12 @@ export function SlotsPage() {
     }
   };
 
+  /** 不可看時段 = 有空時段的補集 */
   const slotsByDate = useMemo(() => {
     const map = new Map<string, UnavailableSlot[]>();
-    for (const s of user.unavailable_slots) map.set(s.date, [...(map.get(s.date) ?? []), s]);
-    for (const arr of map.values()) arr.sort((a, b) => (a.start_min ?? -1) - (b.start_min ?? -1));
-    return [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-  }, [user.unavailable_slots]);
+    for (const s of complementOf(availability)) map.set(s.date, [...(map.get(s.date) ?? []), s]);
+    return [...map.entries()];
+  }, [availability]);
 
   return (
     <>
@@ -118,7 +147,7 @@ export function SlotsPage() {
             >
               <span className="hint">{weekdayLabel(d)}</span>
               <b className="mono">{Number(d.slice(8))}</b>
-              {user.unavailable_slots.some((s) => s.date === d) && <i />}
+              {availability.some((r) => r.date === d) && <i />}
             </button>
           ))}
         </div>
@@ -127,6 +156,16 @@ export function SlotsPage() {
             整天不可看
           </button>
         </div>
+      </section>
+
+      <section className="card">
+        <h2>小時格子</h2>
+        <p className="hint" style={{ margin: 0 }}>
+          {pickedSorted.length > 0 ? "點一格切換有空／沒空；選了多天會一起切換" : "先在上方選擇日期，就會出現當天的 24 格"}
+        </p>
+        {pickedSorted.map((d) => (
+          <HourGrid key={d} date={d} availability={availability} onToggle={toggleHourOnPicked} />
+        ))}
       </section>
 
       <form

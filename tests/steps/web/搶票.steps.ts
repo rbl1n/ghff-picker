@@ -170,7 +170,9 @@ Then("搶票清單沒有 {string}", async ({ page, world }, title: string) => {
   // 權威狀態：引擎搶票清單沒有該片，但該片仍在行程中（非售票場次）
   const eng = await engineOf(page, world);
   expect(eng.tickets.map((t) => eng.titleOfFilm(t.film_id))).not.toContain(title);
-  expect(eng.itinerary.map((e) => eng.titleOfFilm(eng.sessionById(e.session_id).film_id))).toContain(title);
+  // 兩人模式：同伴自己看的片不在自己的清單，但仍在兩人行程中
+  const inPlan = eng.plan.duo ?? eng.itinerary;
+  expect(inPlan.map((e) => eng.titleOfFilm(eng.sessionById(e.session_id).film_id))).toContain(title);
 });
 
 // T119
@@ -260,16 +262,33 @@ Then("行程頁中 {string} 排在 {string}", async ({ page, world }, title: str
   for (const g of got) expect(g.session_id, `${title} 已搶到場次不變`).toBe(entry!.session_id);
 });
 
-// T051
-Then("搶票清單每列顯示 {string}", async ({ page, world }, quantity: string) => {
+// T060（003）：一起看「買 2 張」、自己看「買 1 張」；清單只列自己行程中的場次
+Then("搶票清單的購票張數如下：", async ({ page, world }, dataTable: DataTable) => {
   await openTab(page, world, "搶票");
-  const rows = ticketRows(page);
-  await expect(rows.first()).toBeVisible();
-  const texts = (await rows.evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ")))) as string[];
-  // 呈現結果：未處理區與已完成區的每一列都帶有張數，不得有缺
-  texts.forEach((t, i) => expect(t, `第 ${i + 1} 列應含「${quantity}」`).toContain(quantity));
-  // 權威狀態：本機保存有同伴資料（兩人模式）
+  await expect(ticketRows(page).first()).toBeVisible();
+  const expected = dataTable.hashes().map((r) => ({ title: r["片名"], qty: r["張數"].replace(/\s+/g, " ").trim() }));
+  const shown = await ticketRows(page).evaluateAll((els) =>
+    els.map((e) => ({
+      title: e.getAttribute("data-film") ?? "",
+      qty: /買\s*\d+\s*張/.exec((e.textContent ?? "").replace(/\s+/g, " "))?.[0].replace(/\s+/g, " ") ?? "",
+    })),
+  );
+  // 不該發生：任何一列缺少張數；表格片集合 = 清單片集合（同伴自己看的片不得出現在清單）
+  shown.forEach((r) => expect(r.qty, `${r.title} 應有張數`).not.toBe(""));
+  expect(shown.map((r) => r.title).sort(), "清單片集合").toEqual(expected.map((e) => e.title).sort());
+  for (const e of expected) {
+    const row = shown.find((r) => r.title === e.title)!;
+    // 一起看「買 2 張」、自己看「買 1 張」（未處理區與已完成區的列都帶有張數）
+    expect(row.qty, `${e.title} 張數`).toBe(e.qty);
+    await expect(ticketRowOf(page, e.title).getByTestId("ticket-quantity")).toContainText(e.qty);
+  }
+  // 權威狀態：本機保存有同伴資料（兩人模式）；張數等於引擎對同一份狀態算出的參與者推導值（一起 2、自己 1）
   expect(hasPartner(await readState(page)), "兩人模式：本機保存有同伴資料").toBe(true);
+  const eng = await engineOf(page, world);
+  for (const e of expected) {
+    const item = eng.tickets.find((t) => eng.titleOfFilm(t.film_id) === e.title);
+    expect(`買 ${item?.ticket_quantity} 張`, `${e.title} 引擎推導張數`).toBe(e.qty);
+  }
 });
 
 // T052

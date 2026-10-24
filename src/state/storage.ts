@@ -1,9 +1,32 @@
-import type { UserState } from "../domain/types";
+import type { DayAvailability, PartnerData, UserState } from "../domain/types";
 
-/** 寫入一律 2；讀取接受 1（001，個人模式）與 2 */
-export const SCHEMA_VERSION = 2;
-const READABLE_VERSIONS = [1, 2];
+/** 寫入一律 3；讀取接受 1（001，個人模式）、2（002）與 3；高於 3 視為版本不符 */
+export const SCHEMA_VERSION = 3;
+/** 003 的保存格式版本 */
+export const SCHEMA_VERSION_V3 = 3;
+const READABLE_VERSIONS = [1, 2, 3];
 export const STORAGE_KEY = "ghff-picker:user-state";
+
+function isAvailability(value: unknown): value is DayAvailability[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (d) =>
+        typeof d === "object" &&
+        d !== null &&
+        typeof (d as DayAvailability).date === "string" &&
+        Array.isArray((d as DayAvailability).intervals) &&
+        (d as DayAvailability).intervals.every(
+          (i) => typeof i === "object" && i !== null && Number.isFinite(i.start_min) && Number.isFinite(i.end_min),
+        ),
+    )
+  );
+}
+
+/** 有空時段（v3）或舊版不可看時段（v1、v2）至少要有一種，且有的那種格式正確 */
+function hasTimeSettings(v: Record<string, unknown>): boolean {
+  return (v.availability === undefined || isAvailability(v.availability)) && (Array.isArray(v.unavailable_slots) || isAvailability(v.availability));
+}
 
 function isPartnerData(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
@@ -12,7 +35,7 @@ function isPartnerData(value: unknown): boolean {
     typeof p.display_name === "string" &&
     (p.daily_limit === null || (typeof p.daily_limit === "number" && Number.isInteger(p.daily_limit) && p.daily_limit >= 0)) &&
     Array.isArray(p.film_preferences) &&
-    Array.isArray(p.unavailable_slots)
+    hasTimeSettings(p)
   );
 }
 
@@ -28,17 +51,30 @@ export function isUserState(value: unknown): value is UserState {
     (v.daily_limit === null || (typeof v.daily_limit === "number" && Number.isInteger(v.daily_limit) && v.daily_limit >= 0)) &&
     (v.manual_order === null || (Array.isArray(v.manual_order) && v.manual_order.every((x) => typeof x === "string"))) &&
     Array.isArray(v.film_preferences) &&
-    Array.isArray(v.unavailable_slots) &&
+    hasTimeSettings(v) &&
     Array.isArray(v.ticket_marks)
   );
 }
 
+/** 保存／分享前的整理：版本一律 3、不再寫入舊的不可看時段、一律帶有空時段 */
+export function toStored(state: UserState): UserState {
+  const { unavailable_slots: _legacy, ...rest } = state;
+  const out: UserState = { ...rest, schema_version: SCHEMA_VERSION, availability: state.availability ?? [] };
+  if (state.partner) {
+    const { unavailable_slots: _p, ...partner } = state.partner;
+    const p: PartnerData = { ...partner, availability: state.partner.availability ?? [] };
+    out.partner = p;
+  }
+  return out;
+}
+
+/** 讀出原樣驗證通過的內容（版本未升級；遷移由 migrateToV3 負責，下一次保存才以 3 寫回） */
 export function loadState(): UserState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw === null) return null;
     const parsed: unknown = JSON.parse(raw);
-    return isUserState(parsed) ? { ...parsed, schema_version: SCHEMA_VERSION } : null;
+    return isUserState(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -46,7 +82,7 @@ export function loadState(): UserState | null {
 
 export function saveState(state: UserState): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, schema_version: SCHEMA_VERSION }));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStored(state)));
   } catch {
     // 儲存空間不可用（隱私模式等）時，本次操作仍在記憶體內有效
   }

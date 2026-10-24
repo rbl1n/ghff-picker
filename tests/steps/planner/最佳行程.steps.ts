@@ -107,8 +107,9 @@ Then("行程的排程目標不劣於窮舉所有可行組合", async () => {
   expect(new Set(sessions.map((s) => s.film_id)).size, "每片至多一場").toBe(sessions.length);
   expect(pairwiseCompatible(sessions), "行程內場次須兩兩相容").toBe(true);
   const best = bruteForceBest(catalog, state);
-  const actual = objectiveOf(it, catalog);
-  expect(compareObjective(actual, best), `行程目標 ${actual} 應等於窮舉最大值 ${best}`).toBe(0);
+  const actual = objectiveOf(it, catalog, state);
+  const text = (o: typeof actual) => `${o.counts.join("/")} 名次${JSON.stringify(o.ranks)} ★${o.stars}`;
+  expect(compareObjective(actual, best), `行程目標 ${text(actual)} 應等於窮舉最大值 ${text(best)}`).toBe(0);
 });
 
 // 排程在 {秒} 秒內完成
@@ -118,4 +119,27 @@ Then("排程在 {int} 秒內完成", async ({}, seconds: number) => {
   expect(ctx.world.elapsedMs!).toBeLessThanOrEqual(seconds * 1000);
   const sessions = itinerary().map((e) => sessionById(e.session_id));
   expect(pairwiseCompatible(sessions), "行程不得有衝堂").toBe(true);
+});
+
+// 行程中沒有 "{片名}"（權威位置由介面根下放回本模組，語意不變）
+Then("行程中沒有 {string}", async ({}, title: string) => {
+  const cat = requireCatalog();
+  const result = getCtx().world.lastResult;
+  expect(result, "尚未執行排程").not.toBeNull();
+  const film = cat.films.find((f) => f.title === title);
+  if (!film) return; // 片名不在場次表，行程自然沒有
+  expect(result!.itinerary.filter((e) => sessionById(e.session_id).film_id === film.film_id)).toHaveLength(0);
+});
+
+// 行程沒有任何場次（權威位置由介面根下放回本模組，語意不變）
+Then("行程沒有任何場次", async () => {
+  const world = getCtx().world;
+  const result = world.lastResult;
+  expect(result, "尚未執行排程").not.toBeNull();
+  expect(result!.itinerary).toHaveLength(0);
+  // 兩人模式的「行程」是觀眾自己的行程：未排入清單只能含觀眾自己的必看片
+  const mustIds = new Set(ensureState().film_preferences.filter((p) => p.tier === "must").map((p) => p.film_id));
+  for (const u of result!.unscheduled) {
+    expect(mustIds.has(u.film_id), "未排入清單只能含必看片").toBe(true);
+  }
 });

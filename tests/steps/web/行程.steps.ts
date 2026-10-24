@@ -10,7 +10,8 @@ import {
   unscheduledBox,
   waitItineraryReady,
 } from "../../support/web-b-helpers";
-import { hasPartner, readState, singleSideTitles } from "../../support/web-duo-helpers";
+import { hasPartner, readState } from "../../support/web-duo-helpers";
+import { filterControl, filterOf, participantTags, setFilter, type ItineraryFilter } from "../../support/web-003-helpers";
 
 // T097
 Given("觀眾已排好行程，之後又把 {string} 標為 {string}", async ({ page, world }, title: string, tier: string) => {
@@ -74,28 +75,44 @@ Then("行程頁頂部紅框顯示 {string}", async ({ page }, message: string) =
   await expect(box.getByRole("heading", { name: message, exact: true })).toBeVisible();
 });
 
-// T103
+// T056（003）：新增可選欄「誰」（兩人模式標明是誰的必看，名字）
 Then("行程頁列出未排入的必看片與原因如下：", async ({ page, world }, dataTable: DataTable) => {
   const box = unscheduledBox(page);
   await expect(box).toBeVisible();
-  const texts = (await box.getByRole("listitem").allInnerTexts()).map(norm);
-  const actual = texts.map((t) => {
-    const i = t.search(/[：:]/);
-    return i < 0 ? { title: t, reason: "" } : { title: t.slice(0, i).trim(), reason: t.slice(i + 1).trim() };
+  const hasWho = dataTable.raw()[0].includes("誰");
+  const items = box.getByRole("listitem");
+  // 標示是誰的必看的元素（data-testid=unscheduled-owner）不計入「片名：原因」文字
+  const actual = (
+    await items.evaluateAll((els) =>
+      els.map((e) => {
+        const clone = e.cloneNode(true) as HTMLElement;
+        const ownerEl = clone.querySelector('[data-testid="unscheduled-owner"]');
+        const owner = (ownerEl?.textContent ?? "").replace(/\s+/g, " ").trim();
+        ownerEl?.remove();
+        return { text: (clone.textContent ?? "").replace(/\s+/g, " ").trim(), owner };
+      }),
+    )
+  ).map(({ text, owner }) => {
+    const i = text.search(/[：:]/);
+    const base = i < 0 ? { title: text, reason: "" } : { title: text.slice(0, i).trim(), reason: text.slice(i + 1).trim() };
+    return hasWho ? { ...base, who: owner } : base;
   });
-  const expected = dataTable.hashes().map((r) => ({ title: r["片名"], reason: r["原因"] }));
+  const expected = dataTable.hashes().map((r) => ({ title: r["片名"], reason: r["原因"], ...(hasWho ? { who: r["誰"] } : {}) }));
   expect(actual).toEqual(expected);
-  // 權威狀態：原因與排程引擎對同一份使用者狀態算出的未排入原因一致
+  // 權威狀態：原因（與誰的必看）與排程引擎對同一份使用者狀態（兩人模式含同伴資料）算出的一致
   const eng = await engineOf(page, world);
-  expect(eng.unscheduled.map((u) => eng.titleOfFilm(u.film_id)).sort(), "未排入片名集合").toEqual(
-    expected.map((e) => e.title).sort(),
-  );
+  const nameOf = (owner: string | undefined) => (owner === "partner" ? eng.state.partner?.display_name : eng.state.self_name) ?? "";
+  expect(
+    eng.unscheduled.map((u) => `${eng.titleOfFilm(u.film_id)}${hasWho ? `|${nameOf(u.owner)}` : ""}`).sort(),
+    "未排入片名集合",
+  ).toEqual(expected.map((e) => `${e.title}${hasWho ? `|${(e as { who: string }).who}` : ""}`).sort());
   for (const u of eng.unscheduled) {
-    const shown = actual.find((a) => a.title === eng.titleOfFilm(u.film_id))!;
+    const shown = actual.find((a) => a.title === eng.titleOfFilm(u.film_id) && (!hasWho || (a as { who: string }).who === nameOf(u.owner)))!;
     for (const frag of reasonFragments(u.reason, (u.conflict_film_ids ?? []).map(eng.titleOfFilm))) {
       expect(shown.reason, `${shown.title} 原因應含「${frag}」`).toContain(frag);
     }
   }
+  // 不該發生：只被另一人標為必看的片不得掛在此人名下（引擎的 owner 已對照）
 });
 
 // T104
@@ -131,27 +148,42 @@ Then("行程頁顯示提示 {string}", async ({ page }, hint: string) => {
   }
 });
 
-// T049
-Then("行程頁頂部顯示單方標記統計 {string}", async ({ page, world }, stats: string) => {
+// T053（003）：篩選為畫面狀態，不保存、不影響排程
+When("觀眾把行程篩選為 {string}", async ({ page, world }, filter: string) => {
   await openTab(page, world, "行程");
-  const box = page.getByTestId("single-side-stats");
-  await expect(box).toBeVisible();
-  expect(norm(await box.innerText())).toBe(stats);
-  // 權威狀態：兩個數字 = 各自只有單方分層、對方沒有、且存在於場次快照的影片數，且這些影片不在行程中
-  const st = (await readState(page))!;
-  const single = singleSideTitles(world.catalog!, st);
-  const nums = [...stats.matchAll(/標記：(\d+) 部/g)].map((m) => Number(m[1]));
-  expect(nums, "統計文字含兩個數字").toHaveLength(2);
-  expect(nums).toEqual([single.self.length, single.partner.length]);
-  for (const t of [...single.self, ...single.partner]) {
-    await expect(itineraryItems(page).filter({ hasText: t }), `${t} 不應在行程中`).toHaveCount(0);
-  }
+  const control = filterControl(page);
+  await expect(control).toBeVisible();
+  const radio = control.getByRole("radio", { name: filter, exact: true });
+  await radio.click();
+  await expect(radio).toBeChecked();
+  setFilter(page, filter as ItineraryFilter);
+  await waitItineraryReady(page);
+  expect(hasPartner(await readState(page)), "兩人模式：本機保存有同伴資料").toBe(true);
 });
 
-// T050
-Then("行程頁不顯示單方標記統計", async ({ page, world }) => {
+// T054（003）
+Then("行程頁的篩選選項為 {string}", async ({ page, world }, options: string) => {
   await openTab(page, world, "行程");
-  await expect(page.getByTestId("single-side-stats")).toHaveCount(0);
-  await expect(page.getByText(/只有 .+ 標記/)).toHaveCount(0);
+  const control = filterControl(page);
+  await expect(control).toBeVisible();
+  const radios = control.getByRole("radio");
+  await expect(radios).toHaveCount(options.split("、").length);
+  expect((await radios.allInnerTexts()).map(norm)).toEqual(options.split("、").map((x) => x.trim()));
+  // 預設選取「全部」（尚未改過篩選時）
+  await expect(control.getByRole("radio", { name: filterOf(page), exact: true })).toBeChecked();
+  expect(hasPartner(await readState(page)), "兩人模式：本機保存有同伴資料").toBe(true);
+});
+
+// T055（003）
+Then("行程頁不顯示一起與自己標示及篩選", async ({ page, world }) => {
+  await openTab(page, world, "行程");
+  await expect(itineraryItems(page).first()).toBeVisible();
+  await expect(participantTags(page)).toHaveCount(0);
+  await expect(filterControl(page)).toHaveCount(0);
+  for (const label of ["全部", "只看自己", "只看同伴"]) {
+    await expect(page.getByRole("radio", { name: label, exact: true })).toHaveCount(0);
+  }
+  const texts = await itineraryItems(page).allInnerTexts();
+  texts.forEach((t, i) => expect(norm(t), `第 ${i + 1} 列不應有一起／自己標示`).not.toMatch(/一起| 自己/));
   expect(hasPartner(await readState(page)), "個人模式：本機保存沒有同伴資料").toBe(false);
 });

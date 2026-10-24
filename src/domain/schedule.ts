@@ -1,6 +1,18 @@
-import type { Catalog, ItineraryEntry, Session, Tier, UnscheduledMustFilm, UserState } from "./types";
+import type {
+  Catalog,
+  CinemaId,
+  DayAvailability,
+  FilmPreference,
+  ItineraryEntry,
+  Session,
+  TicketMark,
+  Tier,
+  UnavailableSlot,
+  UnscheduledMustFilm,
+  UserState,
+} from "./types";
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
-import { isSessionWatchable } from "./availability";
+import { availabilityOf, isSessionAvailable } from "./availability";
 import { sessionStartAbs } from "./time";
 
 export interface ScheduleResult {
@@ -8,7 +20,7 @@ export interface ScheduleResult {
   unscheduled: UnscheduledMustFilm[];
 }
 
-const TIER_RANK: Record<Tier, number> = { must: 0, want: 1, maybe: 2 };
+export const TIER_RANK: Record<Tier, number> = { must: 0, want: 1, maybe: 2 };
 
 export function isGuestSession(s: Session): boolean {
   return s.marks.includes("guest_attending");
@@ -23,213 +35,552 @@ export function compareSessionsPreferred(a: Session, b: Session): number {
   return a.session_id < b.session_id ? -1 : a.session_id > b.session_id ? 1 : 0;
 }
 
-type Objective = [number, number, number, number];
+// ───────────────────────── 排程輸入與準備 ─────────────────────────
 
-function compareObjective(a: Objective, b: Objective): number {
-  for (let i = 0; i < 4; i++) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
+/** 一個人的排程輸入（自己或同伴）：分層含層內名次、有空時段、每日上限、搶票標記 */
+export interface PersonInput {
+  film_preferences: FilmPreference[];
+  availability: DayAvailability[];
+  daily_limit: number | null;
+  ticket_marks: TicketMark[];
 }
 
-interface Cand {
-  session: Session;
-  tier: Tier;
-  star: boolean;
-  /** 與此候選不相容的候選索引 */
-  conflicts: number[];
+/** 由使用者狀態或同伴資料取出排程輸入（有空時段缺省時由舊不可看時段即時相減） */
+export function personInputOf(p: {
+  film_preferences: FilmPreference[];
+  availability?: DayAvailability[];
+  unavailable_slots?: UnavailableSlot[];
+  daily_limit: number | null;
+  ticket_marks?: TicketMark[];
+}): PersonInput {
+  return {
+    film_preferences: p.film_preferences,
+    availability: availabilityOf(p),
+    daily_limit: p.daily_limit,
+    ticket_marks: p.ticket_marks ?? [],
+  };
 }
 
-interface FreeFilm {
-  filmId: string;
-  tier: Tier;
-  cands: number[];
+export interface EngineContext {
+  catalog: Catalog;
+  filmOrder: Map<string, number>;
+  sessionsOf: Map<string, Session[]>;
+  cinemaOf: (venueName: string) => CinemaId;
+  compat: (a: Session, b: Session) => boolean;
 }
 
-/**
- * 精確搜尋：以影片為單位選一場或不排，依 (必看數, 想看數, 有空再看數, ★數) 字典序取最大；
- * 分支界限以「剩餘影片中仍有可行場次者全部排入」為樂觀上界；同分時先找到者勝（候選依 ★、時間排序）。
- */
-export function buildItinerary(catalog: Catalog, state: UserState): ScheduleResult {
+export function makeContext(catalog: Catalog): EngineContext {
   const cinemaOf = cinemaResolver(catalog);
-  const limit = state.daily_limit;
-  const filmOrder = new Map(catalog.films.map((f, i) => [f.film_id, i]));
-  const missed = new Set(state.ticket_marks.filter((m) => m.result === "missed").map((m) => m.session_id));
-  const sessionById = new Map(catalog.sessions.map((s) => [s.session_id, s]));
-  const gotByFilm = new Map<string, Session>();
-  for (const m of state.ticket_marks) {
-    if (m.result !== "got") continue;
-    const s = sessionById.get(m.session_id);
-    if (s && !gotByFilm.has(s.film_id)) gotByFilm.set(s.film_id, s);
-  }
-
-  // 去重後的已分層影片（依場次表影片順序）
-  const prefMap = new Map<string, Tier>();
-  for (const p of state.film_preferences) if (filmOrder.has(p.film_id)) prefMap.set(p.film_id, p.tier);
-  const prefs = [...prefMap.entries()]
-    .map(([filmId, tier]) => ({ filmId, tier }))
-    .sort((a, b) => filmOrder.get(a.filmId)! - filmOrder.get(b.filmId)!);
-
   const sessionsOf = new Map<string, Session[]>();
   for (const s of catalog.sessions) {
     const arr = sessionsOf.get(s.film_id);
     if (arr) arr.push(s);
     else sessionsOf.set(s.film_id, [s]);
   }
+  return {
+    catalog,
+    filmOrder: new Map(catalog.films.map((f, i) => [f.film_id, i])),
+    sessionsOf,
+    cinemaOf,
+    compat: (a, b) => areSessionsCompatibleEitherOrder(a, b, cinemaOf),
+  };
+}
 
-  const compat = (a: Session, b: Session) => areSessionsCompatibleEitherOrder(a, b, cinemaOf);
+export interface Cand {
+  session: Session;
+  filmId: string;
+  star: boolean;
+  fixed: boolean;
+  /** 與此候選不相容的候選索引（同一個人的候選之間） */
+  conflicts: number[];
+}
 
-  // 已搶到的場次先固定
-  const fixed: { session: Session; tier: Tier }[] = [];
-  for (const p of prefs) {
-    const g = gotByFilm.get(p.filmId);
-    if (g) fixed.push({ session: g, tier: p.tier });
+export interface PFilm {
+  filmId: string;
+  tier: Tier;
+  /** 在同層內的次序（層內名次由小到大；沒有名次者依場次表影片順序） */
+  pos: number;
+  /** 場次表影片順序 */
+  order: number;
+  cands: number[];
+}
+
+export interface PersonPlan {
+  limit: number | null;
+  cands: Cand[];
+  /** 已搶到（固定）的影片，各只有一個固定候選 */
+  fixed: PFilm[];
+  /** 其餘有可行候選的影片 */
+  free: PFilm[];
+  /** 所有有效分層影片（依場次表影片順序） */
+  prefs: { filmId: string; tier: Tier }[];
+  fixedDay: Map<string, number>;
+  base: [number, number, number];
+  gotFilms: Set<string>;
+  /** 該片可看（有空且未標沒搶到）的場次，依偏好順序 */
+  watchable: (filmId: string) => Session[];
+  tierOf: Map<string, Tier>;
+}
+
+export function preparePerson(ctx: EngineContext, input: PersonInput): PersonPlan {
+  const { catalog, filmOrder, sessionsOf, compat } = ctx;
+  const limit = input.daily_limit;
+  const missed = new Set(input.ticket_marks.filter((m) => m.result === "missed").map((m) => m.session_id));
+  const sessionById = new Map(catalog.sessions.map((s) => [s.session_id, s]));
+  const gotByFilm = new Map<string, Session>();
+  for (const m of input.ticket_marks) {
+    if (m.result !== "got") continue;
+    const s = sessionById.get(m.session_id);
+    if (s && !gotByFilm.has(s.film_id)) gotByFilm.set(s.film_id, s);
   }
-  const fixedDay = new Map<string, number>();
-  for (const f of fixed) fixedDay.set(f.session.date, (fixedDay.get(f.session.date) ?? 0) + 1);
 
-  // 各影片的可看候選（不含 missed）
+  // 去重後的已分層影片（後者覆蓋前者）
+  const prefMap = new Map<string, FilmPreference>();
+  for (const p of input.film_preferences) if (filmOrder.has(p.film_id)) prefMap.set(p.film_id, p);
+  const prefList = [...prefMap.values()].sort((a, b) => filmOrder.get(a.film_id)! - filmOrder.get(b.film_id)!);
+  const prefs = prefList.map((p) => ({ filmId: p.film_id, tier: p.tier }));
+  const tierOf = new Map(prefs.map((p) => [p.filmId, p.tier]));
+
+  // 層內次序：同層依名次由小到大，沒有名次者依場次表影片順序接在後面
+  const pos = new Map<string, number>();
+  for (const tier of ["must", "want", "maybe"] as Tier[]) {
+    prefList
+      .filter((p) => p.tier === tier)
+      .sort(
+        (a, b) =>
+          (a.tier_rank ?? Number.MAX_SAFE_INTEGER) - (b.tier_rank ?? Number.MAX_SAFE_INTEGER) ||
+          filmOrder.get(a.film_id)! - filmOrder.get(b.film_id)!,
+      )
+      .forEach((p, k) => pos.set(p.film_id, k));
+  }
+
   const watchable = (filmId: string): Session[] =>
     (sessionsOf.get(filmId) ?? [])
-      .filter((s) => !missed.has(s.session_id) && isSessionWatchable(s, state.unavailable_slots))
+      .filter((s) => !missed.has(s.session_id) && isSessionAvailable(s, input.availability))
       .sort(compareSessionsPreferred);
 
-  // 候選池（只含自由影片，已排除與固定場次衝堂、固定場次已佔滿當天者）
   const cands: Cand[] = [];
-  const free: FreeFilm[] = [];
+  const fixed: PFilm[] = [];
+  const base: [number, number, number] = [0, 0, 0];
+  const fixedDay = new Map<string, number>();
+  for (const p of prefs) {
+    const g = gotByFilm.get(p.filmId);
+    if (!g) continue;
+    fixed.push({ filmId: p.filmId, tier: p.tier, pos: pos.get(p.filmId)!, order: filmOrder.get(p.filmId)!, cands: [cands.length] });
+    cands.push({ session: g, filmId: p.filmId, star: isGuestSession(g), fixed: true, conflicts: [] });
+    base[TIER_RANK[p.tier]]++;
+    fixedDay.set(g.date, (fixedDay.get(g.date) ?? 0) + 1);
+  }
+  const fixedSessions = fixed.map((f) => cands[f.cands[0]].session);
+
+  const free: PFilm[] = [];
   for (const p of prefs) {
     if (gotByFilm.has(p.filmId)) continue;
     const idxs: number[] = [];
     for (const s of watchable(p.filmId)) {
       if (limit !== null && (fixedDay.get(s.date) ?? 0) >= limit) continue;
-      if (!fixed.every((f) => compat(s, f.session))) continue;
+      if (!fixedSessions.every((f) => compat(s, f))) continue;
       idxs.push(cands.length);
-      cands.push({ session: s, tier: p.tier, star: isGuestSession(s), conflicts: [] });
+      cands.push({ session: s, filmId: p.filmId, star: isGuestSession(s), fixed: false, conflicts: [] });
     }
-    if (idxs.length > 0) free.push({ filmId: p.filmId, tier: p.tier, cands: idxs });
+    if (idxs.length > 0) free.push({ filmId: p.filmId, tier: p.tier, pos: pos.get(p.filmId)!, order: filmOrder.get(p.filmId)!, cands: idxs });
   }
   for (let i = 0; i < cands.length; i++) {
     for (let j = i + 1; j < cands.length; j++) {
-      if (cands[i].session.film_id === cands[j].session.film_id) continue;
+      if (cands[i].filmId === cands[j].filmId) continue;
       if (!compat(cands[i].session, cands[j].session)) {
         cands[i].conflicts.push(j);
         cands[j].conflicts.push(i);
       }
     }
   }
-  // 搜尋順序：層級、候選少者先、影片順序
-  free.sort(
-    (a, b) =>
-      TIER_RANK[a.tier] - TIER_RANK[b.tier] ||
-      a.cands.length - b.cands.length ||
-      filmOrder.get(a.filmId)! - filmOrder.get(b.filmId)!,
-  );
+  return { limit, cands, fixed, free, prefs, fixedDay, base, gotFilms: new Set(gotByFilm.keys()), watchable, tierOf };
+}
 
-  const base: Objective = [0, 0, 0, 0];
-  for (const f of fixed) {
-    base[TIER_RANK[f.tier]]++;
-    if (isGuestSession(f.session)) base[3]++;
+/** 一個人的搜尋狀態：被選中候選造成的封鎖與每日場次數 */
+export class PersonState {
+  readonly blocked: Int32Array;
+  readonly dayCount: Map<string, number>;
+  constructor(readonly plan: PersonPlan, initDay?: Map<string, number>) {
+    this.blocked = new Int32Array(plan.cands.length);
+    this.dayCount = new Map(initDay ?? []);
   }
+  feasible(c: number): boolean {
+    const cand = this.plan.cands[c];
+    if (cand.fixed) return true;
+    return this.blocked[c] === 0 && (this.plan.limit === null || (this.dayCount.get(cand.session.date) ?? 0) < this.plan.limit);
+  }
+  take(c: number): void {
+    const cand = this.plan.cands[c];
+    this.dayCount.set(cand.session.date, (this.dayCount.get(cand.session.date) ?? 0) + 1);
+    for (const x of cand.conflicts) this.blocked[x]++;
+  }
+  undo(c: number): void {
+    const cand = this.plan.cands[c];
+    this.dayCount.set(cand.session.date, this.dayCount.get(cand.session.date)! - 1);
+    for (const x of cand.conflicts) this.blocked[x]--;
+  }
+}
 
-  // ---- DFS + branch and bound ----
-  const blocked = new Array<number>(cands.length).fill(0);
-  const dayCount = new Map(fixedDay);
-  const chosen: number[] = [];
-  const cur: Objective = [...base];
-  let best: Objective | null = null;
-  let bestChosen: number[] = [];
+type Counts = [number, number, number];
 
-  const feasible = (c: number): boolean =>
-    blocked[c] === 0 && (limit === null || (dayCount.get(cands[c].session.date) ?? 0) < limit);
+function compareCounts(a: Counts, b: Counts): number {
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
 
-  const bound = (from: number): Objective => {
-    const b: Objective = [cur[0], cur[1], cur[2], cur[3]];
-    for (let i = from; i < free.length; i++) {
-      let any = false;
-      let anyStar = false;
-      for (const c of free[i].cands) {
-        if (!feasible(c)) continue;
-        any = true;
-        if (cands[c].star) {
-          anyStar = true;
-          break;
-        }
-      }
-      if (any) {
-        b[TIER_RANK[free[i].tier]]++;
-        if (anyStar) b[3]++;
-      }
-    }
+// ───────────────────────── 個人最佳：第 1～3 項（層級數） ─────────────────────────
+
+/** 精確搜尋：必看數、想看數、有空再看數的字典序最大值（含已搶到固定的影片） */
+export function bestCounts(plan: PersonPlan): Counts {
+  return searchCounts(plan).counts;
+}
+
+function searchCounts(plan: PersonPlan): { counts: Counts; films: Set<string> } {
+  const st = new PersonState(plan, plan.fixedDay);
+  const free = [...plan.free].sort(
+    (a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.cands.length - b.cands.length || a.order - b.order,
+  );
+  const cur: Counts = [...plan.base];
+  const chosen: string[] = [];
+  let best: Counts | null = null;
+  let bestFilms: string[] = [];
+
+  const bound = (from: number): Counts => {
+    const b: Counts = [cur[0], cur[1], cur[2]];
+    for (let i = from; i < free.length; i++) if (free[i].cands.some((c) => st.feasible(c))) b[TIER_RANK[free[i].tier]]++;
     return b;
   };
-
   const dfs = (i: number): void => {
     if (i === free.length) {
-      if (best === null || compareObjective(cur, best) > 0) {
-        best = [cur[0], cur[1], cur[2], cur[3]];
-        bestChosen = [...chosen];
+      if (best === null || compareCounts(cur, best) > 0) {
+        best = [cur[0], cur[1], cur[2]];
+        bestFilms = [...chosen];
       }
       return;
     }
-    if (best !== null && compareObjective(bound(i), best) <= 0) return;
+    if (best !== null && compareCounts(bound(i), best) <= 0) return;
     const film = free[i];
     const rank = TIER_RANK[film.tier];
     for (const c of film.cands) {
-      if (!feasible(c)) continue;
-      const cand = cands[c];
-      chosen.push(c);
+      if (!st.feasible(c)) continue;
+      st.take(c);
       cur[rank]++;
-      if (cand.star) cur[3]++;
-      dayCount.set(cand.session.date, (dayCount.get(cand.session.date) ?? 0) + 1);
-      for (const x of cand.conflicts) blocked[x]++;
+      chosen.push(film.filmId);
       dfs(i + 1);
-      for (const x of cand.conflicts) blocked[x]--;
-      dayCount.set(cand.session.date, dayCount.get(cand.session.date)! - 1);
-      if (cand.star) cur[3]--;
-      cur[rank]--;
       chosen.pop();
+      cur[rank]--;
+      st.undo(c);
     }
     dfs(i + 1); // 不排此片
   };
   dfs(0);
+  return { counts: best ?? [...plan.base], films: new Set(bestFilms) };
+}
 
-  // ---- 組合結果 ----
-  const picked: { session: Session; tier: Tier }[] = [
-    ...fixed,
-    ...bestChosen.map((c) => ({ session: cands[c].session, tier: cands[c].tier })),
-  ];
-  picked.sort((a, b) => sessionStartAbs(a.session) - sessionStartAbs(b.session) || (a.session.session_id < b.session.session_id ? -1 : 1));
-  const itinerary: ItineraryEntry[] = picked.map((p) => ({
-    session_id: p.session.session_id,
-    tier: p.tier,
-    is_non_ticketed: p.session.marks.includes("non_ticketed"),
-  }));
+/**
+ * 在層級數恰為 counts 的前提下，找一組「committed 全部排入、其餘 optional 影片可排可不排」的可行影片集合。
+ * 回傳其中一組解的影片 id（不含固定影片）；找不到回傳 null。committed 先依候選少者排、optional 依 (層級, 候選數) 排。
+ */
+function findSolution(plan: PersonPlan, committed: PFilm[], optional: PFilm[], counts: Counts, budget: { nodes: number }): Set<string> | null {
+  const st = new PersonState(plan, plan.fixedDay);
+  const req = [...committed].sort((a, b) => a.cands.length - b.cands.length || a.order - b.order);
+  const opt = [...optional].sort(
+    (a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.cands.length - b.cands.length || a.order - b.order,
+  );
+  const films = [...req, ...opt];
+  const nReq = req.length;
+  const cur: Counts = [...plan.base];
+  const chosen: string[] = [];
 
-  // ---- 未排入必看片原因 ----
-  const scheduledFilms = new Set(picked.map((p) => p.session.film_id));
-  const mustLike = new Set<string>([...prefs.filter((p) => p.tier === "must").map((p) => p.filmId), ...gotByFilm.keys()]);
-  const unscheduled: UnscheduledMustFilm[] = [];
-  for (const p of prefs) {
+  const viable = (from: number): boolean => {
+    const rem: Counts = [0, 0, 0];
+    for (let i = from; i < films.length; i++) {
+      const any = films[i].cands.some((c) => st.feasible(c));
+      if (!any) {
+        if (i < nReq) return false;
+        continue;
+      }
+      rem[TIER_RANK[films[i].tier]]++;
+    }
+    for (let t = 0; t < 3; t++) if (cur[t] > counts[t] || cur[t] + rem[t] < counts[t]) return false;
+    return true;
+  };
+  const dfs = (i: number): boolean => {
+    if (--budget.nodes < 0) return false;
+    if (!viable(i)) return false;
+    if (i === films.length) return cur[0] === counts[0] && cur[1] === counts[1] && cur[2] === counts[2];
+    const film = films[i];
+    const rank = TIER_RANK[film.tier];
+    for (const c of film.cands) {
+      if (!st.feasible(c)) continue;
+      st.take(c);
+      cur[rank]++;
+      chosen.push(film.filmId);
+      if (dfs(i + 1)) return true;
+      chosen.pop();
+      cur[rank]--;
+      st.undo(c);
+    }
+    return i >= nReq ? dfs(i + 1) : false;
+  };
+  return dfs(0) ? new Set(chosen) : null;
+}
+
+/** 層內排序可行性檢查的總節點預算（決定性）：用完後尚未確認可行的影片視為排不進去，層級數不受影響 */
+export const SET_NODE_BUDGET = 6_000_000;
+
+export interface FilmSetResult {
+  /** 層級數（含已搶到固定的影片）：必看、想看、有空再看 */
+  counts: Counts;
+  /** 個人最佳的影片集合（不含已搶到固定的影片） */
+  films: Set<string>;
+}
+
+/**
+ * 個人目標第 1～4 項：先求層級數最大值，再在其中取層內排序最佳的影片集合。
+ * 層內排序（各層排入影片的名次由小到大逐一比較，名次較小者勝）在層級數相同時等價於：
+ * 依 (層級, 層內名次) 逐片「能排就排」；可行條件是「已收進的影片全部排入後，仍能湊成最大層級數」。
+ */
+export function bestFilmSet(plan: PersonPlan): FilmSetResult {
+  const { counts, films: first } = searchCounts(plan);
+  const order = [...plan.free].sort((a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.pos - b.pos || a.order - b.order);
+  const committed: PFilm[] = [];
+  const budget = { nodes: SET_NODE_BUDGET };
+  let witness: Set<string> = first;
+  order.forEach((f, i) => {
+    if (witness.has(f.filmId)) {
+      committed.push(f);
+      return;
+    }
+    const w = findSolution(plan, [...committed, f], order.slice(i + 1), counts, budget);
+    if (w) {
+      committed.push(f);
+      witness = w;
+    }
+  });
+  return { counts, films: new Set(committed.map((f) => f.filmId)) };
+}
+
+// ───────────────────────── 場次指派（第 5 項 ★；兩人時先比一起看） ─────────────────────────
+
+interface JointFilm {
+  filmId: string;
+  /** 各人的候選索引；該人沒有這部片 = null */
+  per: (number[] | null)[];
+  /** 兩人都有這部片時，同一場次的候選配對 [人0 索引, 人1 索引] */
+  pairs: [number, number][];
+  key: [number, number, number, number];
+}
+
+/** 場次指派的搜尋節點預算（找到第一個可行解之後才生效） */
+export const ASSIGN_NODE_BUDGET = 1_500_000;
+
+export interface Assignment {
+  /** 各人排入的場次 */
+  sessions: Session[][];
+  /** 兩人排入同一場次的數量（單人 = 0） */
+  together: number;
+  stars: number;
+}
+
+/**
+ * 每人已決定要排的影片（sets，不含固定影片，固定影片一律排入）：
+ * 單人 -> 最大化 ★ 場次數；兩人 -> 先最大化一起看的場次數，再最大化兩人 ★ 合計。
+ * 同分時先找到者勝（候選依 ★、時間排序），所以固定為場次較早者。
+ */
+export function assignSessions(plans: PersonPlan[], sets: Set<string>[]): Assignment {
+  const states = plans.map((p) => new PersonState(p));
+  const filmMap = new Map<string, JointFilm>();
+  plans.forEach((plan, p) => {
+    const add = (f: PFilm) => {
+      let jf = filmMap.get(f.filmId);
+      if (!jf) {
+        jf = { filmId: f.filmId, per: plans.map(() => null), pairs: [], key: [1, 0, 0, f.order] };
+        filmMap.set(f.filmId, jf);
+      }
+      jf.per[p] = f.cands;
+    };
+    for (const f of plan.fixed) add(f);
+    for (const f of plan.free) if (sets[p].has(f.filmId)) add(f);
+  });
+  const films = [...filmMap.values()];
+  for (const jf of films) {
+    const idx = jf.per.map((c) => c);
+    const hasFixed = idx.some((c, p) => c !== null && plans[p].cands[c[0]].fixed);
+    const tiers = idx.map((_, p) => plans[p].tierOf.get(jf.filmId)).filter((t): t is Tier => !!t).map((t) => TIER_RANK[t]);
+    const counts = idx.filter((c): c is number[] => c !== null).map((c) => c.length);
+    jf.key = [hasFixed ? 0 : 1, Math.min(...tiers), Math.min(...counts), jf.key[3]];
+    if (plans.length === 2 && idx[0] && idx[1]) {
+      for (const a of idx[0]) for (const b of idx[1]) if (plans[0].cands[a].session.session_id === plans[1].cands[b].session.session_id) jf.pairs.push([a, b]);
+    }
+  }
+  films.sort((a, b) => a.key[0] - b.key[0] || a.key[1] - b.key[1] || a.key[2] - b.key[2] || a.key[3] - b.key[3]);
+
+  const chosen: number[][] = plans.map(() => []);
+  let together = 0;
+  let stars = 0;
+  let best: { together: number; stars: number; chosen: number[][] } | null = null;
+
+  const bound = (from: number): { t: number; s: number } | null => {
+    let t = together;
+    let s = stars;
+    for (let i = from; i < films.length; i++) {
+      const jf = films[i];
+      for (let p = 0; p < plans.length; p++) {
+        const list = jf.per[p];
+        if (!list) continue;
+        let any = false;
+        let anyStar = false;
+        for (const c of list) {
+          if (!states[p].feasible(c)) continue;
+          any = true;
+          if (plans[p].cands[c].star) {
+            anyStar = true;
+            break;
+          }
+        }
+        if (!any) return null; // 這部必排的片已無可行場次
+        if (anyStar) s++;
+      }
+      if (jf.pairs.some(([a, b]) => states[0].feasible(a) && states[1].feasible(b))) t++;
+    }
+    return { t, s };
+  };
+
+  const place = (p: number, c: number) => {
+    states[p].take(c);
+    chosen[p].push(c);
+    if (plans[p].cands[c].star) stars++;
+  };
+  const unplace = (p: number, c: number) => {
+    if (plans[p].cands[c].star) stars--;
+    chosen[p].pop();
+    states[p].undo(c);
+  };
+
+  // 決定性的節點預算：極端難的資料（大量互相衝堂的候選）不證明最佳，改回傳目前最佳解，確保回應時間；一般資料遠低於此預算
+  let nodes = 0;
+  const dfs = (i: number): void => {
+    if (best !== null && ++nodes > ASSIGN_NODE_BUDGET) return;
+    if (i === films.length) {
+      if (best === null || together > best.together || (together === best.together && stars > best.stars)) {
+        best = { together, stars, chosen: chosen.map((c) => [...c]) };
+      }
+      return;
+    }
+    const ub = bound(i);
+    if (ub === null) return;
+    if (best !== null && (ub.t < best.together || (ub.t === best.together && ub.s <= best.stars))) return;
+    const jf = films[i];
+    if (plans.length === 1 || !jf.per[0] || !jf.per[1]) {
+      const p = jf.per[0] ? 0 : 1;
+      for (const c of jf.per[p]!) {
+        if (!states[p].feasible(c)) continue;
+        place(p, c);
+        dfs(i + 1);
+        unplace(p, c);
+      }
+      return;
+    }
+    // 兩人都要看這部：先試一起（同一場次），再試各自不同場次
+    for (const [a, b] of jf.pairs) {
+      if (!states[0].feasible(a) || !states[1].feasible(b)) continue;
+      place(0, a);
+      place(1, b);
+      together++;
+      dfs(i + 1);
+      together--;
+      unplace(1, b);
+      unplace(0, a);
+    }
+    for (const a of jf.per[0]) {
+      if (!states[0].feasible(a)) continue;
+      place(0, a);
+      for (const b of jf.per[1]) {
+        if (!states[1].feasible(b)) continue;
+        if (plans[0].cands[a].session.session_id === plans[1].cands[b].session.session_id) continue;
+        place(1, b);
+        dfs(i + 1);
+        unplace(1, b);
+      }
+      unplace(0, a);
+    }
+  };
+  dfs(0);
+
+  const result = best as { together: number; stars: number; chosen: number[][] } | null;
+  const sel = result ? result.chosen : plans.map(() => [] as number[]);
+  return {
+    sessions: sel.map((list, p) => list.map((c) => plans[p].cands[c].session)),
+    together: result?.together ?? 0,
+    stars: result?.stars ?? 0,
+  };
+}
+
+// ───────────────────────── 未排入必看片原因 ─────────────────────────
+
+export function explainUnscheduled(
+  ctx: EngineContext,
+  plan: PersonPlan,
+  pickedSessions: Session[],
+  owner?: "self" | "partner",
+): UnscheduledMustFilm[] {
+  const { compat, filmOrder } = ctx;
+  const scheduledFilms = new Set(pickedSessions.map((s) => s.film_id));
+  const mustLike = new Set<string>([...plan.prefs.filter((p) => p.tier === "must").map((p) => p.filmId), ...plan.gotFilms]);
+  const out: UnscheduledMustFilm[] = [];
+  const own = owner ? { owner } : {};
+  for (const p of plan.prefs) {
     if (p.tier !== "must" || scheduledFilms.has(p.filmId)) continue;
-    const options = watchable(p.filmId);
+    const options = plan.watchable(p.filmId);
     if (options.length === 0) {
-      unscheduled.push({ film_id: p.filmId, reason: "no_available_session", conflict_film_ids: null });
+      out.push({ ...own, film_id: p.filmId, reason: "no_available_session", conflict_film_ids: null });
       continue;
     }
     const blockers = new Set<string>();
     let limitBlocked = false;
     for (const s of options) {
-      const blocking = picked.filter((q) => !compat(s, q.session));
+      const blocking = pickedSessions.filter((q) => !compat(s, q));
       if (blocking.length === 0) {
         limitBlocked = true;
         break;
       }
-      for (const q of blocking) if (mustLike.has(q.session.film_id)) blockers.add(q.session.film_id);
+      for (const q of blocking) if (mustLike.has(q.film_id)) blockers.add(q.film_id);
     }
     if (limitBlocked || blockers.size === 0) {
-      unscheduled.push({ film_id: p.filmId, reason: "daily_limit", conflict_film_ids: null });
+      out.push({ ...own, film_id: p.filmId, reason: "daily_limit", conflict_film_ids: null });
     } else {
       const ids = [...blockers].sort((a, b) => filmOrder.get(a)! - filmOrder.get(b)!);
-      unscheduled.push({ film_id: p.filmId, reason: "conflicts_with_must", conflict_film_ids: ids });
+      out.push({ ...own, film_id: p.filmId, reason: "conflicts_with_must", conflict_film_ids: ids });
     }
   }
-  return { itinerary, unscheduled };
+  return out;
+}
+
+// ───────────────────────── 個人排程 ─────────────────────────
+
+/** 一個人的最佳影片集合（個人目標第 1～4 項） */
+export function personalFilmSet(plan: PersonPlan): Set<string> {
+  return bestFilmSet(plan).films;
+}
+
+/**
+ * 個人排程。目標依序為：必看數、想看數、有空再看數、層內排序（各層排入影片的名次由小到大逐一比較）、★ 場次數；
+ * 其餘同分固定為場次較早者。先求層級數最大值，再在其中取層內名次最佳的影片集合，最後挑場次最大化 ★。
+ */
+export function buildItinerary(catalog: Catalog, state: UserState): ScheduleResult {
+  const ctx = makeContext(catalog);
+  const plan = preparePerson(ctx, personInputOf(state));
+  const set = personalFilmSet(plan);
+  const { sessions } = assignSessions([plan], [set]);
+  const sorted = [...sessions[0]].sort(
+    (a, b) => sessionStartAbs(a) - sessionStartAbs(b) || (a.session_id < b.session_id ? -1 : 1),
+  );
+  const itinerary: ItineraryEntry[] = sorted.map((s) => ({
+    session_id: s.session_id,
+    tier: plan.tierOf.get(s.film_id)!,
+    is_non_ticketed: s.marks.includes("non_ticketed"),
+  }));
+  return { itinerary, unscheduled: explainUnscheduled(ctx, plan, sorted) };
 }

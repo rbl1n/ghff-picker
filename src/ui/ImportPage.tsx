@@ -38,7 +38,7 @@ function MergedDialog({ decoded }: { decoded: DecodedShare }) {
   const { state } = decoded;
   const title = `這是「${state.self_name || DEFAULT_SELF} ＋ ${state.partner?.display_name || DEFAULT_PARTNER}」的合併結果。`;
   const confirm = () => {
-    replaceUser(state);
+    replaceUser(state, decoded.legacy);
     window.location.replace("#/tickets");
   };
   return (
@@ -73,21 +73,21 @@ function PersonalDialog({ decoded }: { decoded: DecodedShare }) {
     display_name: name,
     daily_limit: state.daily_limit,
     film_preferences: state.film_preferences,
-    unavailable_slots: state.unavailable_slots,
+    availability: state.availability ?? [],
   });
   const finish = () => window.location.replace("#/itinerary");
 
   const replaceMine = () => {
-    replaceUser({ ...state, self_name: null, partner: null });
+    replaceUser({ ...state, self_name: null, partner: null }, decoded.legacy);
     window.location.replace("#/tickets");
   };
   const join = () => setStage(user.partner ? "replace" : "name");
   const confirmName = () => {
-    setPartner(partnerOf(partnerName.trim() || DEFAULT_PARTNER), selfName.trim() || DEFAULT_SELF);
+    setPartner(partnerOf(partnerName.trim() || DEFAULT_PARTNER), selfName.trim() || DEFAULT_SELF, decoded.legacy);
     finish();
   };
   const confirmReplace = () => {
-    setPartner(partnerOf(decoded.senderName ?? DEFAULT_PARTNER), user.self_name || DEFAULT_SELF);
+    setPartner(partnerOf(decoded.senderName ?? DEFAULT_PARTNER), user.self_name || DEFAULT_SELF, decoded.legacy);
     finish();
   };
 

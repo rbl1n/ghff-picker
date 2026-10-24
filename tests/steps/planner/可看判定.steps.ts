@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { applySlotToDates, isSessionWatchable } from "../../../src/domain/availability";
+import { isSessionAvailable, subtractInterval } from "../../../src/domain/availability";
 import { hhmmToMin } from "../../support/tables";
 import {
   When,
@@ -9,16 +9,16 @@ import {
   getCtx,
   requireCatalog,
   parseSlotText,
-  slotToText,
 } from "../../support/planner-a-helpers";
 
 type Table = { hashes(): Record<string, string>[] };
 
 function queryAll(): Map<string, boolean> {
   const catalog = requireCatalog();
-  const state = ensureState();
+  // 可看 = 開演到散場每一分鐘都有空（分鐘比較）
+  const availability = ensureState().availability ?? [];
   const map = new Map<string, boolean>();
-  for (const s of catalog.sessions) map.set(s.session_id, isSessionWatchable(s, state.unavailable_slots));
+  for (const s of catalog.sessions) map.set(s.session_id, isSessionAvailable(s, availability));
   return map;
 }
 
@@ -35,8 +35,10 @@ When("觀眾把不可看時段 {string} 一次套用到以下日期：", async (
   const state = ensureState();
   const dates = dataTable.hashes().map((r) => r["日期"].trim());
   const { start_min, end_min } = parseSlotText(dates[0], slotText);
-  const added = applySlotToDates({ start_min, end_min }, dates);
-  state.unavailable_slots = [...state.unavailable_slots, ...added];
+  // 對每個日期各呼叫一次「從有空時段扣掉區間」
+  let avail = state.availability ?? [];
+  for (const date of dates) avail = subtractInterval(avail, date, start_min ?? 0, end_min ?? 1440);
+  state.availability = avail;
 });
 
 // 場次可看狀態如下：
@@ -62,15 +64,35 @@ Then("場次可看狀態如下：", async ({}, dataTable: Table) => {
   void hhmmToMin;
 });
 
-// 不可看時段設定如下：
-Then("不可看時段設定如下：", async ({}, dataTable: Table) => {
+// 觀眾查看有空時段
+When("觀眾查看有空時段", async () => {
+  const ctx = getCtx();
   const state = ensureState();
-  const norm = (rows: { date: string; text: string }[]) =>
-    rows.map((r) => `${r.date} ${r.text}`).sort();
-  const expected = norm(dataTable.hashes().map((r) => ({ date: r["日期"].trim(), text: slotToText(parseSlotText(r["日期"].trim(), r["時段"])) })));
-  const actual = norm(state.unavailable_slots.map((s) => ({ date: s.date, text: slotToText(s) })));
-  expect(actual).toEqual(expected);
-  // 再讀確認
+  ctx.stateSnapshotAtQuery = JSON.stringify(state);
+  ctx.world.lastAvailability = JSON.parse(JSON.stringify(state.availability ?? []));
+  expect(JSON.stringify(state), "查詢是純查詢，不得改使用者狀態").toBe(ctx.stateSnapshotAtQuery);
+});
+
+function fmt(n: number): string {
+  return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
+}
+
+/** 有空時段 → 表格文字：區間由早到晚以「、」連接；沒有任何區間 = 整天沒空 */
+function availabilityText(intervals: { start_min: number; end_min: number }[]): string {
+  if (intervals.length === 0) return "整天沒空";
+  return intervals.map((iv) => `${fmt(iv.start_min)}–${fmt(iv.end_min)}`).join("、");
+}
+
+// 有空時段如下：
+Then("有空時段如下：", async ({}, dataTable: Table) => {
+  const state = ensureState();
+  const rows = (state.availability ?? [])
+    .map((d) => `${d.date} ${availabilityText(d.intervals)}`)
+    .sort();
+  const expected = dataTable.hashes().map((r) => `${r["日期"].trim()} ${r["有空時段"].trim()}`).sort();
+  // 權威狀態：不是全天有空的日期恰為表格各列（未列出的日期全天有空）
+  expect(rows, "有空時段須恰為表格各列（已正規化：合併相鄰、由早到晚）").toEqual(expected);
+  // 再讀確認：重新讀取使用者狀態仍一致
   const reread = JSON.parse(JSON.stringify(state)) as typeof state;
-  expect(norm(reread.unavailable_slots.map((s) => ({ date: s.date, text: slotToText(s) })))).toEqual(expected);
+  expect((reread.availability ?? []).map((d) => `${d.date} ${availabilityText(d.intervals)}`).sort()).toEqual(expected);
 });

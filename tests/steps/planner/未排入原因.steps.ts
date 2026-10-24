@@ -62,3 +62,35 @@ Then("沒有未排入的必看片", async () => {
     expect(scheduledFilms.has(p.film_id), `必看片 ${titleOf(p.film_id)} 應在行程中`).toBe(true);
   }
 });
+
+// 兩人未排入的必看片與原因如下：
+Then("兩人未排入的必看片與原因如下：", async ({}, dataTable: Table) => {
+  const world = getCtx().world;
+  const duo = world.lastDuo;
+  expect(duo, "尚未執行兩人排程（world 沒有同伴資料時本句型不適用）").not.toBeNull();
+  const WHO = { self: "觀眾", partner: "同伴" } as const;
+  const actual = duo!.unscheduled.map((u) => `${WHO[u.owner ?? "self"]}|${titleOf(u.film_id)}|${reasonText(u)}`).sort();
+  const expected = dataTable.hashes().map((r) => `${r["誰"].trim()}|${r["片名"].trim()}|${r["原因"].trim()}`).sort();
+  expect(actual, "兩人未排入的必看片 (誰, 片名, 原因) 集合").toEqual(expected);
+
+  // 權威狀態：每筆的「誰」是該片必看層級的持有人；不得掛在只有另一人標必看的片上
+  const state = ensureState();
+  const mustOf = {
+    self: new Set(state.film_preferences.filter((p) => p.tier === "must").map((p) => p.film_id)),
+    partner: new Set((world.partner?.film_preferences ?? []).filter((p) => p.tier === "must").map((p) => p.film_id)),
+  };
+  const scheduled = {
+    self: new Set(duo!.entries.filter((e) => e.participant !== "partner").map((e) => sessionById(e.session_id).film_id)),
+    partner: new Set(duo!.entries.filter((e) => e.participant !== "self").map((e) => sessionById(e.session_id).film_id)),
+  };
+  for (const u of duo!.unscheduled) {
+    const who = u.owner ?? "self";
+    expect(mustOf[who].has(u.film_id), `${titleOf(u.film_id)} 不是${WHO[who]}的必看片`).toBe(true);
+    expect(scheduled[who].has(u.film_id), `${titleOf(u.film_id)} 已排入${WHO[who]}的行程卻出現在未排入清單`).toBe(false);
+    expect(reasonText(u).length, "原因不得空白").toBeGreaterThan(0);
+  }
+  // 觀眾的列等於「未排入的必看片與原因如下：」觀察到的集合
+  const selfRows = duo!.unscheduled.filter((u) => (u.owner ?? "self") === "self").map((u) => `${titleOf(u.film_id)}|${reasonText(u)}`).sort();
+  const observed = world.lastResult!.unscheduled.map((u) => `${titleOf(u.film_id)}|${reasonText(u)}`).sort();
+  expect(observed, "觀眾的列須等於個人觀察到的未排入集合").toEqual(selfRows);
+});

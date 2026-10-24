@@ -129,16 +129,16 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 
 | 頁面 | 定位點 | 說明 |
 | --- | --- | --- |
-| 行程 | `data-testid=single-side-stats` | 僅兩人模式且行程頁顯示；文字完全等於 `只有 {自己} 標記：{n} 部、只有 {同伴} 標記：{m} 部（不排入）`；個人模式不得渲染，頁面也不得有 `只有 … 標記` 文字 |
-| 行程 | 兩人沒有共同標記 | 沿用 `行程頁顯示提示`：完整文字 `兩人沒有共同標記的片，先到選片頁一起挑`（getByText exact） |
-| 搶票 | `data-testid=ticket-quantity`（位於 ticket-row 內） | 兩人模式每列（pending 與 done 區）文字含 `買 2 張`；個人模式任何列都不得出現 `買 N 張` |
+| 行程 | ~~`data-testid=single-side-stats`~~ **（003 已移除，見下方「003」章節；UI 不得再渲染）** | 僅兩人模式且行程頁顯示；文字完全等於 `只有 {自己} 標記：{n} 部、只有 {同伴} 標記：{m} 部（不排入）`；個人模式不得渲染，頁面也不得有 `只有 … 標記` 文字 |
+| 行程 | ~~兩人沒有共同標記~~ **（003 已移除：兩人各自排程，沒有「共同分層」空狀態）** | ~~沿用 `行程頁顯示提示`：完整文字 `兩人沒有共同標記的片，先到選片頁一起挑`（getByText exact）~~ |
+| 搶票 | `data-testid=ticket-quantity`（位於 ticket-row 內） | **（003 改版）** 兩人模式每列（pending 與 done 區）一起看 `買 2 張`、自己看 `買 1 張`（舊的「每列買 2 張」已移除）；個人模式任何列都不得出現 `買 N 張` |
 
 ### 分享頁（合併結果）
 
 | 定位點 | 說明 |
 | --- | --- |
 | 文字 `合併結果連結` | 僅兩人模式的分享畫面出現（個人模式分享畫面不得含此文字）；仍須有 `share-url`、`share-qr`（`data-url` 相同）、button `複製連結` |
-| `share-url` 的連結內容 | `#/import?d=` + lz-string `compressToEncodedURIComponent(JSON.stringify(payload))`；merged：`payload = { kind: "merged", schema_version: 2, state }`，`state` 含 `self_name`、`partner`（display_name、daily_limit、film_preferences、unavailable_slots）、manual_order、ticket_marks；personal：`{ kind: "personal", schema_version: 2, sender_name, state }`；001 版連結 = 直接是 schema_version 1 的 UserState（沒有 kind，視為 personal） |
+| `share-url` 的連結內容 | **（003：schema_version 改為 3，payload 的 state 以 `availability` 取代 `unavailable_slots`、分層帶 `tier_rank`；讀取仍接受 1、2、3，高於 3 視為損毀。以下為 002 描述，僅供對照）** `#/import?d=` + lz-string `compressToEncodedURIComponent(JSON.stringify(payload))`；merged：`payload = { kind: "merged", schema_version: 2, state }`，`state` 含 `self_name`、`partner`（display_name、daily_limit、film_preferences、unavailable_slots）、manual_order、ticket_marks；personal：`{ kind: "personal", schema_version: 2, sender_name, state }`；001 版連結 = 直接是 schema_version 1 的 UserState（沒有 kind，視為 personal） |
 
 ### 合併結果連結對話
 
@@ -151,5 +151,57 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 
 ### 資料契約補充
 
-- 使用者狀態寫入 `schema_version: 2`，新增 `self_name`（string|null）與 `partner`（`{ display_name, daily_limit, film_preferences[], unavailable_slots[] }`｜null）；讀取接受 1（個人模式）與 2。
+- **（003 起寫入 `schema_version: 3`，見「003」章節）** 使用者狀態寫入 `schema_version: 2`，新增 `self_name`（string|null）與 `partner`（`{ display_name, daily_limit, film_preferences[], unavailable_slots[] }`｜null）；讀取接受 1（個人模式）與 2。
 - 同伴分層的 `film_id` 可以不在場次快照中（steps 用 `__not_in_catalog__:<片名>` 合成 id）；合併時須忽略。
+
+## 003 兩人各自片單、層內排序、小時格子
+
+唯一來源：`tests/support/web-003-helpers.ts`、`tests/steps/web/shared.steps.ts`、`時段.steps.ts`、`選片.steps.ts`、`行程.steps.ts`、`搶票.steps.ts`、`分享與保存.steps.ts`。
+慣例同上。保存格式 `schema_version: 3`（見 `specs/truth/data/data-model.dbml`）：
+- `film_preferences[]` 帶 `tier_rank`（同層 1 起連續）。
+- `availability: [{ date, intervals: [{ start_min, end_min }] }]`；沒有該日期的列 = 全天有空；`intervals` 為空 = 整天沒空；正規化（排序、合併相鄰、恰為 0–1440 則不保留該列）。`partner` 內同樣帶 `availability`、`tier_rank`。
+- 不再寫入 `unavailable_slots`；畫面的「不可看時段」是有空時段的補集（24:00 為當日結尾）。
+- 測試預載（Given）一律以 v3 寫入；`裝置上保存的是 001／002 版本格式…` 以舊格式（無 `tier_rank`／`availability`，有 `unavailable_slots`）預載，開啟後 UI 須依遷移規則讀成 3，下次保存才以 3 寫回。
+
+### 時段頁 `#/slots`：小時格子（新增）
+
+| 定位點 | 屬性 | 說明 | 使用檔 |
+| --- | --- | --- | --- |
+| `data-testid=hour-cell`（`<button>`） | `data-date`、`data-hour`（0–23）、`data-state=free|busy|partial` | 每個已選取日期各有 24 格（選取日期後才渲染該日的 24 格）；可見文字含 `有空`／`沒空`／`部分沒空`（不得只靠顏色，三種文字互不相同）；點擊恰好一次：有空→沒空、部分沒空→沒空、沒空→有空；選取多日時，在任一被選日期的格子點擊，所有被選日期的同一小時各自依自身狀態切換 | 時段、shared steps |
+| 沿用 `day-cell`、`slot-item`、`slot-range` | | 小時格子與不可看時段編輯同一份資料：`slot-item` 列出有空時段的補集；整天有空的日期沒有 `slot-item`；整天沒空顯示 `整天不可看` | 時段、shared steps |
+
+### 選片頁 `#/pick`：層內順序檢視（新增）
+
+| 定位點 | 屬性 | 說明 | 使用檔 |
+| --- | --- | --- | --- |
+| `data-testid=tier-order-group` | `data-tier=must|want|maybe` | 三層各一個容器（可無影片）；容器內 `tier-order-item` 依層內名次由前到後排列 | 選片、shared、分享與保存 steps |
+| `data-testid=tier-order-item` | `data-title=<片名>` | 該層每部已標記影片一項 | 同上 |
+| button `上移`／`下移`（item 內，accessible name 完全相符） | 層內第一位的 `上移`、最後一位的 `下移` 為 `disabled`；點擊與相鄰者互換名次並立即更新畫面與保存 | 兩人模式也只調整自己的順序 | 選片 steps |
+| 既有 `film-card` 的層級按鈕 | 新標記或改層的影片排在目標層最後 | | 選片 steps |
+
+### 行程頁 `#/itinerary`：一起／自己、篩選、未排入必看片（新增／改版）
+
+| 定位點 | 屬性 | 說明 | 使用檔 |
+| --- | --- | --- | --- |
+| `data-testid=participant-tag`（位於 `itinerary-entry` 內） | 文字完全等於 `一起` 或 `{名字} 自己` | 僅兩人模式每一列都有；個人模式完全不渲染 | shared、分享與保存 steps |
+| `data-testid=itinerary-filter` | 內含 `role=radio` 三個，順序與名稱（exact）：`全部`、`只看自己`、`只看同伴`；選中者 `aria-checked=true`，預設 `全部` | 僅兩人模式渲染；個人模式不得有此元素、也不得有同名 radio；篩選是畫面狀態，不保存、不觸發重新排程 | 行程 steps |
+| 篩選語意 | `只看自己` = 一起與{自己} 自己；`只看同伴` = 一起與{同伴} 自己 | 每列層級色塊與 `data-tier` 顯示「視角」那個人的層級：預設視角為自己；`只看同伴` 為同伴；`全部` 中同伴自己看的列顯示同伴層級 | shared steps |
+| `data-testid=unscheduled-owner`（位於未排入 `li` 內） | 文字為名字（如 `Fischer`） | 僅兩人模式；標明這部必看是誰的。`li` 其餘文字（扣掉此元素後）仍為 `<片名>：<原因>` | 行程 steps |
+
+### 搶票頁 `#/tickets`（改版）
+
+| 定位點 | 說明 |
+| --- | --- |
+| `data-testid=ticket-quantity` | 兩人模式每列（pending 與 done 區）：一起看 `買 2 張`、自己看 `買 1 張`；清單只列自己行程中的場次（同伴自己看的片不出現）；個人模式不得出現任何 `買 N 張` |
+
+### 分享頁（改版）
+
+| 定位點 | 說明 |
+| --- | --- |
+| 個人／合併結果連結 payload | `schema_version: 3`；personal：`{ kind, schema_version: 3, sender_name, state }`；state 含 `availability`、分層 `tier_rank`；版本 1、2 的連結開啟時轉成 3；版本 4 以上顯示 `這個分享連結無法讀取，請在原裝置重新產生`，不出現 dialog、不改本機保存 |
+
+### 已移除的 002 定位點（003）
+
+- `single-side-stats`（行程頁單方標記統計）與其「只有 … 標記」文字。
+- 行程頁 `兩人沒有共同標記的片，先到選片頁一起挑` 空狀態提示。
+- 搶票頁「每列 `買 2 張`」（改為一起 2／自己 1，見上）。

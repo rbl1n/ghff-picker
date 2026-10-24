@@ -1,9 +1,9 @@
 import { getCtx, Given, When, Then } from "./planner-a-helpers";
 import { expect } from "@playwright/test";
 import type { Catalog, Session, TicketListItem, UserState } from "../../src/domain/types";
-import { cinemaOfVenue, effectiveState, type PlannerWorld } from "./planner-world";
+import { cinemaOfVenue, type PlannerWorld } from "./planner-world";
+import { computeTicketList } from "./planner-duo-helpers";
 import { hhmmToMin, minToHhmm } from "./tables";
-import { buildTicketList } from "../../src/domain/tickets";
 
 /** 與 planner-a-helpers 共用同一個 module 層級 ctx（每個 scenario 的 Before 重置） */
 export function getWorld(): PlannerWorld {
@@ -27,8 +27,8 @@ export function need(world: PlannerWorld): { catalog: Catalog; state: UserState 
 export function rebuildList(world: PlannerWorld): TicketListItem[] {
   const { catalog } = need(world);
   if (!world.lastResult) throw new Error("尚未排程");
-  // 有同伴時以兩人合併結果加上自己的搶票標記為輸入
-  const list = buildTicketList(catalog, effectiveState(world), world.lastResult.itinerary);
+  // 有同伴時清單只含觀眾自己的行程，並帶兩人行程與同伴資料（搶票標記只屬於自己）
+  const list = computeTicketList(world, catalog);
   setTicketList(world, list);
   return list;
 }

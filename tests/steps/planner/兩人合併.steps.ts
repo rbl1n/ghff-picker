@@ -1,131 +1,166 @@
 // planner/兩人合併 stepdefs（specs/truth/features/planner/兩人合併/dsl.md）
+// 003：兩人各自片單同時排程。每人的可看、相容、每日上限只約束自己；兩人排入同一場次即為「一起」。
 import { expect } from "@playwright/test";
-import { mergePartner, singleSideCounts } from "../../../src/domain/merge";
-import type { MergedView } from "../../../src/domain/types";
-import {
-  When,
-  Then,
-  TIER_LABEL_TO_ENUM,
-  ensureState,
-  getCtx,
-  parseSlotText,
-  slotToText,
-  titleOf,
-} from "../../support/planner-a-helpers";
-import { catalogOrEmpty } from "../../support/planner-duo-helpers";
-import { TIER_ENUM_TO_LABEL } from "../../support/tables";
+import type { DuoItineraryEntry, ItineraryParticipant, Session, Tier } from "../../../src/domain/types";
+import { Then, absMin, compareCounts, compareRanks, enumerateFeasible, ensureState, getCtx, objectiveFrom, oracleAvailable, pairwiseCompatible, requireCatalog, sessionById, titleOf, type Objective } from "../../support/planner-a-helpers";
+import { ensurePartner } from "../../support/planner-duo-helpers";
+import { minToHhmm } from "../../support/tables";
 
 type Table = { hashes(): Record<string, string>[] };
 
-/** 雙方原始設定（自己的分層、熱門、不可看時段、每日上限、手動順序、搶票標記，及同伴資料）的 JSON 快照 */
-function originals(): string {
-  const { state, partner } = getCtx().world;
-  return JSON.stringify({
-    own: state && {
-      film_preferences: state.film_preferences,
-      unavailable_slots: state.unavailable_slots,
-      daily_limit: state.daily_limit,
-      manual_order: state.manual_order,
-      ticket_marks: state.ticket_marks,
-    },
-    partner,
+const PARTICIPANT_TO_ENUM: Record<string, ItineraryParticipant> = { 一起: "together", 觀眾自己: "self", 同伴自己: "partner" };
+const PARTICIPANT_ORDER: Record<ItineraryParticipant, number> = { together: 0, self: 1, partner: 2 };
+const PARTICIPANT_LABEL: Record<ItineraryParticipant, string> = { together: "一起", self: "觀眾自己", partner: "同伴自己" };
+
+function duoEntries(): DuoItineraryEntry[] {
+  const duo = getCtx().world.lastDuo;
+  expect(duo, "尚未執行兩人排程（world 沒有同伴資料時本句型不適用）").not.toBeNull();
+  return duo!.entries;
+}
+
+/** 某人的場次：觀眾 = 一起 + 觀眾自己；同伴 = 一起 + 同伴自己 */
+function sessionsOf(entries: DuoItineraryEntry[], who: "self" | "partner"): Session[] {
+  return entries
+    .filter((e) => e.participant === "together" || e.participant === who)
+    .map((e) => sessionById(e.session_id));
+}
+
+// 兩人行程依日期排列如下：
+Then("兩人行程依日期排列如下：", async ({}, dataTable: Table) => {
+  const catalog = requireCatalog();
+  const world = getCtx().world;
+  const entries = duoEntries();
+  const filmOrder = new Map(catalog.films.map((f, i) => [f.film_id, i]));
+  const actual = entries.map((e) => {
+    const s = sessionById(e.session_id);
+    return { e, s, 日期: s.date, 開演: minToHhmm(s.start_min), 片名: titleOf(s.film_id), 參與者: PARTICIPANT_LABEL[e.participant] };
   });
-}
 
-function merged(): MergedView {
-  const m = getCtx().world.lastMerged;
-  expect(m, "尚未查看兩人合併結果").not.toBeNull();
-  return m!;
-}
+  // 呈現結果：順序依日期、開演時間，同一開演時間依 一起、觀眾自己、同伴自己，再依影片首次出現順序
+  for (let i = 1; i < actual.length; i++) {
+    const a = actual[i - 1];
+    const b = actual[i];
+    const key = (x: typeof a) => [absMin(x.s.date, x.s.start_min), PARTICIPANT_ORDER[x.e.participant], filmOrder.get(x.s.film_id) ?? 0];
+    const ka = key(a);
+    const kb = key(b);
+    const cmp = ka[0] - kb[0] || ka[1] - kb[1] || ka[2] - kb[2];
+    expect(cmp, `兩人行程須依日期、開演、參與者、影片順序排列（第 ${i} 與 ${i + 1} 列）`).toBeLessThanOrEqual(0);
+  }
+  const expected = dataTable.hashes();
+  expect(actual.length, "兩人行程列數").toBe(expected.length);
+  expected.forEach((r, i) => {
+    const a = actual[i];
+    expect(a.日期, `第 ${i + 1} 列 日期`).toBe(r["日期"].trim());
+    expect(a.開演, `第 ${i + 1} 列 開演`).toBe(minToHhmm(toMin(r["開演"])));
+    expect(a.片名, `第 ${i + 1} 列 片名`).toBe(r["片名"].trim());
+    expect(PARTICIPANT_TO_ENUM[r["參與者"].trim()], `未知參與者 ${r["參與者"]}`).toBeTruthy();
+    expect(a.參與者, `第 ${i + 1} 列 參與者`).toBe(r["參與者"].trim());
+  });
 
-function query(): MergedView {
-  const world = getCtx().world;
-  if (!world.partner) throw new Error("世界沒有同伴資料：兩人合併 When 在個人模式下不適用");
-  const view = mergePartner(catalogOrEmpty(), ensureState(), world.partner);
-  // singleSideCounts 與 mergePartner 的結果須一致
-  const counts = singleSideCounts(catalogOrEmpty(), ensureState(), world.partner);
-  return { ...view, single_side_counts: counts };
-}
-
-// 觀眾查看兩人合併結果
-When("觀眾查看兩人合併結果", async () => {
-  const world = getCtx().world;
-  ensureState(); // 沒有 Given 自己設定時先補預設狀態，避免查詢時才建立而被誤判為寫入
-  world.baseline = originals();
-  world.lastMerged = query();
-  expect(originals(), "查看合併結果不得寫入使用者狀態或同伴資料").toBe(world.baseline);
+  // 權威狀態：每人每部片至多一列；一起的場次對兩人都可看、都相容
+  const selfSessions = sessionsOf(entries, "self");
+  const partnerSessions = sessionsOf(entries, "partner");
+  expect(new Set(selfSessions.map((s) => s.film_id)).size, "觀眾每部片至多一列").toBe(selfSessions.length);
+  expect(new Set(partnerSessions.map((s) => s.film_id)).size, "同伴每部片至多一列").toBe(partnerSessions.length);
+  expect(pairwiseCompatible(selfSessions), "觀眾自己的行程須兩兩相容").toBe(true);
+  expect(pairwiseCompatible(partnerSessions), "同伴的行程須兩兩相容").toBe(true);
+  for (const e of entries.filter((x) => x.participant === "together")) {
+    const s = sessionById(e.session_id);
+    expect(oracleAvailable(s, ensureState().availability), `一起的場次 ${s.date} ${titleOf(s.film_id)} 觀眾須有空`).toBe(true);
+    expect(oracleAvailable(s, world.partner?.availability), `一起的場次 ${s.date} ${titleOf(s.film_id)} 同伴須有空`).toBe(true);
+  }
+  // 不該發生：同一場次不得同時標觀眾自己與同伴自己
+  expect(new Set(entries.map((e) => e.session_id)).size, "同一場次只能有一列").toBe(entries.length);
 });
 
-// 合併後參與排程的影片如下：
-Then("合併後參與排程的影片如下：", async ({}, dataTable: Table) => {
-  const m = merged();
-  const rows = dataTable.hashes();
-  const hasTier = rows.length > 0 && "層級" in rows[0];
-  const hasHot = rows.length > 0 && "熱門" in rows[0];
-  const byTitle = new Map(m.film_preferences.map((p) => [titleOf(p.film_id), p]));
-  expect([...byTitle.keys()].sort(), "合併後影片集合須與表格完全一致").toEqual(rows.map((r) => r["片名"].trim()).sort());
-  for (const r of rows) {
-    const p = byTitle.get(r["片名"].trim())!;
-    if (hasTier) {
-      expect(TIER_ENUM_TO_LABEL[p.tier], `${r["片名"]} 合併層級`).toBe(r["層級"].trim());
-      expect(TIER_LABEL_TO_ENUM[r["層級"].trim()]).toBe(p.tier);
+function toMin(t: string): number {
+  const [h, m] = t.trim().split(":").map(Number);
+  return h * 60 + m;
+}
+
+interface DuoObjective {
+  counts: [number, number, number];
+  self: Objective;
+  partner: Objective;
+  together: number;
+  stars: number;
+}
+
+function duoObjective(selfSet: { s: Session; tier: Tier; rank: number }[], partnerSet: { s: Session; tier: Tier; rank: number }[]): DuoObjective {
+  const toObj = (set: typeof selfSet) => objectiveFrom(set.map((c) => ({ tier: c.tier, rank: c.rank, star: c.s.marks.includes("guest_attending") })));
+  const self = toObj(selfSet);
+  const partner = toObj(partnerSet);
+  const ids = new Set(selfSet.map((c) => c.s.session_id));
+  return {
+    counts: [0, 1, 2].map((i) => self.counts[i] + partner.counts[i]) as [number, number, number],
+    self,
+    partner,
+    together: partnerSet.filter((c) => ids.has(c.s.session_id)).length,
+    stars: self.stars + partner.stars,
+  };
+}
+
+/** >0 表示 a 較佳。依兩人排程目標：1～3 項字典序；第 4 項兩人皆不劣且至少一人較佳者勝、否則視為相同；再比一起看場次數、★ 合計。 */
+function compareDuo(a: DuoObjective, b: DuoObjective): number {
+  const c = compareCounts({ counts: a.counts, ranks: [[], [], []], stars: 0 }, { counts: b.counts, ranks: [[], [], []], stars: 0 });
+  if (c !== 0) return c;
+  const rs = compareRanks(a.self, b.self);
+  const rp = compareRanks(a.partner, b.partner);
+  if (rs >= 0 && rp >= 0 && (rs > 0 || rp > 0)) return 1;
+  if (rs <= 0 && rp <= 0 && (rs < 0 || rp < 0)) return -1;
+  return a.together - b.together || a.stars - b.stars;
+}
+
+// 兩人行程的排程目標不劣於窮舉所有可行組合
+Then("兩人行程的排程目標不劣於窮舉所有可行組合", async () => {
+  const catalog = requireCatalog();
+  const state = ensureState();
+  const partner = ensurePartner();
+  const entries = duoEntries();
+
+  // 權威狀態：行程本身符合每人的限制
+  const rankOf = (prefs: { film_id: string; tier: Tier; tier_rank?: number }[], filmId: string) => prefs.find((p) => p.film_id === filmId);
+  const toSet = (sessions: Session[], prefs: { film_id: string; tier: Tier; tier_rank?: number }[]) =>
+    sessions.map((s) => {
+      const p = rankOf(prefs, s.film_id);
+      expect(p, `${titleOf(s.film_id)} 必須是該人標記過的影片`).toBeTruthy();
+      return { s, tier: p!.tier, rank: p!.tier_rank ?? Number.MAX_SAFE_INTEGER };
+    });
+  const selfSessions = sessionsOf(entries, "self");
+  const partnerSessions = sessionsOf(entries, "partner");
+  for (const [who, sessions, avail, limit] of [
+    ["觀眾", selfSessions, state.availability, state.daily_limit],
+    ["同伴", partnerSessions, partner.availability, partner.daily_limit],
+  ] as const) {
+    expect(new Set(sessions.map((s) => s.film_id)).size, `${who}每部片至多一場`).toBe(sessions.length);
+    expect(pairwiseCompatible(sessions), `${who}的行程須兩兩相容`).toBe(true);
+    for (const s of sessions) expect(oracleAvailable(s, avail), `${who}的場次 ${s.date} ${titleOf(s.film_id)} 須有空`).toBe(true);
+    if (limit !== null) {
+      const perDay = new Map<string, number>();
+      for (const s of sessions) perDay.set(s.date, (perDay.get(s.date) ?? 0) + 1);
+      for (const [d, n] of perDay) expect(n, `${who} ${d} 不得超過每日上限`).toBeLessThanOrEqual(limit);
     }
-    if (hasHot) expect(p.is_hot, `${r["片名"]} 合併熱門`).toBe((r["熱門"] ?? "").trim() === "是");
   }
-  // 權威狀態與再讀確認
-  expect(originals(), "自己與同伴原始設定不得被改動").toBe(getCtx().world.baseline);
-  const again = query();
-  expect(JSON.stringify(again.film_preferences)).toBe(JSON.stringify(m.film_preferences));
-});
+  const actual = duoObjective(toSet(selfSessions, state.film_preferences), toSet(partnerSessions, partner.film_preferences));
 
-// 合併後的不可看時段如下：
-Then("合併後的不可看時段如下：", async ({}, dataTable: Table) => {
-  const m = merged();
-  const expected = dataTable.hashes().map((r) => `${r["日期"].trim()} ${slotToText(parseSlotText(r["日期"].trim(), r["時段"]))}`);
-  const actual = m.unavailable_slots.map((s) => `${s.date} ${slotToText(s)}`);
-  expect([...actual].sort(), "合併不可看時段恰為兩人時段聯集（列順序不比對）").toEqual([...expected].sort());
-  expect(originals(), "自己與同伴原始不可看時段不得被改動").toBe(getCtx().world.baseline);
-});
-
-// 合併後的每日上限為 "{上限}"
-Then("合併後的每日上限為 {string}", async ({}, limit: string) => {
-  const m = merged();
-  const expected = limit.trim() === "不設上限" ? null : Number(limit);
-  expect(m.daily_limit, "合併每日上限").toBe(expected);
-  expect(originals(), "自己與同伴原始每日上限不得被改動").toBe(getCtx().world.baseline);
-});
-
-// 單方標記的影片數如下：
-Then("單方標記的影片數如下：", async ({}, dataTable: Table) => {
-  const m = merged();
-  const expected = { 自己: 0, 同伴: 0 } as Record<string, number>;
-  for (const r of dataTable.hashes()) {
-    const who = r["標記者"].trim();
-    if (who !== "自己" && who !== "同伴") throw new Error(`未知標記者: ${who}`);
-    expected[who] = Number(r["部數"]);
-  }
-  expect(m.single_side_counts.self, "只有自己標記的影片數").toBe(expected["自己"]);
-  expect(m.single_side_counts.partner, "只有同伴標記的影片數").toBe(expected["同伴"]);
-  // 權威狀態：單方標記的影片不在合併後參與排程的影片中
-  const world = getCtx().world;
-  const catalogIds = new Set(catalogOrEmpty().films.map((f) => f.film_id));
-  const mergedIds = new Set(m.film_preferences.map((p) => p.film_id));
-  const selfIds = new Set(ensureState().film_preferences.map((p) => p.film_id));
-  const partnerIds = new Set(world.partner!.film_preferences.map((p) => p.film_id));
-  for (const id of catalogIds) {
-    if (selfIds.has(id) !== partnerIds.has(id)) {
-      expect(mergedIds.has(id), `單方標記的 ${titleOf(id)} 不得參與排程`).toBe(false);
+  // 呈現結果：窮舉兩人所有可行組合（各自可行，兩人排入同一場次即為一起），找不到更好的
+  const A = enumerateFeasible({ catalog, film_preferences: state.film_preferences, availability: state.availability, daily_limit: state.daily_limit });
+  const B = enumerateFeasible({ catalog, film_preferences: partner.film_preferences, availability: partner.availability, daily_limit: partner.daily_limit });
+  for (const a of A) {
+    for (const b of B) {
+      const o = duoObjective(a, b);
+      expect(compareDuo(o, actual), `存在更好的兩人組合：觀眾 ${a.map((c) => titleOf(c.s.film_id) + c.s.date).join("、")} / 同伴 ${b.map((c) => titleOf(c.s.film_id) + c.s.date).join("、")}`).toBeLessThanOrEqual(0);
     }
   }
 });
 
-// 雙方原始設定與合併前相同
-Then("雙方原始設定與合併前相同", async () => {
+// 雙方原始設定與排程前相同
+Then("雙方原始設定與排程前相同", async () => {
   const world = getCtx().world;
-  expect(world.baseline, "尚未記下基準快照（缺少查看合併結果）").not.toBeNull();
-  expect(originals(), "雙方原始設定須等於合併前快照").toBe(world.baseline);
-  // 不該發生：合併不得把同伴的分層或時段寫進自己的使用者狀態
-  const selfIds = new Set(ensureState().film_preferences.map((p) => p.film_id));
-  const before = JSON.parse(world.baseline!).own.film_preferences.map((p: { film_id: string }) => p.film_id);
-  expect([...selfIds].sort()).toEqual([...before].sort());
+  expect(world.baseline, "尚未記下排程前快照（缺少 When 觀眾執行排程）").not.toBeNull();
+  const now = JSON.stringify({ own: ensureState(), partner: world.partner });
+  expect(now, "自己與同伴的分層、層內排序、有空時段、每日上限、手動順序、搶票標記須等於排程前快照").toBe(world.baseline);
+  // 不該發生：不得把同伴的分層或時段寫進自己的使用者狀態
+  const own = JSON.parse(world.baseline!).own as { film_preferences: { film_id: string }[] };
+  expect(ensureState().film_preferences.map((p) => p.film_id).sort()).toEqual(own.film_preferences.map((p) => p.film_id).sort());
 });

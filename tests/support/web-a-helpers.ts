@@ -4,6 +4,7 @@ import type { Catalog, Session, Tier, UserState } from "../../src/domain/types";
 import { STORAGE_KEY } from "../../src/state/storage";
 import { cinemaOfVenue } from "./planner-world";
 import { hhmmToMin, marksFromSymbols, minToHhmm, TIER_LABEL_TO_ENUM } from "./tables";
+import { availFromSlots, availOf, legacyState, prefsOf, ranked } from "./web-003-helpers";
 
 /* ------------------------------------------------------------------ world */
 
@@ -24,6 +25,8 @@ export interface WebWorld {
   /** 是否已經開啟過網站（之後 Given 要直接寫 localStorage 並重新載入） */
   opened: boolean;
   routesReady: boolean;
+  /** 非 null = 預載舊版格式（1 = 001、2 = 002）的保存內容，不經 003 的寫入程式 */
+  legacyFormat: 1 | 2 | null;
 }
 
 export function createWebWorld(): WebWorld {
@@ -36,6 +39,7 @@ export function createWebWorld(): WebWorld {
     marks: [],
     opened: false,
     routesReady: false,
+    legacyFormat: null,
   };
 }
 
@@ -132,39 +136,49 @@ export function slotText(slot: { start_min: number | null; end_min: number | nul
     : `${minToHhmm(slot.start_min)}–${minToHhmm(slot.end_min)}`;
 }
 
+/** schema_version 3 的空狀態（003：有空時段取代不可看時段、影片分層帶層內名次） */
 export function defaultState(): UserState {
   return {
-    schema_version: 1,
+    schema_version: 3,
     daily_limit: null,
     manual_order: null,
     updated_at: "2026-10-01T00:00:00+08:00",
     film_preferences: [],
-    unavailable_slots: [],
+    availability: [],
     ticket_marks: [],
-  };
+  } as unknown as UserState;
 }
 
-/** 由 Given 累積的資料組出預載使用者狀態 */
+/** 由 Given 累積的資料組出預載使用者狀態（schema_version 3：層內名次依列順序、不可看時段從有空時段扣除） */
 export function buildState(world: WebWorld): UserState {
-  const s = defaultState();
+  const s = defaultState() as unknown as Record<string, unknown>;
   s.daily_limit = world.dailyLimit;
-  s.film_preferences = world.prefs.map((p) => ({ film_id: filmIdOf(world, p.title), tier: p.tier, is_hot: p.is_hot }));
-  s.unavailable_slots = world.slots.map((x) => ({ ...x }));
+  s.film_preferences = ranked(world.prefs.map((p) => ({ film_id: filmIdOf(world, p.title), tier: p.tier, is_hot: p.is_hot })));
+  s.availability = availFromSlots(world.slots);
   s.ticket_marks = world.marks.map((m) => ({
     session_id: sessionOf(world, m.title, m.sessionText).session_id,
     result: m.result,
   }));
-  return s;
+  return s as unknown as UserState;
+}
+
+/** 實際預載進本機保存的內容：舊版格式 Given 之後為 001／002 格式，否則為 schema_version 3 */
+export function storageStateOf(world: WebWorld): UserState {
+  if (world.legacyFormat === null) return buildState(world);
+  return legacyState(world.legacyFormat, {
+    prefs: world.prefs.map((p) => ({ film_id: filmIdOf(world, p.title), tier: p.tier, is_hot: p.is_hot })),
+    slots: world.slots,
+    dailyLimit: world.dailyLimit,
+    marks: buildState(world).ticket_marks,
+  });
 }
 
 function sortedNorm(s: UserState) {
   return {
     daily_limit: s.daily_limit,
     manual_order: s.manual_order,
-    film_preferences: [...s.film_preferences].sort((a, b) => a.film_id.localeCompare(b.film_id)),
-    unavailable_slots: [...s.unavailable_slots].sort((a, b) =>
-      `${a.date}${a.start_min}`.localeCompare(`${b.date}${b.start_min}`),
-    ),
+    film_preferences: [...prefsOf(s)].sort((a, b) => a.film_id.localeCompare(b.film_id)),
+    availability: [...availOf(s)].sort((a, b) => a.date.localeCompare(b.date)),
     ticket_marks: [...s.ticket_marks].sort((a, b) => a.session_id.localeCompare(b.session_id)),
   };
 }
@@ -194,7 +208,7 @@ async function prepare(page: Page, world: WebWorld): Promise<void> {
   const hasState =
     world.prefs.length > 0 || world.slots.length > 0 || world.dailyLimit !== null || world.marks.length > 0;
   if (hasState) {
-    const json = JSON.stringify(buildState(world));
+    const json = JSON.stringify(storageStateOf(world));
     await page.addInitScript(
       ([key, value]) => {
         if (window.localStorage.getItem(key) === null) window.localStorage.setItem(key, value);
@@ -226,7 +240,7 @@ export async function openTab(page: Page, world: WebWorld, label: TabLabel): Pro
 /** Given 於頁面已開啟後才補寫狀態：直接寫 localStorage 後重新載入，回到指定分頁 */
 export async function reapplyState(page: Page, world: WebWorld, backTo: TabLabel): Promise<void> {
   if (!world.opened) return;
-  const json = JSON.stringify(buildState(world));
+  const json = JSON.stringify(storageStateOf(world));
   await page.evaluate(([k, v]) => window.localStorage.setItem(k, v), [STORAGE_KEY, json] as const);
   await page.reload();
   if (!page.url().includes(`#/${TAB_HASH[backTo]}`)) await navLink(page, backTo).click();

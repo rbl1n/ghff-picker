@@ -1,12 +1,12 @@
 // web 兩人模式（002）專用 helper。不修改既有 support 檔的行為；只放 Arrange / 讀取 / 比對工具，不放產品邏輯。
 import { expect, type Locator, type Page } from "@playwright/test";
 import LZString from "lz-string";
-import type { Catalog, FilmPreference, PartnerData, Tier, UnavailableSlot, UserState } from "../../src/domain/types";
-import { mergePartner } from "../../src/domain/merge";
+import type { FilmPreference, PartnerData, Tier, UserState } from "../../src/domain/types";
 import { SHARE_HASH_PREFIX } from "../../src/state/share";
 import { STORAGE_KEY } from "../../src/state/storage";
 import { buildState, norm, parseSlotText, slotText, type WebWorld } from "./web-a-helpers";
 import { TIER_ENUM_TO_LABEL } from "./tables";
+import { availFromSlots, availOf, complementLines, prefsOf, ranked, type DayAvail, type PrefV3 } from "./web-003-helpers";
 
 /* ------------------------------------------------------------- 常數 */
 
@@ -23,8 +23,8 @@ export interface PendingPartner {
 }
 
 export interface SelfSnapshot {
-  film_preferences: FilmPreference[];
-  unavailable_slots: UnavailableSlot[];
+  film_preferences: PrefV3[];
+  availability: DayAvail[];
   daily_limit: number | null;
 }
 
@@ -79,9 +79,10 @@ export function pendingToPartner(world: WebWorld, name: string): PartnerData {
   return {
     display_name: name,
     daily_limit: p.dailyLimit,
-    film_preferences: p.prefs.map((x) => ({ film_id: partnerFilmId(world, x.title), tier: x.tier, is_hot: x.is_hot })),
-    unavailable_slots: p.slots.map((s) => ({ ...s })),
-  };
+    // 003：層內名次依 Given 列順序；不可看時段從有空時段扣除
+    film_preferences: ranked(p.prefs.map((x) => ({ film_id: partnerFilmId(world, x.title), tier: x.tier, is_hot: x.is_hot }))),
+    availability: availFromSlots(p.slots),
+  } as unknown as PartnerData;
 }
 
 export function addPendingSlots(world: WebWorld, rows: Record<string, string>[]): void {
@@ -90,17 +91,17 @@ export function addPendingSlots(world: WebWorld, rows: Record<string, string>[])
 
 /* ------------------------------------------------------ 自己設定的基準快照 */
 
-function sortPrefs(a: FilmPreference[]): FilmPreference[] {
+function sortPrefs<T extends { film_id: string }>(a: T[]): T[] {
   return [...a].sort((x, y) => x.film_id.localeCompare(y.film_id));
 }
-function sortSlots(a: UnavailableSlot[]): UnavailableSlot[] {
-  return [...a].sort((x, y) => `${x.date}${x.start_min}${x.end_min}`.localeCompare(`${y.date}${y.start_min}${y.end_min}`));
+function sortAvail(a: DayAvail[]): DayAvail[] {
+  return [...a].sort((x, y) => x.date.localeCompare(y.date));
 }
 
-export function selfSnapshotOf(s: { film_preferences: FilmPreference[]; unavailable_slots: UnavailableSlot[]; daily_limit: number | null }): SelfSnapshot {
+export function selfSnapshotOf(s: UserState | SelfSnapshot): SelfSnapshot {
   return {
-    film_preferences: sortPrefs(s.film_preferences),
-    unavailable_slots: sortSlots(s.unavailable_slots),
+    film_preferences: sortPrefs(prefsOf(s)),
+    availability: sortAvail(availOf(s)),
     daily_limit: s.daily_limit,
   };
 }
@@ -112,11 +113,11 @@ export function baselineOf(world: WebWorld): SelfSnapshot {
 
 /* ------------------------------------------------------------ 預載兩人模式 */
 
-/** 由 world 累積的自己設定 + 同伴資料組出 schema_version 2 的預載狀態 */
+/** 由 world 累積的自己設定 + 同伴資料組出 schema_version 3 的預載狀態 */
 export function buildDuoState(world: WebWorld): UserState {
   const c = duoOf(world);
   const s = buildState(world);
-  s.schema_version = 2;
+  s.schema_version = 3;
   s.self_name = c.selfName;
   s.partner = c.preloaded;
   return s;
@@ -174,19 +175,19 @@ export function decodePayload(url: string): { kind?: string; state?: UserState; 
   return JSON.parse(json ?? "null");
 }
 
-/** 以待載入同伴資料編成「個人分享連結」（相對網址，由 page.goto 以 baseURL 解析） */
+/** 以待載入同伴資料編成「個人分享連結」（schema_version 3；相對網址，由 page.goto 以 baseURL 解析） */
 export function buildPersonalLink(world: WebWorld, senderName: string | null): string {
-  const p = pendingToPartner(world, senderName ?? "");
-  const state: UserState = {
-    schema_version: 2,
+  const p = pendingToPartner(world, senderName ?? "") as unknown as { daily_limit: number | null; film_preferences: PrefV3[]; availability: DayAvail[] };
+  const state = {
+    schema_version: 3,
     daily_limit: p.daily_limit,
     manual_order: null,
     updated_at: "2026-10-24T00:00:00+08:00",
     film_preferences: p.film_preferences,
-    unavailable_slots: p.unavailable_slots,
+    availability: p.availability,
     ticket_marks: [],
   };
-  return `/${SHARE_HASH_PREFIX}${encodePayload({ kind: "personal", schema_version: 2, sender_name: senderName, state })}`;
+  return `/${SHARE_HASH_PREFIX}${encodePayload({ kind: "personal", schema_version: 3, sender_name: senderName, state })}`;
 }
 
 /** 001 版本格式的個人分享連結：內容為 schema_version 1 的使用者狀態，沒有 kind 欄位 */
@@ -240,35 +241,9 @@ export function partnerPrefLines(world: WebWorld, partner: PartnerData | null | 
     .sort();
 }
 
+/** 同伴有空時段的補集（不可看時段），`日期|時段` */
 export function partnerSlotLines(partner: PartnerData | null | undefined): string[] {
-  return [...(partner?.unavailable_slots ?? [])].map((s) => `${s.date}|${slotText(s)}`).sort();
-}
-
-/** 預期單方標記影片數：只有單方有分層（且存在於場次快照）的片 */
-export function singleSideTitles(catalog: Catalog, state: UserState): { self: string[]; partner: string[] } {
-  const inCatalog = new Set(catalog.films.map((f) => f.film_id));
-  const title = (id: string) => catalog.films.find((f) => f.film_id === id)!.title;
-  const mine = new Set(state.film_preferences.map((p) => p.film_id));
-  const theirs = new Set((state.partner?.film_preferences ?? []).map((p) => p.film_id));
-  return {
-    self: [...mine].filter((id) => inCatalog.has(id) && !theirs.has(id)).map(title),
-    partner: [...theirs].filter((id) => inCatalog.has(id) && !mine.has(id)).map(title),
-  };
-}
-
-/**
- * 排程輸入：沒有同伴時原樣回傳；有同伴時以合併結果取代分層、不可看時段、每日上限
- * （手動順序與搶票標記仍是自己的）。供既有 web steps 的「權威狀態」比對使用。
- */
-export function planStateOf(catalog: Catalog, state: UserState): UserState {
-  if (!state.partner) return state;
-  const merged = mergePartner(catalog, state, state.partner);
-  return {
-    ...state,
-    film_preferences: merged.film_preferences,
-    unavailable_slots: merged.unavailable_slots,
-    daily_limit: merged.daily_limit,
-  };
+  return complementLines(availOf(partner)).sort();
 }
 
 /* ------------------------------------------------- 行程／搶票清單快照 */
@@ -277,6 +252,8 @@ export interface ItineraryRow {
   date: string;
   tier: string;
   text: string;
+  /** 「一起」或「{名字} 自己」；個人模式沒有標示 = 空字串 */
+  participant: string;
 }
 
 export async function snapshotItinerary(page: Page): Promise<ItineraryRow[]> {
@@ -287,6 +264,7 @@ export async function snapshotItinerary(page: Page): Promise<ItineraryRow[]> {
       date: e.getAttribute("data-date") ?? "",
       tier: e.getAttribute("data-tier") ?? "",
       text: (e.textContent ?? "").replace(/\s+/g, " ").trim(),
+      participant: (e.querySelector('[data-testid="participant-tag"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
     })),
   );
 }
@@ -313,18 +291,16 @@ export const setDesktopDuo = (page: Page, d: DesktopDuo): void => void desktopSn
 export const desktopDuo = (page: Page): DesktopDuo | undefined => desktopSnaps.get(page);
 
 export function sameSelfFields(actual: UserState, expected: UserState, label: string): void {
-  expect(sortPrefs(actual.film_preferences), `${label}分層與熱門`).toEqual(sortPrefs(expected.film_preferences));
-  expect(sortSlots(actual.unavailable_slots), `${label}不可看時段`).toEqual(sortSlots(expected.unavailable_slots));
+  expect(sortPrefs(prefsOf(actual)), `${label}分層、層內名次與熱門`).toEqual(sortPrefs(prefsOf(expected)));
+  expect(sortAvail(availOf(actual)), `${label}有空時段`).toEqual(sortAvail(availOf(expected)));
   expect(actual.daily_limit ?? null, `${label}每日上限`).toEqual(expected.daily_limit ?? null);
 }
 
 export function samePartnerFields(actual: UserState, expected: UserState, label: string): void {
   expect(actual.self_name ?? null, `${label}自己名稱`).toEqual(expected.self_name ?? null);
   expect(actual.partner?.display_name ?? null, `${label}同伴名稱`).toEqual(expected.partner?.display_name ?? null);
-  expect(sortPrefs(actual.partner?.film_preferences ?? []), `${label}同伴分層`).toEqual(sortPrefs(expected.partner?.film_preferences ?? []));
-  expect(sortSlots(actual.partner?.unavailable_slots ?? []), `${label}同伴不可看時段`).toEqual(
-    sortSlots(expected.partner?.unavailable_slots ?? []),
-  );
+  expect(sortPrefs(prefsOf(actual.partner)), `${label}同伴分層與層內名次`).toEqual(sortPrefs(prefsOf(expected.partner)));
+  expect(sortAvail(availOf(actual.partner)), `${label}同伴有空時段`).toEqual(sortAvail(availOf(expected.partner)));
   expect(actual.partner?.daily_limit ?? null, `${label}同伴每日上限`).toEqual(expected.partner?.daily_limit ?? null);
 }
 
