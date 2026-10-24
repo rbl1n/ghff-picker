@@ -1,6 +1,7 @@
 import type { Catalog, DuoItineraryEntry, ItineraryParticipant, PartnerData, Session, UnscheduledMustFilm, UserState } from "./types";
 import { assignSessions, explainUnscheduled, makeContext, personInputOf, personalFilmSet, preparePerson } from "./schedule";
 import { sessionStartAbs } from "./time";
+import { availabilityOf, isSessionAvailable } from "./availability";
 
 export interface DuoSchedule {
   entries: DuoItineraryEntry[];
@@ -18,8 +19,15 @@ const PARTICIPANT_ORDER: Record<ItineraryParticipant, number> = { together: 0, s
  */
 export function scheduleDuo(catalog: Catalog, self: UserState, partner: PartnerData): DuoSchedule {
   const ctx = makeContext(catalog);
+  // 004：搶票標記可標在同伴的順序上；落在自己沒空時段的標記（同伴自己看的場次）不拿來固定自己的行程
+  const sessionById = new Map(catalog.sessions.map((s) => [s.session_id, s]));
+  const selfAvail = availabilityOf(self);
+  const ownMarks = self.ticket_marks.filter((m) => {
+    const s = sessionById.get(m.session_id);
+    return !!s && isSessionAvailable(s, selfAvail);
+  });
   const plans = [
-    preparePerson(ctx, personInputOf(self)),
+    preparePerson(ctx, personInputOf({ ...self, ticket_marks: ownMarks })),
     preparePerson(ctx, personInputOf({ ...partner, ticket_marks: [] })),
   ];
   const sets = plans.map((p) => personalFilmSet(p));

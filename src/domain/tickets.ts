@@ -1,4 +1,4 @@
-import type { Catalog, DuoItineraryEntry, ItineraryEntry, ItineraryParticipant, PartnerData, Session, TicketListItem, TicketResult, UserState } from "./types";
+import type { Catalog, ItineraryEntry, Session, TicketListItem, TicketResult, UserState } from "./types";
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { compareSessionsPreferred, isGuestSession } from "./schedule";
@@ -11,18 +11,11 @@ const TIER_RANK = { must: 0, want: 1, maybe: 2 } as const;
  * - backup_session_ids：可看、未被標沒搶到、與行程中其他影片及已搶到場次相容、不使當天超過每日上限；影人出席優先再依時間。
  * 順序：手動順序（manual_order，以索引為固定名次，"" 為空位）優先，其餘依層級、熱門、可看場次少、★、影片順序。
  */
-/** 兩人模式的搶票清單輸入（003）：兩人行程與同伴資料 */
-export interface DuoTicketContext {
-  entries: DuoItineraryEntry[];
-  partner: PartnerData;
-}
-
 export function buildTicketList(
   catalog: Catalog,
   state: UserState,
   itinerary: ItineraryEntry[],
   ticketQuantity?: number,
-  duo?: DuoTicketContext,
 ): TicketListItem[] {
   const cinemaOf = cinemaResolver(catalog);
   const compat = (a: Session, b: Session) => areSessionsCompatibleEitherOrder(a, b, cinemaOf);
@@ -37,19 +30,6 @@ export function buildTicketList(
   const hot = new Map(state.film_preferences.map((p) => [p.film_id, p.is_hot]));
   const myAvail = availabilityOf(state);
 
-  // 兩人模式（003）：一起看的片，備案與換場須兩人都成立；自己看的片只看觀眾
-  const participantOf = new Map<string, ItineraryParticipant>();
-  const partnerSessions: Session[] = [];
-  const partnerAvail = duo ? availabilityOf(duo.partner) : [];
-  if (duo) {
-    for (const e of duo.entries) {
-      participantOf.set(e.session_id, e.participant);
-      const s = sessionById.get(e.session_id);
-      if (s && e.participant !== "self") partnerSessions.push(s);
-    }
-  }
-  const partnerLimit = duo ? duo.partner.daily_limit : null;
-
   const planned = itinerary
     .map((e) => ({ entry: e, session: sessionById.get(e.session_id) }))
     .filter((x): x is { entry: ItineraryEntry; session: Session } => !!x.session);
@@ -62,15 +42,7 @@ export function buildTicketList(
       const otherGot = gotSessions.filter((s) => s.film_id !== filmId);
       const mine = catalog.sessions.filter((s) => s.film_id === filmId);
       const usable = (s: Session) => !missed.has(s.session_id) && otherGot.every((g) => compat(s, g));
-      const participant: ItineraryParticipant | undefined = duo ? participantOf.get(session.session_id) ?? entry.participant : undefined;
-      const together = participant === "together";
-      const partnerOthers = partnerSessions.filter((s) => s.film_id !== filmId);
-      const partnerOk = (s: Session): boolean =>
-        !together ||
-        (isSessionAvailable(s, partnerAvail) &&
-          partnerOthers.every((o) => compat(s, o)) &&
-          (partnerLimit === null || partnerOthers.filter((o) => o.date === s.date).length + 1 <= partnerLimit));
-      const watchableMine = mine.filter((s) => isSessionAvailable(s, myAvail) && partnerOk(s));
+      const watchableMine = mine.filter((s) => isSessionAvailable(s, myAvail));
 
       const backups = watchableMine
         .filter((s) => s.session_id !== session.session_id && usable(s))
@@ -89,8 +61,7 @@ export function buildTicketList(
         backup_session_ids: backups.filter((s) => s.session_id !== current?.session_id).map((s) => s.session_id),
         exhausted: !current,
       };
-      if (duo) item.ticket_quantity = together ? 2 : 1;
-      return { item, tier: entry.tier, star: isGuestSession(session), watchableCount: mine.filter((s) => isSessionAvailable(s, myAvail)).length };
+      return { item, tier: entry.tier, star: isGuestSession(session), watchableCount: watchableMine.length };
     });
 
   rows.sort(
@@ -103,7 +74,7 @@ export function buildTicketList(
   );
 
   const ordered = applyManualOrder(rows.map((r) => r.item), state.manual_order);
-  return ordered.map((item, i) => ({ ...item, order: i + 1, ...(item.ticket_quantity === undefined && ticketQuantity !== undefined ? { ticket_quantity: ticketQuantity } : {}) }));
+  return ordered.map((item, i) => ({ ...item, order: i + 1, ...(ticketQuantity !== undefined ? { ticket_quantity: ticketQuantity } : {}) }));
 }
 
 function applyManualOrder(items: TicketListItem[], manual: string[] | null): TicketListItem[] {

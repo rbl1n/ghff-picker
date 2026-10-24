@@ -204,8 +204,10 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 
 /* 003 行程篩選分段控制與一起標籤 */
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0 0 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg.two{grid-template-columns:repeat(2,1fr)}
+.divsum{margin:0 0 12px;font-weight:700;overflow-wrap:anywhere}
 .segbtn{min-height:44px;border:0;border-right:1px solid var(--line);background:var(--panel);cursor:pointer}
 .segbtn:last-child{border-right:0}
-.segbtn[aria-checked=true]{background:var(--gold);color:var(--gold-ink);font-weight:700}
+.segbtn[aria-checked=true],.segbtn[aria-selected=true]{background:var(--gold);color:var(--gold-ink);font-weight:700}
 .segbtn:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .tag-together{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}

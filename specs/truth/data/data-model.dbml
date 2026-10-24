@@ -97,7 +97,7 @@ Table user_state {
   單一使用者的全部狀態根（FR-022）。
   模式由 partner 是否存在決定：沒有 partner = 個人模式（與 001 完全相同，SC-305）；有 partner = 兩人模式。
   film_preferences、day_availability / available_intervals、daily_limit、ticket_marks 永遠是「自己」的資料；加入同伴 MUST NOT 改動它們（FR-202）。
-  搶票標記與手動順序只屬於自己，不與同伴合併（假設：搶票由一人負責，CL-203）。
+  搶票標記與手動順序只屬於自己，不與同伴合併（假設：搶票由一人負責，CL-203）。004：兩人模式的標記可標在「我的順序」或「{同伴}的順序」的任一列，仍存在本裝置的 ticket_marks（FR-409）；手動順序只在個人模式有效，兩人模式的分工不讀 manual_order（FR-404）。
 
   遷移規則（讀到 schema_version 1 或 2，無論來自 localStorage 或分享連結，自己與 partner 一律相同）：
   1. 不可看時段 → 有空時段：對每個有不可看時段的日期，有空時段 = 00:00–24:00 減去該日全部不可看區間（先合併重疊區間）；整天不可看 = 該日整天沒空（day_availability 有列、available_intervals 無列）；沒有不可看時段的日期不產生任何列（預設全天有空）。
@@ -275,13 +275,35 @@ Table ticket_list_items {
   current_session_id varchar [note: '目前要搶的場次：排定場次，或沒搶到後切換的下一個備案']
   backup_session_ids "session_id[]" [note: '備案：★ 優先、再依時間；排程時須與行程其他場次相容（FR-016），搶票中只需與 got 場次相容（FR-020）。一起看的片，備案須兩人都可看、都不超過各自上限；自己看的片，備案只看自己']
   exhausted boolean [note: '已無可用場次']
-  ticket_quantity int [null, note: '兩人模式：一起看 = 2（顯示「買 2 張」）、自己看 = 1（顯示「買 1 張」）；個人模式 = null（不顯示張數）。FR-312']
+  ticket_quantity int [null, note: '兩人模式：一起看 = 2（顯示「買 2 張」）、自己看 = 1（顯示「買 1 張」）；個人模式 = null（不顯示張數）。FR-312、FR-401']
 
   Note: '''
-  搶票清單（003 起只含「本裝置使用者自己的行程」中的場次，FR-312；同伴自己看的片不在清單）；不含 ⊚ 場次（FR-017）。
-  順序規則見 001 spec「狀態與公式」，以自己的層級與自己標的熱門計算（同伴的熱門不影響）。
+  個人模式：搶票清單 = 自己的行程中的售票場次，順序規則見 001 spec「狀態與公式」，可手動調整。
+  兩人模式（004 起）：搶票清單 = 兩人分工表中「分給本人」的列（我的順序），同伴的列為「{同伴}的順序」（見 ticket_division_items）；一起看的片只在負責人的清單；兩人模式不套用 manual_order。不含 ⊚ 場次（FR-017）。
+  '''
+}
+
+Table ticket_division_items {
+  film_id varchar
+  participant itinerary_participant [note: '一起看 = together；只有一人看 = self 或 partner（相對本裝置）；同一部片兩人各看不同場時是兩筆']
+  owner person_side [note: '負責人（FR-403）：自己看的給本人；一起看的給目前筆數較少者，同筆數給名字（Unicode 碼點順序）較前者；名字相同改比兩人設定指紋。結果與「誰是本裝置使用者」無關（FR-404）']
+  global_order int [note: '整體順序（兩人共用）：層級（一起取較高）→ 熱門（一起取任一人）→ 可看場次少（一起以兩人都可看計）→ ★ → 影片順序（FR-402）']
+  order int [note: '負責人清單內的名次（1 起）']
+  ticket_quantity int [note: '一起 = 2、自己 = 1；每筆訂單一個場次、不需拆單（CL-404）']
+  current_session_id varchar
+  backup_session_ids "session_id[]" [note: '一起看的片，備案須兩人都可看、都不超過各自上限、與各自行程其他場次相容（沿用 FR-312）']
+  exhausted boolean
+
+  indexes {
+    (film_id, owner) [pk]
+  }
+
+  Note: '''
+  兩人分工表（004，衍生、不保存、不改 schema_version）：由兩人行程（itinerary_entries）與兩人設定即時算出，兩台裝置各自算出相同結果；手動順序與搶票標記不影響分工，標記只影響每列的目前場次與備案（標記屬本裝置，可標在任一人的列，FR-407、FR-409）。
+  摘要 = 每人的筆數（列數）與張數（ticket_quantity 加總）（FR-406）。
   '''
 }
 
 Ref: itinerary_entries.session_id > sessions.session_id
 Ref: ticket_list_items.film_id > films.film_id
+Ref: ticket_division_items.film_id > films.film_id

@@ -22,6 +22,8 @@ import { availableForSession } from "./availability-oracle";
 export interface PlannerCtx {
   world: PlannerWorld;
   ticketList: TicketListItem[] | null;
+  /** 兩人模式：分給同伴的列（同伴的順序，004）；個人模式 = null */
+  partnerList: TicketListItem[] | null;
   /** session_id -> 可看與否（最近一次「查看場次可看狀態」） */
   watchability: Map<string, boolean> | null;
   /** 查看可看狀態當下的使用者狀態快照（JSON） */
@@ -43,7 +45,7 @@ export interface CompatRow {
 let ctx: PlannerCtx = freshCtx();
 
 function freshCtx(): PlannerCtx {
-  return { world: createPlannerWorld(), ticketList: null, watchability: null, stateSnapshotAtQuery: null, compat: null };
+  return { world: createPlannerWorld(), ticketList: null, partnerList: null, watchability: null, stateSnapshotAtQuery: null, compat: null };
 }
 
 export function getCtx(): PlannerCtx {

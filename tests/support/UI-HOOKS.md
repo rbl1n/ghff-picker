@@ -214,3 +214,16 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 - 熱門 checkbox（name 含「熱門」）在收合的卡片面上，label 高度 ≥ 44px；展開區不再有第二個。不看的片不渲染熱門開關。
 - 時段頁底部 link `下一步：選片`（`#/pick`）；選片頁保留 `排行程`。
 - 使用說明：`data-testid=onboarding-dialog`（role=dialog），`onboarding-progress`（`n/4`）、`onboarding-title`；buttons `上一步` `下一步` `開始使用` `略過`；頁首 button `使用說明`（aria-label，顯示 `?`）。已看過記錄 localStorage `ghff-picker:onboarding-seen`。測試預設由 context init script 預載該記錄；Given `觀眾是第一次使用…` 設 cookie `ghff_first_time=1` 讓它不預載。
+
+## 005 兩人搶票分工（搶票頁 `#/tickets`，僅兩人模式）
+
+唯一來源：`tests/steps/web/搶票.steps.ts`、`tests/support/web-b-helpers.ts`。
+
+| 定位點 | 屬性 | 說明 | 使用檔 |
+| --- | --- | --- | --- |
+| `data-testid=division-tabs`（`role=tablist`）內兩個 `role=tab` | 名稱（exact）：`我的順序`、`{同伴名字}的順序`；`aria-selected`；高度 ≥ 44px | 預設「我的順序」；切換只改畫面，不保存 | 搶票 steps |
+| `data-testid=division-summary` | 文字 `{自己} {n} 筆 {m} 張・{同伴} {n} 筆 {m} 張` | 兩個分頁都顯示 | 搶票 steps |
+| `data-testid=ticket-participant`（位於 ticket-row 內） | 文字 `一起` 或 `自己` | 與 `ticket-quantity`（`買 2 張`／`買 1 張`）並列；個人模式不渲染 | 搶票 steps |
+| `ticket-row` 的 `data-participant` | `together`／`self`／`partner` | 方便除錯，非必要 | — |
+| 分頁清單為空 | 文字 `沒有要搶的場次` | | 搶票 steps |
+| 兩人模式的列 | 不渲染 `ticket-drag-handle`、`上移`、`下移` | 手動順序僅個人模式 | 搶票 steps |

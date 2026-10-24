@@ -9,6 +9,7 @@ import type { Catalog, DuoItineraryEntry, ItineraryEntry, Session, Tier, TicketL
 import { scheduleDuo } from "../../src/domain/duo";
 import { buildItinerary } from "../../src/domain/schedule";
 import { buildTicketList } from "../../src/domain/tickets";
+import { buildDuoDivision, type DuoDivision } from "../../src/domain/division";
 import { STORAGE_KEY } from "../../src/state/storage";
 
 /* ------------------------------------------------------------------ 型別 */
@@ -316,6 +317,8 @@ export interface Plan {
   itinerary: ItineraryEntry[];
   unscheduled: UnscheduledMustFilm[];
   tickets: TicketListItem[];
+  /** 兩人模式的分工表（004）；個人模式 = null。tickets 在兩人模式 = 我的順序 */
+  division: DuoDivision | null;
 }
 
 /**
@@ -331,11 +334,11 @@ export function computePlan(catalog: Catalog, state: UserState, replanned: boole
     const mine = result.entries
       .filter((e) => e.participant === "self" || e.participant === "together")
       .map((e) => ({ session_id: e.session_id, tier: e.tier!, is_non_ticketed: e.is_non_ticketed, participant: e.participant, partner_tier: e.partner_tier }));
-    const tickets = buildTicketList(catalog, state, mine, undefined, { entries: result.entries, partner: state.partner });
-    return { duo: result.entries, itinerary: mine, unscheduled: result.unscheduled, tickets };
+    const division = buildDuoDivision(catalog, state, result.entries, state.partner);
+    return { duo: result.entries, itinerary: mine, unscheduled: result.unscheduled, tickets: division.self, division };
   }
   const { itinerary, unscheduled } = buildItinerary(catalog, planState);
-  return { duo: null, itinerary, unscheduled, tickets: buildTicketList(catalog, state, itinerary) };
+  return { duo: null, itinerary, unscheduled, tickets: buildTicketList(catalog, state, itinerary), division: null };
 }
 
 /** 兩人行程套用篩選後的列（全部 / 只看自己 = 一起與自己 / 只看同伴 = 一起與同伴），含視角層級 */

@@ -75,3 +75,8 @@ export function formatSession(s: Session): string {
 }
 
 export { cinemaOfVenue, expect, Given, When, Then };
+
+/** 兩人模式下 `{片名}` 的搶票列：先找分給觀眾的，沒有再找分給同伴的（004） */
+export function findTicketItem(filmId: string): TicketListItem | undefined {
+  return getTicketList().find((i) => i.film_id === filmId) ?? getCtx().partnerList?.find((i) => i.film_id === filmId);
+}

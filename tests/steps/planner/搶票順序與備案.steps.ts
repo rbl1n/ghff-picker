@@ -4,7 +4,7 @@ import { areSessionsCompatible } from "../../../src/domain/compat";
 import { computeSchedule, computeTicketList, availableForSession } from "../../support/planner-duo-helpers";
 import type { DuoItineraryEntry } from "../../../src/domain/types";
 import {
-  getWorld, Given, When, Then, expect, need, rebuildList, setTicketList, getTicketList, filmIdByTitle, titleOf,
+  getWorld, Given, When, Then, expect, need, rebuildList, setTicketList, getTicketList, findTicketItem, filmIdByTitle, titleOf,
   sessionById, formatSession, cinemaOfVenue,
 } from "../../support/planner-b-helpers";
 
@@ -74,7 +74,7 @@ Then("搶票清單的備案場次如下：", async ({}, table: DataTable) => {
   const itinerary = world.lastResult!.itinerary;
   for (const row of table.hashes()) {
     const filmId = filmIdByTitle(catalog, row["片名"]);
-    const item = list.find((i) => i.film_id === filmId);
+    const item = findTicketItem(filmId);
     expect(item, `搶票清單應含「${row["片名"]}」`).toBeTruthy();
     const backups = item!.backup_session_ids.map((id) => sessionById(catalog, id));
     const text = backups.length === 0 ? "無不衝堂備案" : backups.map(formatSession).join("、");
@@ -83,6 +83,12 @@ Then("搶票清單的備案場次如下：", async ({}, table: DataTable) => {
     const others = itinerary.map((e) => sessionById(catalog, e.session_id)).filter((s) => s.film_id !== filmId);
     // 一起看的片：備案須兩人都可看、都不使自己當天超過自己的上限；其餘只看觀眾
     const together = !!duoEntries?.some((e) => e.participant === "together" && sessionById(catalog, e.session_id).film_id === filmId);
+    // 同伴自己看的片（兩人模式）：備案只看同伴，不檢查觀眾
+    const partnerSolo = (item as { participant?: string }).participant === "partner";
+    if (partnerSolo) {
+      for (const b of backups) expect(availableForSession(b, partner?.availability), `同伴自己看的備案 ${formatSession(b)} 須在同伴可看時段`).toBe(true);
+      continue;
+    }
     for (const b of backups) {
       expect(availableForSession(b, state.availability), `備案 ${formatSession(b)} 須在觀眾可看時段`).toBe(true);
       if (together) {

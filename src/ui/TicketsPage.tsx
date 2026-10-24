@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Catalog, Session, Tier, TicketListItem, UserState } from "../domain/types";
+import type { Catalog, PersonSide, Session, Tier, TicketListItem, UserState } from "../domain/types";
 import { buildTicketList, clearMark, markSession } from "../domain/tickets";
+import { buildDuoDivision, type DuoTicketRow } from "../domain/division";
 import { CatalogGate } from "./CatalogGate";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
 import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
@@ -23,20 +24,16 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
-  // 兩人模式只列自己行程中的場次；一起看買 2 張、自己看買 1 張（張數與備案由 domain 推導）
-  const items = useMemo(
-    () =>
-      schedule
-        ? buildTicketList(
-            catalog,
-            user,
-            schedule.itinerary,
-            undefined,
-            schedule.duo && user.partner ? { entries: schedule.duo, partner: user.partner } : undefined,
-          )
-        : [],
+  // 兩人模式（004）：兩人共用同一套順序，一起看的片只分給一人；分頁看「我的順序」或「{同伴}的順序」
+  const [tab, setTab] = useState<PersonSide>("self");
+  const division = useMemo(
+    () => (schedule?.duo && user.partner ? buildDuoDivision(catalog, user, schedule.duo, user.partner) : null),
     [catalog, user, schedule],
   );
+  const personalItems = useMemo(() => (schedule && !division ? buildTicketList(catalog, user, schedule.itinerary) : []), [catalog, user, schedule, division]);
+  const items: (TicketListItem | DuoTicketRow)[] = division ? division[tab] : personalItems;
+  const selfName = user.self_name || "我";
+  const partnerName = user.partner?.display_name ?? "同伴";
 
   if (!schedule) {
     return (
@@ -48,9 +45,11 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
 
   const tierOf = new Map<string, Tier>(user.film_preferences.map((p) => [p.film_id, p.tier]));
   const hotOf = new Map(user.film_preferences.map((p) => [p.film_id, p.is_hot]));
-  const gotSessionOf = (filmId: string): string | undefined =>
-    user.ticket_marks.find((m) => m.result === "got" && sessionById.get(m.session_id)?.film_id === filmId)?.session_id;
-  const stateOf = (it: TicketListItem): RowState => (gotSessionOf(it.film_id) ? "got" : it.exhausted ? "dead" : "pending");
+  const gotSessionOf = (it: TicketListItem | DuoTicketRow): string | undefined =>
+    "got_session_id" in it
+      ? it.got_session_id
+      : user.ticket_marks.find((m) => m.result === "got" && sessionById.get(m.session_id)?.film_id === it.film_id)?.session_id;
+  const stateOf = (it: TicketListItem | DuoTicketRow): RowState => (gotSessionOf(it) ? "got" : it.exhausted ? "dead" : "pending");
 
   const apply = (change: (s: UserState) => UserState, film: string | null = null) => {
     updateUser(change);
@@ -61,10 +60,10 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
     }
   };
 
-  const onGot = (it: TicketListItem) => apply((s) => markSession(s, it.current_session_id, "got"));
-  const onMiss = (it: TicketListItem) => apply((s) => markSession(s, it.current_session_id, "missed"), it.film_id);
-  const onUndo = (it: TicketListItem) => {
-    const got = gotSessionOf(it.film_id);
+  const onGot = (it: TicketListItem | DuoTicketRow) => apply((s) => markSession(s, it.current_session_id, "got"));
+  const onMiss = (it: TicketListItem | DuoTicketRow) => apply((s) => markSession(s, it.current_session_id, "missed"), it.film_id);
+  const onUndo = (it: TicketListItem | DuoTicketRow) => {
+    const got = gotSessionOf(it);
     if (got) return apply((s) => clearMark(s, got));
     // 已無可用場次：撤銷該片最近一次「沒搶到」
     apply((s) => {
@@ -87,21 +86,24 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
   const deadCount = items.filter((it) => stateOf(it) === "dead").length;
   const allHandled = items.length > 0 && gotCount + deadCount === items.length;
 
-  const renderRow = (it: TicketListItem, idx: number, list: TicketListItem[]) => {
+  const renderRow = (it: TicketListItem | DuoTicketRow, idx: number, list: (TicketListItem | DuoTicketRow)[]) => {
+    const duo = "owner" in it ? it : null;
     const state = stateOf(it);
     const film = filmById.get(it.film_id);
     const current = sessionById.get(it.current_session_id);
     const backups = it.backup_session_ids.map((id) => sessionById.get(id)).filter((s): s is Session => !!s);
-    const tier = tierOf.get(it.film_id);
+    const tier = duo ? duo.tier : tierOf.get(it.film_id);
+    const hot = duo ? duo.is_hot : hotOf.get(it.film_id);
     const prev = list[idx - 1];
     const next = list[idx + 1];
     return (
       <article
-        key={it.film_id}
+        key={`${tab}:${it.film_id}`}
         className={`card t ${state === "got" ? "got" : state === "dead" ? "dead" : "pend"}${flash === it.film_id ? " flash" : ""}`}
         data-testid="ticket-row"
         data-film={film?.title ?? ""}
         data-state={state}
+        data-participant={duo?.participant}
         onDragOver={state === "pending" ? (e) => e.preventDefault() : undefined}
         onDrop={
           state === "pending"
@@ -120,14 +122,19 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
           <div className="tinfo">
             <h2>{film?.title}</h2>
             {tier && <span className={`tag ${TIER_TAG_CLASS[tier]}`}>{TIER_LABEL[tier]}</span>}
-            {hotOf.get(it.film_id) && <span className="tag tag-star">熱門</span>}
+            {hot && <span className="tag tag-star">熱門</span>}
             {it.ticket_quantity !== undefined && (
               <span className="tag tag-want qty" data-testid="ticket-quantity">
                 買 {it.ticket_quantity} 張
               </span>
             )}
+            {duo && (
+              <span className="tag tag-free" data-testid="ticket-participant">
+                {duo.participant === "together" ? "一起" : "自己"}
+              </span>
+            )}
           </div>
-          {state === "pending" && (
+          {state === "pending" && !division && (
             <div className="tmove">
               {IS_TOUCH ? (
                 <>
@@ -212,6 +219,24 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
 
   return (
     <>
+      {division && (
+        <div className="divhead">
+          <div className="seg two" role="tablist" aria-label="搶票順序" data-testid="division-tabs">
+            {([
+              ["self", "我的順序"],
+              ["partner", `${partnerName}的順序`],
+            ] as [PersonSide, string][]).map(([side, label]) => (
+              <button key={side} role="tab" className="segbtn" aria-selected={tab === side} onClick={() => setTab(side)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="divsum" data-testid="division-summary">
+            {selfName} {division.summary.self.count} 筆 {division.summary.self.tickets} 張・{partnerName} {division.summary.partner.count} 筆{" "}
+            {division.summary.partner.tickets} 張
+          </p>
+        </div>
+      )}
       {(allHandled || user.ticket_marks.length > 0) && (
         <div className="sumbar">
           {allHandled && (
@@ -224,7 +249,7 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
           </a>
         </div>
       )}
-      {items.length === 0 && <p className="empty">行程裡沒有需要搶票的片，先到選片頁標記並排行程</p>}
+      {items.length === 0 && <p className="empty">{division ? "沒有要搶的場次" : "行程裡沒有需要搶票的片，先到選片頁標記並排行程"}</p>}
       <div data-testid="ticket-pending">{pending.map(renderRow)}</div>
       {done.length > 0 && <h3>已完成</h3>}
       <div data-testid="ticket-done">{done.map(renderRow)}</div>

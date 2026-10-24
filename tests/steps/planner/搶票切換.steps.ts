@@ -5,7 +5,7 @@ import type { Session, TicketListItem } from "../../../src/domain/types";
 import type { PlannerWorld } from "../../support/planner-world";
 import { computeSchedule } from "../../support/planner-duo-helpers";
 import {
-  getWorld, Given, When, Then, expect, need, rebuildList, getTicketList, filmIdByTitle, titleOf,
+  getWorld, Given, When, Then, expect, need, rebuildList, getTicketList, findTicketItem, filmIdByTitle, titleOf,
   sessionById, findSession, formatSession, cinemaOfVenue,
 } from "../../support/planner-b-helpers";
 
@@ -20,7 +20,7 @@ function mark(world: PlannerWorld, title: string, sessionText: string, result: "
 function itemOf(world: PlannerWorld, title: string): TicketListItem {
   const { catalog } = need(world);
   const filmId = filmIdByTitle(catalog, title);
-  const item = getTicketList(world).find((i) => i.film_id === filmId);
+  const item = findTicketItem(filmId);
   if (!item) throw new Error(`搶票清單沒有「${title}」`);
   return item;
 }

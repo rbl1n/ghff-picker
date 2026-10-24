@@ -19,6 +19,11 @@ import {
   waitTicketRows,
 } from "../../support/web-b-helpers";
 import { hasPartner, readState } from "../../support/web-duo-helpers";
+import type { Page } from "@playwright/test";
+import { createPhone, snapshotTickets } from "../../support/web-b-helpers";
+import { preloadUserState } from "../../support/web-fixtures";
+import { pressSchedule } from "../../support/web-a-helpers";
+import type { UserState } from "../../../src/domain/types";
 
 const canon = (spec: string): string => {
   const { date, time, star } = parseSessionSpec(spec);
@@ -300,3 +305,204 @@ Then("搶票清單不顯示張數", async ({ page, world }) => {
   texts.forEach((t, i) => expect(t, `第 ${i + 1} 列不應有張數`).not.toMatch(/買\s*\d+\s*張/));
   expect(hasPartner(await readState(page)), "個人模式：本機保存沒有同伴資料").toBe(false);
 });
+
+/* ------------------------- 005 兩人搶票分工 ------------------------- */
+
+const tabsOf = (page: Page) => page.getByRole("tab");
+const activeTabSide = async (page: Page): Promise<"self" | "partner"> =>
+  (await tabsOf(page).nth(0).getAttribute("aria-selected")) === "true" ? "self" : "partner";
+
+async function switchTab(page: Page, name: string): Promise<void> {
+  const tab = page.getByRole("tab", { name, exact: true });
+  await tab.click();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+}
+
+Given("觀眾正在看搶票頁的 {string} 分頁", async ({ page }, name: string) => {
+  await switchTab(page, name);
+});
+
+When("觀眾切換到搶票頁的 {string} 分頁", async ({ page }, name: string) => {
+  await switchTab(page, name);
+});
+
+Then("搶票頁的分頁為 {string}", async ({ page }, names: string) => {
+  const tabs = tabsOf(page);
+  await expect(tabs.first()).toBeVisible();
+  const shown = (await tabs.allInnerTexts()).map((t) => norm(t));
+  expect(shown.join("、")).toBe(names);
+  const state = await readState(page);
+  expect(hasPartner(state), "兩人模式：本機保存有同伴資料").toBe(true);
+  expect(shown[1]).toBe(`${state!.partner!.display_name}的順序`);
+});
+
+Then("搶票頁目前分頁是 {string}", async ({ page }, name: string) => {
+  const selected = page.getByRole("tab", { selected: true });
+  await expect(selected).toHaveCount(1);
+  await expect(selected).toHaveText(name);
+});
+
+Then("目前分頁的搶票列如下：", async ({ page, world }, dataTable: DataTable) => {
+  await expect(page.getByRole("tab", { selected: true })).toHaveCount(1);
+  const expected = dataTable.hashes();
+  await waitTicketRows(page);
+  const rows = ticketRows(page);
+  await expect(rows).toHaveCount(expected.length);
+  const shown = await rows.evaluateAll((els) =>
+    els.map((e) => ({
+      title: e.getAttribute("data-film") ?? "",
+      order: (e.querySelector('[data-testid="ticket-order"]')?.textContent ?? "").trim(),
+      qty: (e.querySelector('[data-testid="ticket-quantity"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      who: (e.querySelector('[data-testid="ticket-participant"]')?.textContent ?? "").trim(),
+      session: (e.querySelector('[data-testid="ticket-session"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+    })),
+  );
+  // 未處理區在前、已完成區在後：以順序號比對（表格依順序號）
+  const byOrder = [...shown].sort((a, b) => Number(a.order) - Number(b.order));
+  expected.forEach((r, i) => {
+    expect(Number(byOrder[i].order), `第 ${i + 1} 列順序`).toBe(Number(r["順序"]));
+    expect(byOrder[i].title, `第 ${i + 1} 列片名`).toBe(r["片名"]);
+    expect(byOrder[i].qty, `${r["片名"]} 張數`).toBe(r["張數"].replace(/\s+/g, " ").trim());
+    expect(byOrder[i].who, `${r["片名"]} 標示`).toBe(r["標示"]);
+    expect(byOrder[i].session, `${r["片名"]} 應顯示場次`).toMatch(/\d{2}\/\d{2}（.）\s*\d{2}:\d{2}/);
+  });
+  expect(new Set(shown.map((x) => x.title)).size, "同一片在同一分頁不得兩列").toBe(shown.length);
+  // 權威狀態：等於 src/domain 對同一份保存狀態算出的分工表
+  const eng = await engineOf(page, world);
+  expect(eng.plan.division, "兩人模式應有分工表").not.toBeNull();
+  const side = await activeTabSide(page);
+  const list = eng.plan.division![side];
+  expect(list.map((t) => `${t.order}|${eng.titleOfFilm(t.film_id)}|${t.ticket_quantity}|${t.participant === "together" ? "一起" : "自己"}`)).toEqual(
+    expected.map((r) => `${r["順序"]}|${r["片名"]}|${r["張數"].replace(/\D/g, "")}|${r["標示"]}`),
+  );
+});
+
+Then("搶票頁摘要顯示 {string}", async ({ page, world }, summary: string) => {
+  const el = page.getByTestId("division-summary");
+  await expect(el).toBeVisible();
+  expect(norm(await el.innerText())).toBe(summary);
+  const eng = await engineOf(page, world);
+  const d = eng.plan.division!;
+  const state = eng.state;
+  const selfName = state.self_name || "我";
+  const text = `${selfName} ${d.summary.self.count} 筆 ${d.summary.self.tickets} 張・${state.partner!.display_name} ${d.summary.partner.count} 筆 ${d.summary.partner.tickets} 張`;
+  expect(text).toBe(summary);
+});
+
+Then("搶票清單中 {string} 的狀態是 {string}", async ({ page, world }, title: string, status: string) => {
+  const row = ticketRowOf(page, title);
+  const dataState = { 未處理: "pending", 搶到: "got", 沒搶到: "dead" }[status];
+  await expect(row).toHaveAttribute("data-state", dataState!);
+  if (status === "搶到") {
+    const eng = await engineOf(page, world);
+    const fid = filmIdOf(world, title);
+    const got = eng.state.ticket_marks.filter((m) => m.result === "got" && eng.sessionById(m.session_id).film_id === fid);
+    expect(got.length, `${title} 本機應保存搶到標記`).toBeGreaterThan(0);
+    const rowsOfFilm = [...eng.plan.division!.self, ...eng.plan.division!.partner].filter((r) => r.film_id === fid);
+    expect(rowsOfFilm.some((r) => r.got_session_id !== undefined), "分工表中該片有一列為搶到").toBe(true);
+  }
+});
+
+Then("搶票頁沒有分頁與分工摘要", async ({ page }) => {
+  await waitTicketRows(page);
+  await expect(tabsOf(page)).toHaveCount(0);
+  await expect(page.getByTestId("division-summary")).toHaveCount(0);
+  await expect(page.getByTestId("ticket-participant")).toHaveCount(0);
+  const texts = await ticketRows(page).evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ")));
+  texts.forEach((t) => expect(t).not.toMatch(/買\s*\d+\s*張/));
+  expect(hasPartner(await readState(page)), "個人模式").toBe(false);
+});
+
+Then("搶票清單沒有調整順序的控制項", async ({ page, world }) => {
+  await waitTicketRows(page);
+  for (const name of ["我的順序", await page.getByRole("tab").nth(1).innerText()]) {
+    await switchTab(page, norm(name));
+    await expect(page.getByTestId("ticket-drag-handle")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "上移", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "下移", exact: true })).toHaveCount(0);
+  }
+  expect(hasPartner(await readState(page)), "兩人模式").toBe(true);
+  void world;
+});
+
+Then("搶票清單有調整順序的控制項", async ({ page }) => {
+  await waitTicketRows(page);
+  const controls = page.getByTestId("ticket-drag-handle").or(page.getByRole("button", { name: "上移", exact: true }));
+  await expect(controls.first()).toBeVisible();
+  expect(hasPartner(await readState(page)), "個人模式").toBe(false);
+});
+
+Then("目前分頁顯示 {string}", async ({ page, world }, message: string) => {
+  await expect(page.getByText(message, { exact: true })).toBeVisible();
+  await expect(ticketRows(page)).toHaveCount(0);
+  const eng = await engineOf(page, world);
+  const side = await activeTabSide(page);
+  expect(eng.plan.division![side]).toHaveLength(0);
+});
+
+Then("搶票頁的分頁與按鈕高度至少 44px", async ({ page }) => {
+  const vw = page.viewportSize()!.width;
+  const boxes = [
+    ...(await Promise.all([tabsOf(page).nth(0).boundingBox(), tabsOf(page).nth(1).boundingBox()])),
+    ...(await Promise.all([
+      page.getByTestId("ticket-pending").getByTestId("ticket-row").first().getByRole("button", { name: "搶到", exact: true }).boundingBox(),
+      page.getByTestId("ticket-pending").getByTestId("ticket-row").first().getByRole("button", { name: "沒搶到", exact: true }).boundingBox(),
+    ])),
+  ];
+  for (const b of boxes) {
+    expect(b, "按鈕應可見").not.toBeNull();
+    expect(b!.height).toBeGreaterThanOrEqual(44);
+    expect(b!.x + b!.width).toBeLessThanOrEqual(vw + 1);
+  }
+});
+
+Then(
+  "對方在自己的裝置開啟搶票頁，對方的「我的順序」與這台的 {string} 分頁相同",
+  async ({ page, world, browser, baseURL }, tab: string) => {
+    await switchTab(page, tab);
+    const mine = await snapshotTickets(page);
+    const myQty = await Promise.all(
+      (await ticketRows(page).all()).map(async (r) => norm(await r.getByTestId("ticket-quantity").innerText())),
+    );
+    const state = await storedOrDefault(page);
+    const p = state.partner!;
+    // 對調：對方的設定當自己，自己的設定當同伴；沒有搶票標記與手動順序
+    const swapped: UserState = {
+      ...state,
+      self_name: p.display_name,
+      daily_limit: p.daily_limit,
+      film_preferences: p.film_preferences,
+      availability: p.availability,
+      unavailable_slots: undefined,
+      skipped_film_ids: p.skipped_film_ids,
+      manual_order: null,
+      ticket_marks: [],
+      partner: {
+        display_name: state.self_name || "我",
+        daily_limit: state.daily_limit,
+        film_preferences: state.film_preferences,
+        availability: state.availability,
+        skipped_film_ids: state.skipped_film_ids,
+      },
+    };
+    const other = await createPhone(browser, baseURL, world.catalog!);
+    await preloadUserState(other.context, swapped);
+    await other.page.goto("/#/pick");
+    await pressSchedule(other.page);
+    await gotoTab(other.page, "搶票");
+    await waitTicketRows(other.page);
+    await expect(other.page.getByRole("tab", { selected: true })).toHaveText("我的順序");
+    const theirs = await snapshotTickets(other.page);
+    const theirQty = await Promise.all(
+      (await ticketRows(other.page).all()).map(async (r) => norm(await r.getByTestId("ticket-quantity").innerText())),
+    );
+    expect(theirs.length, "列數").toBe(mine.length);
+    mine.forEach((row, i) => {
+      expect(theirs[i].order, `第 ${i + 1} 列順序`).toBe(row.order);
+      expect(theirs[i].title, `第 ${i + 1} 列片名`).toBe(row.title);
+      expect(norm(theirs[i].session), `${row.title} 排定場次`).toBe(norm(row.session));
+      expect(theirs[i].backups, `${row.title} 備案場次`).toEqual(row.backups);
+      expect(theirQty[i], `${row.title} 張數`).toBe(myQty[i]);
+    });
+  },
+);

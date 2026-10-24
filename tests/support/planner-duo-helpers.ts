@@ -12,6 +12,7 @@ import type {
 import { buildItinerary } from "../../src/domain/schedule";
 import { scheduleDuo } from "../../src/domain/duo";
 import { buildTicketList } from "../../src/domain/tickets";
+import { buildDuoDivision, type DuoDivision } from "../../src/domain/division";
 import { getCtx } from "./planner-a-helpers";
 import { EMPTY_CATALOG, effectiveState, type PlannerWorld } from "./planner-world";
 
@@ -102,12 +103,19 @@ export function computeSchedule(world: PlannerWorld, catalog: Catalog): Computed
   return { result: buildItinerary(catalog, input), duo: null };
 }
 
-/** 由目前行程產生搶票清單；兩人模式只含觀眾自己的行程並帶兩人行程與同伴資料 */
+/** 兩人模式的分工表（004）；個人模式 = null。需先排程 */
+export function computeDivision(world: PlannerWorld, catalog: Catalog): DuoDivision | null {
+  if (!world.partner || !world.lastDuo) return null;
+  return buildDuoDivision(catalog, effectiveState(world), world.lastDuo.entries, world.partner);
+}
+
+/** 由目前行程產生搶票清單；兩人模式 = 觀眾的分工清單（我的順序，004），個人模式 = 001 清單 */
 export function computeTicketList(world: PlannerWorld, catalog: Catalog) {
   if (!world.lastResult) throw new Error("尚未排程");
-  const input = effectiveState(world);
-  const duo = world.partner && world.lastDuo ? { entries: world.lastDuo.entries, partner: world.partner } : undefined;
-  return buildTicketList(catalog, input, world.lastResult.itinerary, undefined, duo);
+  const division = computeDivision(world, catalog);
+  getCtx().partnerList = division ? division.partner : null;
+  if (division) return division.self;
+  return buildTicketList(catalog, effectiveState(world), world.lastResult.itinerary);
 }
 
 export type { UnscheduledMustFilm, DuoItineraryEntry };
