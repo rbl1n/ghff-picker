@@ -3,6 +3,7 @@ import type { Catalog, PersonSide, Session, Tier, TicketListItem, UserState } fr
 import { buildTicketList, clearMark, markSession } from "../domain/tickets";
 import { buildDuoDivision, type DuoTicketRow } from "../domain/division";
 import { CatalogGate } from "./CatalogGate";
+import { CatNo } from "./CatNo";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
 import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
 
@@ -120,6 +121,7 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
             {it.order}
           </span>
           <div className="tinfo">
+            <CatNo no={film?.catalog_no} />
             <h2>{film?.title}</h2>
             {tier && <span className={`tag ${TIER_TAG_CLASS[tier]}`}>{TIER_LABEL[tier]}</span>}
             {hot && <span className="tag tag-star">熱門</span>}

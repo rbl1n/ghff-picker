@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { Catalog, DuoItineraryEntry, ItineraryParticipant, Session, Tier, UnscheduledMustFilm } from "../domain/types";
 import { CatalogGate } from "./CatalogGate";
+import { CatNo, labelWithNo } from "./CatNo";
 import { TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
 import { ensureSchedule, runSchedule, scheduleSignature, useItineraryFilter, useStore, type ItineraryFilter } from "./store";
 
@@ -68,6 +69,8 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
 
   const stale = schedule.sig !== scheduleSignature(user);
   const titleOf = (id: string) => filmById.get(id)?.title ?? "";
+  const noOf = (id: string) => filmById.get(id)?.catalog_no;
+  const labelOf = (id: string) => labelWithNo(titleOf(id), noOf(id));
   const nameOf = (owner: "self" | "partner" | undefined) => (owner === "partner" ? partner?.display_name ?? "" : selfName);
 
   // 兩人模式依篩選取列，層級色塊顯示「視角」那個人的層級（預設自己；只看同伴為同伴；全部中同伴自己看的列為同伴）
@@ -132,7 +135,7 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           <ul>
             {schedule.unscheduled.map((u) => (
               <li key={`${u.owner ?? "self"}-${u.film_id}`}>
-                <b>{titleOf(u.film_id)}</b>：{reasonOf(u, titleOf)}
+                <CatNo no={noOf(u.film_id)} /> <b>{titleOf(u.film_id)}</b>：{reasonOf(u, labelOf)}
                 {partner && (
                   <>
                     {" "}
@@ -164,6 +167,7 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
                 </div>
                 <div className="info">
                   <div className="row">
+                    <CatNo no={noOf(session.film_id)} />
                     <b className="nm">{titleOf(session.film_id)}</b>
                     <span className={`tag ${TIER_TAG_CLASS[tier]}`}>{TIER_LABEL[tier]}</span>
                     {participant && (

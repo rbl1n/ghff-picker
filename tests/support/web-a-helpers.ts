@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd, test as base } from "playwright-bdd";
+import { sortFilmsByCatalogOrder } from "../../src/domain/catalog-order";
 import type { Catalog, Session, Tier, UserState } from "../../src/domain/types";
 import { STORAGE_KEY } from "../../src/state/storage";
 import { cinemaOfVenue } from "./planner-world";
@@ -92,9 +93,15 @@ export function buildCatalog(rows: Row[]): Catalog {
   for (const r of rows) {
     const title = r["片名"];
     if (!filmIds.has(title)) {
-      const id = `film-${filmIds.size + 1}`;
+      const id = r["影片編號"]?.trim() || `film-${filmIds.size + 1}`;
       filmIds.set(title, id);
-      catalog.films.push({ film_id: id, title, runtime_min: Number(r["片長"]), rating: r["分級"] || "普" });
+      catalog.films.push({
+        film_id: id,
+        title,
+        runtime_min: Number(r["片長"]),
+        rating: r["分級"] || "普",
+        ...(r["片號"]?.trim() ? { catalog_no: r["片號"].trim() } : {}),
+      });
     }
     const venue = r["影廳"];
     if (!catalog.venues.some((v) => v.venue_name === venue)) {
@@ -327,7 +334,7 @@ export async function expectFilterTitles(page: Page, world: WebWorld, filter: st
     const cat = world.catalog!;
     const idOf = (t: string) => cat.films.find((f) => f.title === t)!.film_id;
     const prefIds = new Set(st.film_preferences.map((p) => p.film_id));
-    const want = cat.films
+    const want = sortFilmsByCatalogOrder(cat.films)
       .filter((f) => {
         if (filter === "不看") return skipped.has(f.film_id);
         if (skipped.has(f.film_id)) return false;
@@ -360,4 +367,9 @@ export async function openUrl(page: Page, world: WebWorld, url: string): Promise
     world.opened = true;
   }
   await page.goto(url);
+}
+
+/** 選片頁目前列出的影片卡（畫面順序）的片名 */
+export async function shownFilmTitles(page: Page): Promise<string[]> {
+  return page.getByTestId("film-card").evaluateAll((els) => els.map((e) => e.getAttribute("data-title") ?? ""));
 }

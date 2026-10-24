@@ -16,6 +16,7 @@ import {
   filmIdOf,
   norm,
   openTab,
+  shownFilmTitles,
   storedOrDefault,
   type WebWorld,
 } from "../../support/web-a-helpers";
@@ -249,4 +250,46 @@ Then("畫面提供重試按鈕", async ({ page }) => {
   // 載入失敗不得顯示空白場次表當作成功
   await expect(page.getByTestId("film-card")).toHaveCount(0);
   await expect(page.getByTestId("session-row")).toHaveCount(0);
+});
+
+// 手冊片號
+When("觀眾在選片頁搜尋 {string}", async ({ page, world }, keyword: string) => {
+  await openTab(page, world, "選片");
+  await page.getByRole("searchbox", { name: "搜尋片名" }).fill(keyword);
+});
+
+Then("選片頁列出的影片如下：", async ({ page }, table: DataTable) => {
+  const expected = table.hashes().map((r) => r["片名"]);
+  await expect.poll(() => shownFilmTitles(page)).toEqual(expected);
+});
+
+Then("選片頁 {string} 的片號顯示為 {string}", async ({ page, world }, title: string, no: string) => {
+  await openTab(page, world, "選片");
+  await expect(filmCard(page, title).getByTestId("catalog-no")).toHaveText(no);
+});
+
+Then("選片頁 {string} 沒有片號", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  await expect(filmCard(page, title)).toBeVisible();
+  await expect(filmCard(page, title).getByTestId("catalog-no")).toHaveCount(0);
+});
+
+Then("層內順序檢視中 {string} 的片號顯示為 {string}", async ({ page }, title: string, no: string) => {
+  const item = page.locator(`[data-testid="tier-order-item"][data-title="${title}"]`);
+  await expect(item.getByTestId("catalog-no")).toHaveText(no);
+});
+
+// 官網連結
+Then("選片頁 {string} 有官網介紹連結 {string}", async ({ page, world }, title: string, url: string) => {
+  await openTab(page, world, "選片");
+  const link = filmCard(page, title).getByTestId("film-official-link");
+  await expect(link).toHaveAttribute("href", url);
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", /noopener/);
+});
+
+Then("選片頁 {string} 沒有官網介紹連結", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  await expect(filmCard(page, title)).toBeVisible();
+  await expect(filmCard(page, title).getByTestId("film-official-link")).toHaveCount(0);
 });

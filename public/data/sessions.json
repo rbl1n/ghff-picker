@@ -4,688 +4,1067 @@
   "fetched_at": "2026-10-24T09:30:36.331Z",
   "films": [
     {
-      "film_id": "4408",
-      "title": "泥娃娃",
-      "runtime_min": 111,
-      "rating": "15+"
+      "film_id": "4430",
+      "title": "告別的年代",
+      "runtime_min": 142,
+      "rating": "12+",
+      "catalog_no": "084"
     },
     {
-      "film_id": "4409",
-      "title": "完美家庭風暴",
-      "runtime_min": 146,
-      "rating": "6+"
+      "film_id": "4444",
+      "title": "花臉貓：修羅道",
+      "runtime_min": 102,
+      "rating": "15+",
+      "catalog_no": "086"
     },
     {
       "film_id": "4410",
       "title": "死亡賭局",
       "runtime_min": 96,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "089"
     },
     {
-      "film_id": "4411",
-      "title": "野馬九號",
-      "runtime_min": 116,
-      "rating": "12+"
+      "film_id": "4414",
+      "title": "女孩",
+      "runtime_min": 124,
+      "rating": "12+",
+      "catalog_no": "090"
     },
     {
-      "film_id": "4416",
-      "title": "克里姆林宮的巫師",
-      "runtime_min": 145,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4418",
-      "title": "橘子味婚禮",
-      "runtime_min": 115,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4419",
-      "title": "醉愛每一天",
-      "runtime_min": 115,
-      "rating": "12+"
+      "film_id": "4417",
+      "title": "我親愛的怪孩子",
+      "runtime_min": 108,
+      "rating": "12+",
+      "catalog_no": "091"
     },
     {
       "film_id": "4420",
       "title": "我們不是什麼",
       "runtime_min": 128,
-      "rating": "18+"
+      "rating": "18+",
+      "catalog_no": "092"
     },
     {
-      "film_id": "4421",
-      "title": "親密怪物",
-      "runtime_min": 115,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4422",
-      "title": "豪宅女僕日記",
-      "runtime_min": 93,
-      "rating": "12+"
+      "film_id": "4424",
+      "title": "泡泡糖女孩 ( 業界限定場 )",
+      "runtime_min": 99,
+      "rating": "0+",
+      "catalog_no": "093"
     },
     {
       "film_id": "4427",
       "title": "功夫",
       "runtime_min": 127,
-      "rating": "15+"
+      "rating": "15+",
+      "catalog_no": "094"
     },
     {
-      "film_id": "4428",
-      "title": "蝴蝶果醬的滋味",
-      "runtime_min": 102,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4429",
-      "title": "瘋癲老人日記",
-      "runtime_min": 121,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4430",
-      "title": "告別的年代",
-      "runtime_min": 142,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4431",
-      "title": "腥紅女爵",
-      "runtime_min": 119,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4435",
-      "title": "假如愛有如果",
-      "runtime_min": 164,
-      "rating": "15+"
+      "film_id": "4432",
+      "title": "第四幕",
+      "runtime_min": 113,
+      "rating": "6+",
+      "catalog_no": "095"
     },
     {
       "film_id": "4436",
       "title": "UFO離奇命案",
       "runtime_min": 86,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "096"
     },
     {
-      "film_id": "4437",
-      "title": "愛到舞春",
-      "runtime_min": 122,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4439",
-      "title": "池畔的夏日憂傷",
-      "runtime_min": 91,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4440",
-      "title": "肚皮拉警報",
-      "runtime_min": 76,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4445",
-      "title": "中場休息 ( 含10分鐘中場休息 )",
-      "runtime_min": 226,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4446",
-      "title": "家的形狀",
-      "runtime_min": 89,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4452",
-      "title": "終極殺鎮",
-      "runtime_min": 91,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4453",
-      "title": "雲朵上的點點名",
-      "runtime_min": 80,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4455",
-      "title": "明月共此時",
-      "runtime_min": 104,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4458",
-      "title": "豬與軍艦",
-      "runtime_min": 108,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4461",
-      "title": "菲律賓女孩",
+      "film_id": "4441",
+      "title": "沙央",
       "runtime_min": 100,
-      "rating": "12+"
+      "rating": "6+",
+      "catalog_no": "097"
     },
     {
-      "film_id": "4462",
-      "title": "靈魂未知數",
-      "runtime_min": 141,
-      "rating": "18+"
+      "film_id": "4408",
+      "title": "泥娃娃",
+      "runtime_min": 111,
+      "rating": "15+",
+      "catalog_no": "098"
     },
     {
-      "film_id": "4463",
-      "title": "暗夜魔嬰",
-      "runtime_min": 92,
-      "rating": "15+"
+      "film_id": "4412",
+      "title": "雙囍",
+      "runtime_min": 130,
+      "rating": "0+",
+      "catalog_no": "100"
     },
     {
-      "film_id": "4467",
-      "title": "日本昆蟲記",
-      "runtime_min": 123,
-      "rating": "15+"
+      "film_id": "4426",
+      "title": "謊言生活",
+      "runtime_min": 110,
+      "rating": "12+",
+      "catalog_no": "101"
     },
     {
-      "film_id": "4469",
-      "title": "NAZA：附帶損傷",
-      "runtime_min": 77,
-      "rating": "15+"
+      "film_id": "4438",
+      "title": "陽光女子合唱團",
+      "runtime_min": 134,
+      "rating": "12+",
+      "catalog_no": "102"
     },
     {
-      "film_id": "4471",
-      "title": "赤色殺意",
-      "runtime_min": 150,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4473",
-      "title": "紅岩小鬼大激鬥",
-      "runtime_min": 91,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4474",
-      "title": "沙河下的祕密",
-      "runtime_min": 95,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4475",
-      "title": "瘦怨",
-      "runtime_min": 112,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4476",
-      "title": "最初的世界",
-      "runtime_min": 115,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4477",
-      "title": "革命練習曲",
-      "runtime_min": 101,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4478",
-      "title": "我們的藍調時光：第1-2集",
-      "runtime_min": 96,
-      "rating": "6+"
+      "film_id": "4464",
+      "title": "善男信女",
+      "runtime_min": 97,
+      "rating": "6+",
+      "catalog_no": "103"
     },
     {
       "film_id": "4480",
       "title": "那張照片裡的我們",
       "runtime_min": 141,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4481",
-      "title": "坂本日常",
-      "runtime_min": 129,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4482",
-      "title": "有用的人",
-      "runtime_min": 111,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4483",
-      "title": "我蓋了一座小屋想妳",
-      "runtime_min": 78,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4484",
-      "title": "急診室的奇蹟：第1-2集",
-      "runtime_min": 94,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4486",
-      "title": "人類學入門",
-      "runtime_min": 128,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4487",
-      "title": "暗影天使 ( 司法講堂 )",
-      "runtime_min": 129,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4490",
-      "title": "首爾守護者 ( 司法講堂 )",
-      "runtime_min": 72,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4491",
-      "title": "噤聲：她們的故事",
-      "runtime_min": 97,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4495",
-      "title": "黑雨",
-      "runtime_min": 122,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4498",
-      "title": "檢察追緝令 ( 司法講堂 )",
-      "runtime_min": 114,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "104"
     },
     {
       "film_id": "4499",
       "title": "熊山記 Sinisusu Tua Pucumayan",
       "runtime_min": 89,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4500",
-      "title": "以你的記憶審判我",
-      "runtime_min": 122,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4503",
-      "title": "破碎十七 ( 司法講堂 )",
-      "runtime_min": 106,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4504",
-      "title": "紐約同志情與慾",
-      "runtime_min": 97,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4506",
-      "title": "無處安放的青春 ( 司法講堂 )",
-      "runtime_min": 105,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "105"
     },
     {
       "film_id": "4508",
       "title": "日光",
       "runtime_min": 101,
-      "rating": "0+"
+      "rating": "0+",
+      "catalog_no": "106"
     },
     {
-      "film_id": "4515",
-      "title": "超派妖姬救地球",
-      "runtime_min": 90,
-      "rating": "12+"
+      "film_id": "4516",
+      "title": "狂忘警探 ( 業界限定場 )",
+      "runtime_min": 87,
+      "rating": "15+",
+      "catalog_no": "107"
     },
     {
-      "film_id": "4517",
-      "title": "餘燼青春",
-      "runtime_min": 101,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4518",
-      "title": "駭人怪物",
-      "runtime_min": 120,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4520",
-      "title": "裝扮遊戲",
-      "runtime_min": 80,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4525",
-      "title": "親愛的不速之客",
-      "runtime_min": 99,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4527",
-      "title": "死亡密碼",
-      "runtime_min": 84,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4528",
-      "title": "破碎之後我們相擁",
-      "runtime_min": 121,
-      "rating": "15+"
+      "film_id": "4521",
+      "title": "我們不是陌生人 ( 業界限定場 )",
+      "runtime_min": 157,
+      "rating": "6+",
+      "catalog_no": "108"
     },
     {
       "film_id": "4530",
       "title": "黑潮",
       "runtime_min": 106,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4531",
-      "title": "高檔貨",
-      "runtime_min": 102,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4533",
-      "title": "黑天鵝",
-      "runtime_min": 108,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4535",
-      "title": "事到如今還談什麼愛",
-      "runtime_min": 128,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4537",
-      "title": "笑之大學",
-      "runtime_min": 121,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4538",
-      "title": "藍色是太陽的顏色",
-      "runtime_min": 110,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4540",
-      "title": "月亮上的業餘者",
-      "runtime_min": 72,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4543",
-      "title": "兩個油漆匠",
-      "runtime_min": 119,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "109"
     },
     {
       "film_id": "4547",
       "title": "獨奏者之舞",
       "runtime_min": 130,
-      "rating": "0+"
+      "rating": "0+",
+      "catalog_no": "110"
+    },
+    {
+      "film_id": "4551",
+      "title": "那道陽光在外明媚",
+      "runtime_min": 84,
+      "rating": "6+",
+      "catalog_no": "111"
+    },
+    {
+      "film_id": "4552",
+      "title": "離開即景",
+      "runtime_min": 82,
+      "rating": "0+",
+      "catalog_no": "112"
+    },
+    {
+      "film_id": "4554",
+      "title": "快要到達家了",
+      "runtime_min": 96,
+      "rating": "6+",
+      "catalog_no": "113"
     },
     {
       "film_id": "4555",
       "title": "迴山",
       "runtime_min": 110,
-      "rating": "6+"
+      "rating": "6+",
+      "catalog_no": "114"
+    },
+    {
+      "film_id": "4556",
+      "title": "魔法星圖",
+      "runtime_min": 85,
+      "rating": "12+",
+      "catalog_no": "115"
     },
     {
       "film_id": "4557",
       "title": "歡迎來到朵莉之家",
       "runtime_min": 88,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "116"
     },
     {
-      "film_id": "4582",
-      "title": "克里斯馬克：未來式鄉愁",
-      "runtime_min": 76,
-      "rating": "6+"
+      "film_id": "4562",
+      "title": "滄海琴聲",
+      "runtime_min": 114,
+      "rating": "6+",
+      "catalog_no": "117"
+    },
+    {
+      "film_id": "4565",
+      "title": "果",
+      "runtime_min": 56,
+      "rating": "18+",
+      "catalog_no": "118"
+    },
+    {
+      "film_id": "4577",
+      "title": "三隻小豬",
+      "runtime_min": 61,
+      "rating": "6+",
+      "catalog_no": "120"
+    },
+    {
+      "film_id": "4540",
+      "title": "月亮上的業餘者",
+      "runtime_min": 72,
+      "rating": "0+",
+      "catalog_no": "121"
+    },
+    {
+      "film_id": "4553",
+      "title": "嘉翠麗",
+      "runtime_min": 67,
+      "rating": "0+",
+      "catalog_no": "123"
+    },
+    {
+      "film_id": "4558",
+      "title": "你不在這個蛋糕裡",
+      "runtime_min": 46,
+      "rating": "12+",
+      "catalog_no": "124"
+    },
+    {
+      "film_id": "4496",
+      "title": "搭錯車",
+      "runtime_min": 93,
+      "rating": "12+",
+      "catalog_no": "128"
+    },
+    {
+      "film_id": "4534",
+      "title": "孽子",
+      "runtime_min": 106,
+      "rating": "12+",
+      "catalog_no": "129"
+    },
+    {
+      "film_id": "4543",
+      "title": "兩個油漆匠",
+      "runtime_min": 119,
+      "rating": "12+",
+      "catalog_no": "130"
+    },
+    {
+      "film_id": "4445",
+      "title": "中場休息 ( 含10分鐘中場休息 )",
+      "runtime_min": 226,
+      "rating": "18+",
+      "catalog_no": "132"
+    },
+    {
+      "film_id": "4451",
+      "title": "順風順水",
+      "runtime_min": 89,
+      "rating": "0+",
+      "catalog_no": "133"
+    },
+    {
+      "film_id": "4455",
+      "title": "明月共此時",
+      "runtime_min": 104,
+      "rating": "12+",
+      "catalog_no": "134"
+    },
+    {
+      "film_id": "4460",
+      "title": "一路狂奔",
+      "runtime_min": 92,
+      "rating": "15+",
+      "catalog_no": "135"
+    },
+    {
+      "film_id": "4466",
+      "title": "歌舞的我們",
+      "runtime_min": 85,
+      "rating": "12+",
+      "catalog_no": "136"
+    },
+    {
+      "film_id": "4470",
+      "title": "我的意思是",
+      "runtime_min": 134,
+      "rating": "15+",
+      "catalog_no": "137"
+    },
+    {
+      "film_id": "4478",
+      "title": "我們的藍調時光：第1-2集",
+      "runtime_min": 96,
+      "rating": "6+",
+      "catalog_no": "138"
+    },
+    {
+      "film_id": "4484",
+      "title": "急診室的奇蹟：第1-2集",
+      "runtime_min": 94,
+      "rating": "12+",
+      "catalog_no": "139"
+    },
+    {
+      "film_id": "4497",
+      "title": "刺水",
+      "runtime_min": 63,
+      "rating": "6+",
+      "catalog_no": "140"
+    },
+    {
+      "film_id": "4514",
+      "title": "不軌劇場",
+      "runtime_min": 87,
+      "rating": "6+",
+      "catalog_no": "142"
+    },
+    {
+      "film_id": "4542",
+      "title": "和我說話",
+      "runtime_min": 69,
+      "rating": "6+",
+      "catalog_no": "144"
+    },
+    {
+      "film_id": "4409",
+      "title": "完美家庭風暴",
+      "runtime_min": 146,
+      "rating": "6+",
+      "catalog_no": "147"
+    },
+    {
+      "film_id": "4411",
+      "title": "野馬九號",
+      "runtime_min": 116,
+      "rating": "12+",
+      "catalog_no": "148"
+    },
+    {
+      "film_id": "4413",
+      "title": "雙生狂花",
+      "runtime_min": 109,
+      "rating": "12+",
+      "catalog_no": "149"
+    },
+    {
+      "film_id": "4416",
+      "title": "克里姆林宮的巫師",
+      "runtime_min": 145,
+      "rating": "15+",
+      "catalog_no": "150"
+    },
+    {
+      "film_id": "4418",
+      "title": "橘子味婚禮",
+      "runtime_min": 115,
+      "rating": "15+",
+      "catalog_no": "151"
+    },
+    {
+      "film_id": "4421",
+      "title": "親密怪物",
+      "runtime_min": 115,
+      "rating": "12+",
+      "catalog_no": "152"
+    },
+    {
+      "film_id": "4422",
+      "title": "豪宅女僕日記",
+      "runtime_min": 93,
+      "rating": "12+",
+      "catalog_no": "153"
+    },
+    {
+      "film_id": "4429",
+      "title": "瘋癲老人日記",
+      "runtime_min": 121,
+      "rating": "15+",
+      "catalog_no": "154"
+    },
+    {
+      "film_id": "4435",
+      "title": "假如愛有如果",
+      "runtime_min": 164,
+      "rating": "15+",
+      "catalog_no": "155"
+    },
+    {
+      "film_id": "4415",
+      "title": "我們的救贖",
+      "runtime_min": 158,
+      "rating": "12+",
+      "catalog_no": "157"
+    },
+    {
+      "film_id": "4419",
+      "title": "醉愛每一天",
+      "runtime_min": 115,
+      "rating": "12+",
+      "catalog_no": "158"
+    },
+    {
+      "film_id": "4423",
+      "title": "愛的對峙",
+      "runtime_min": 135,
+      "rating": "6+",
+      "catalog_no": "159"
+    },
+    {
+      "film_id": "4428",
+      "title": "蝴蝶果醬的滋味",
+      "runtime_min": 102,
+      "rating": "15+",
+      "catalog_no": "160"
+    },
+    {
+      "film_id": "4437",
+      "title": "愛到舞春",
+      "runtime_min": 122,
+      "rating": "12+",
+      "catalog_no": "161"
+    },
+    {
+      "film_id": "4443",
+      "title": "你不屬於這裡",
+      "runtime_min": 154,
+      "rating": "6+",
+      "catalog_no": "162"
+    },
+    {
+      "film_id": "4449",
+      "title": "熱帶莊園魅影",
+      "runtime_min": 105,
+      "rating": "18+",
+      "catalog_no": "163"
+    },
+    {
+      "film_id": "4456",
+      "title": "崩塌之家",
+      "runtime_min": 130,
+      "rating": "6+",
+      "catalog_no": "164"
+    },
+    {
+      "film_id": "4469",
+      "title": "NAZA：附帶損傷",
+      "runtime_min": 77,
+      "rating": "15+",
+      "catalog_no": "165"
+    },
+    {
+      "film_id": "4477",
+      "title": "革命練習曲",
+      "runtime_min": 101,
+      "rating": "15+",
+      "catalog_no": "166"
+    },
+    {
+      "film_id": "4483",
+      "title": "我蓋了一座小屋想妳",
+      "runtime_min": 78,
+      "rating": "6+",
+      "catalog_no": "167"
+    },
+    {
+      "film_id": "4491",
+      "title": "噤聲：她們的故事",
+      "runtime_min": 97,
+      "rating": "6+",
+      "catalog_no": "168"
+    },
+    {
+      "film_id": "4501",
+      "title": "當戀愛顯化時",
+      "runtime_min": 102,
+      "rating": "15+",
+      "catalog_no": "170"
+    },
+    {
+      "film_id": "4505",
+      "title": "行過微光之路",
+      "runtime_min": 101,
+      "rating": "6+",
+      "catalog_no": "171"
+    },
+    {
+      "film_id": "4512",
+      "title": "愛╳死╳藝術家",
+      "runtime_min": 102,
+      "rating": "12+",
+      "catalog_no": "172"
+    },
+    {
+      "film_id": "4517",
+      "title": "餘燼青春",
+      "runtime_min": 101,
+      "rating": "6+",
+      "catalog_no": "173"
+    },
+    {
+      "film_id": "4525",
+      "title": "親愛的不速之客",
+      "runtime_min": 99,
+      "rating": "6+",
+      "catalog_no": "174"
+    },
+    {
+      "film_id": "4528",
+      "title": "破碎之後我們相擁",
+      "runtime_min": 121,
+      "rating": "15+",
+      "catalog_no": "175"
+    },
+    {
+      "film_id": "4538",
+      "title": "藍色是太陽的顏色",
+      "runtime_min": 110,
+      "rating": "12+",
+      "catalog_no": "176"
+    },
+    {
+      "film_id": "4431",
+      "title": "腥紅女爵",
+      "runtime_min": 119,
+      "rating": "12+",
+      "catalog_no": "178"
+    },
+    {
+      "film_id": "4450",
+      "title": "夢迴險路",
+      "runtime_min": 163,
+      "rating": "12+",
+      "catalog_no": "179"
+    },
+    {
+      "film_id": "4462",
+      "title": "靈魂未知數",
+      "runtime_min": 141,
+      "rating": "18+",
+      "catalog_no": "180"
+    },
+    {
+      "film_id": "4473",
+      "title": "紅岩小鬼大激鬥",
+      "runtime_min": 91,
+      "rating": "0+",
+      "catalog_no": "181"
+    },
+    {
+      "film_id": "4489",
+      "title": "人間壞格",
+      "runtime_min": 67,
+      "rating": "15+",
+      "catalog_no": "182"
+    },
+    {
+      "film_id": "4442",
+      "title": "迷霧中的大象",
+      "runtime_min": 108,
+      "rating": "12+",
+      "catalog_no": "184"
+    },
+    {
+      "film_id": "4448",
+      "title": "燃燒幻夢",
+      "runtime_min": 118,
+      "rating": "12+",
+      "catalog_no": "185"
+    },
+    {
+      "film_id": "4454",
+      "title": "通靈少年神遊中",
+      "runtime_min": 119,
+      "rating": "15+",
+      "catalog_no": "186"
+    },
+    {
+      "film_id": "4457",
+      "title": "果樹下的戀愛夢",
+      "runtime_min": 97,
+      "rating": "12+",
+      "catalog_no": "187"
+    },
+    {
+      "film_id": "4461",
+      "title": "菲律賓女孩",
+      "runtime_min": 100,
+      "rating": "12+",
+      "catalog_no": "188"
+    },
+    {
+      "film_id": "4468",
+      "title": "失落殘響",
+      "runtime_min": 128,
+      "rating": "12+",
+      "catalog_no": "189"
+    },
+    {
+      "film_id": "4474",
+      "title": "沙河下的祕密",
+      "runtime_min": 95,
+      "rating": "6+",
+      "catalog_no": "190"
+    },
+    {
+      "film_id": "4476",
+      "title": "最初的世界",
+      "runtime_min": 115,
+      "rating": "6+",
+      "catalog_no": "191"
+    },
+    {
+      "film_id": "4507",
+      "title": "當風吹來奈義町",
+      "runtime_min": 110,
+      "rating": "0+",
+      "catalog_no": "193"
+    },
+    {
+      "film_id": "4519",
+      "title": "尼爾森先生，你殺過人嗎？",
+      "runtime_min": 116,
+      "rating": "15+",
+      "catalog_no": "194"
+    },
+    {
+      "film_id": "4523",
+      "title": "無人知曉的孩子們",
+      "runtime_min": 150,
+      "rating": "12+",
+      "catalog_no": "195"
+    },
+    {
+      "film_id": "4535",
+      "title": "事到如今還談什麼愛",
+      "runtime_min": 128,
+      "rating": "6+",
+      "catalog_no": "196"
+    },
+    {
+      "film_id": "4545",
+      "title": "富士子不能輸",
+      "runtime_min": 95,
+      "rating": "0+",
+      "catalog_no": "197"
+    },
+    {
+      "film_id": "4548",
+      "title": "無用之人",
+      "runtime_min": 109,
+      "rating": "0+",
+      "catalog_no": "198"
+    },
+    {
+      "film_id": "4482",
+      "title": "有用的人",
+      "runtime_min": 111,
+      "rating": "0+",
+      "catalog_no": "200"
+    },
+    {
+      "film_id": "4487",
+      "title": "暗影天使 ( 司法講堂 )",
+      "runtime_min": 129,
+      "rating": "12+",
+      "catalog_no": "201"
+    },
+    {
+      "film_id": "4490",
+      "title": "首爾守護者 ( 司法講堂 )",
+      "runtime_min": 72,
+      "rating": "6+",
+      "catalog_no": "202"
+    },
+    {
+      "film_id": "4498",
+      "title": "檢察追緝令 ( 司法講堂 )",
+      "runtime_min": 114,
+      "rating": "12+",
+      "catalog_no": "203"
+    },
+    {
+      "film_id": "4503",
+      "title": "破碎十七 ( 司法講堂 )",
+      "runtime_min": 106,
+      "rating": "15+",
+      "catalog_no": "204"
+    },
+    {
+      "film_id": "4506",
+      "title": "無處安放的青春 ( 司法講堂 )",
+      "runtime_min": 105,
+      "rating": "12+",
+      "catalog_no": "205"
+    },
+    {
+      "film_id": "4433",
+      "title": "生命中最美好的夏令營",
+      "runtime_min": 106,
+      "rating": "12+",
+      "catalog_no": "207"
+    },
+    {
+      "film_id": "4439",
+      "title": "池畔的夏日憂傷",
+      "runtime_min": 91,
+      "rating": "12+",
+      "catalog_no": "208"
+    },
+    {
+      "film_id": "4446",
+      "title": "家的形狀",
+      "runtime_min": 89,
+      "rating": "6+",
+      "catalog_no": "209"
+    },
+    {
+      "film_id": "4453",
+      "title": "雲朵上的點點名",
+      "runtime_min": 80,
+      "rating": "0+",
+      "catalog_no": "210"
+    },
+    {
+      "film_id": "4494",
+      "title": "跨出溫室的愛戀",
+      "runtime_min": 103,
+      "rating": "15+",
+      "catalog_no": "214"
+    },
+    {
+      "film_id": "4500",
+      "title": "以你的記憶審判我",
+      "runtime_min": 122,
+      "rating": "6+",
+      "catalog_no": "215"
+    },
+    {
+      "film_id": "4504",
+      "title": "紐約同志情與慾",
+      "runtime_min": 97,
+      "rating": "12+",
+      "catalog_no": "216"
+    },
+    {
+      "film_id": "4509",
+      "title": "男優阿虎",
+      "runtime_min": 126,
+      "rating": "18+",
+      "catalog_no": "217"
+    },
+    {
+      "film_id": "4515",
+      "title": "超派妖姬救地球",
+      "runtime_min": 90,
+      "rating": "12+",
+      "catalog_no": "218"
+    },
+    {
+      "film_id": "4520",
+      "title": "裝扮遊戲",
+      "runtime_min": 80,
+      "rating": "6+",
+      "catalog_no": "219"
+    },
+    {
+      "film_id": "4531",
+      "title": "高檔貨",
+      "runtime_min": 102,
+      "rating": "18+",
+      "catalog_no": "220"
     },
     {
       "film_id": "4583",
       "title": "綠洲合唱團：莫帶憤怒回首",
       "runtime_min": 123,
-      "rating": "12+"
+      "rating": "12+",
+      "catalog_no": "222"
+    },
+    {
+      "film_id": "4584",
+      "title": "Pulp：安可要唱哪一首",
+      "runtime_min": 99,
+      "rating": "6+",
+      "catalog_no": "223"
+    },
+    {
+      "film_id": "4586",
+      "title": "世界上最寂寞的藍調",
+      "runtime_min": 86,
+      "rating": "6+",
+      "catalog_no": "224"
+    },
+    {
+      "film_id": "4585",
+      "title": "我就愛搖滾",
+      "runtime_min": 111,
+      "rating": "15+",
+      "catalog_no": "225"
+    },
+    {
+      "film_id": "4434",
+      "title": "就是柳柳的他",
+      "runtime_min": 105,
+      "rating": "12+",
+      "catalog_no": "227"
+    },
+    {
+      "film_id": "4440",
+      "title": "肚皮拉警報",
+      "runtime_min": 76,
+      "rating": "12+",
+      "catalog_no": "228"
+    },
+    {
+      "film_id": "4452",
+      "title": "終極殺鎮",
+      "runtime_min": 91,
+      "rating": "15+",
+      "catalog_no": "229"
+    },
+    {
+      "film_id": "4463",
+      "title": "暗夜魔嬰",
+      "runtime_min": 92,
+      "rating": "15+",
+      "catalog_no": "230"
+    },
+    {
+      "film_id": "4475",
+      "title": "瘦怨",
+      "runtime_min": 112,
+      "rating": "15+",
+      "catalog_no": "231"
+    },
+    {
+      "film_id": "4481",
+      "title": "坂本日常",
+      "runtime_min": 129,
+      "rating": "12+",
+      "catalog_no": "232"
+    },
+    {
+      "film_id": "4488",
+      "title": "鼠門秀",
+      "runtime_min": 95,
+      "rating": "15+",
+      "catalog_no": "233"
+    },
+    {
+      "film_id": "4492",
+      "title": "牧一：女人村傳奇",
+      "runtime_min": 93,
+      "rating": "6+",
+      "catalog_no": "234"
+    },
+    {
+      "film_id": "4563",
+      "title": "南國再見，南國",
+      "runtime_min": 112,
+      "rating": "12+",
+      "catalog_no": "236"
+    },
+    {
+      "film_id": "4568",
+      "title": "蝶變",
+      "runtime_min": 90,
+      "rating": "6+",
+      "catalog_no": "237"
+    },
+    {
+      "film_id": "4572",
+      "title": "盜夢偵探",
+      "runtime_min": 90,
+      "rating": "12+",
+      "catalog_no": "238"
+    },
+    {
+      "film_id": "4573",
+      "title": "理性與感性",
+      "runtime_min": 136,
+      "rating": "6+",
+      "catalog_no": "239"
+    },
+    {
+      "film_id": "4576",
+      "title": "凡爾賽拜金女",
+      "runtime_min": 123,
+      "rating": "6+",
+      "catalog_no": "240"
+    },
+    {
+      "film_id": "4581",
+      "title": "鏡頭之外：凡爾賽拜金女",
+      "runtime_min": 87,
+      "rating": "6+",
+      "catalog_no": "241"
+    },
+    {
+      "film_id": "4582",
+      "title": "克里斯馬克：未來式鄉愁",
+      "runtime_min": 76,
+      "rating": "6+",
+      "catalog_no": "242"
+    },
+    {
+      "film_id": "4560",
+      "title": "南特傑克",
+      "runtime_min": 120,
+      "rating": "6+",
+      "catalog_no": "246"
+    },
+    {
+      "film_id": "4570",
+      "title": "櫻桃的滋味",
+      "runtime_min": 99,
+      "rating": "6+",
+      "catalog_no": "247"
+    },
+    {
+      "film_id": "4574",
+      "title": "尤里西斯生命之旅",
+      "runtime_min": 175,
+      "rating": "6+",
+      "catalog_no": "248"
+    },
+    {
+      "film_id": "4579",
+      "title": "追逐蝴蝶",
+      "runtime_min": 118,
+      "rating": "6+",
+      "catalog_no": "249"
+    },
+    {
+      "film_id": "4580",
+      "title": "大象",
+      "runtime_min": 81,
+      "rating": "15+",
+      "catalog_no": "250"
+    },
+    {
+      "film_id": "4458",
+      "title": "豬與軍艦",
+      "runtime_min": 108,
+      "rating": "15+",
+      "catalog_no": "254"
+    },
+    {
+      "film_id": "4467",
+      "title": "日本昆蟲記",
+      "runtime_min": 123,
+      "rating": "15+",
+      "catalog_no": "255"
+    },
+    {
+      "film_id": "4471",
+      "title": "赤色殺意",
+      "runtime_min": 150,
+      "rating": "15+",
+      "catalog_no": "256"
+    },
+    {
+      "film_id": "4486",
+      "title": "人類學入門",
+      "runtime_min": 128,
+      "rating": "18+",
+      "catalog_no": "257"
+    },
+    {
+      "film_id": "4493",
+      "title": "我要復仇",
+      "runtime_min": 141,
+      "rating": "18+",
+      "catalog_no": "258"
+    },
+    {
+      "film_id": "4495",
+      "title": "黑雨",
+      "runtime_min": 122,
+      "rating": "15+",
+      "catalog_no": "259"
+    },
+    {
+      "film_id": "4510",
+      "title": "鰻魚",
+      "runtime_min": 117,
+      "rating": "15+",
+      "catalog_no": "260"
+    },
+    {
+      "film_id": "4513",
+      "title": "紅橋下的暖流",
+      "runtime_min": 119,
+      "rating": "15+",
+      "catalog_no": "261"
+    },
+    {
+      "film_id": "4518",
+      "title": "駭人怪物",
+      "runtime_min": 120,
+      "rating": "12+",
+      "catalog_no": "265"
+    },
+    {
+      "film_id": "4526",
+      "title": "非常母親",
+      "runtime_min": 129,
+      "rating": "12+",
+      "catalog_no": "265"
+    },
+    {
+      "film_id": "4527",
+      "title": "死亡密碼",
+      "runtime_min": 84,
+      "rating": "15+",
+      "catalog_no": "267"
+    },
+    {
+      "film_id": "4533",
+      "title": "黑天鵝",
+      "runtime_min": 108,
+      "rating": "18+",
+      "catalog_no": "267"
+    },
+    {
+      "film_id": "4537",
+      "title": "笑之大學",
+      "runtime_min": 121,
+      "rating": "0+",
+      "catalog_no": "268"
+    },
+    {
+      "film_id": "4541",
+      "title": "綿羊偵探團",
+      "runtime_min": 109,
+      "rating": "0+",
+      "catalog_no": "269"
     },
     {
       "film_id": "e913-1yxsqxw",
       "title": "電影沙龍：金馬✕柏林新世代｜電影如何與年輕觀眾相遇？",
       "runtime_min": 90,
       "rating": ""
-    },
-    {
-      "film_id": "4413",
-      "title": "雙生狂花",
-      "runtime_min": 109,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4415",
-      "title": "我們的救贖",
-      "runtime_min": 158,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4433",
-      "title": "生命中最美好的夏令營",
-      "runtime_min": 106,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4438",
-      "title": "陽光女子合唱團",
-      "runtime_min": 134,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4442",
-      "title": "迷霧中的大象",
-      "runtime_min": 108,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4443",
-      "title": "你不屬於這裡",
-      "runtime_min": 154,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4448",
-      "title": "燃燒幻夢",
-      "runtime_min": 118,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4449",
-      "title": "熱帶莊園魅影",
-      "runtime_min": 105,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4450",
-      "title": "夢迴險路",
-      "runtime_min": 163,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4454",
-      "title": "通靈少年神遊中",
-      "runtime_min": 119,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4456",
-      "title": "崩塌之家",
-      "runtime_min": 130,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4466",
-      "title": "歌舞的我們",
-      "runtime_min": 85,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4470",
-      "title": "我的意思是",
-      "runtime_min": 134,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4488",
-      "title": "鼠門秀",
-      "runtime_min": 95,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4489",
-      "title": "人間壞格",
-      "runtime_min": 67,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4493",
-      "title": "我要復仇",
-      "runtime_min": 141,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4494",
-      "title": "跨出溫室的愛戀",
-      "runtime_min": 103,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4497",
-      "title": "刺水",
-      "runtime_min": 63,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4501",
-      "title": "當戀愛顯化時",
-      "runtime_min": 102,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4505",
-      "title": "行過微光之路",
-      "runtime_min": 101,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4507",
-      "title": "當風吹來奈義町",
-      "runtime_min": 110,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4509",
-      "title": "男優阿虎",
-      "runtime_min": 126,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4510",
-      "title": "鰻魚",
-      "runtime_min": 117,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4512",
-      "title": "愛╳死╳藝術家",
-      "runtime_min": 102,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4513",
-      "title": "紅橋下的暖流",
-      "runtime_min": 119,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4519",
-      "title": "尼爾森先生，你殺過人嗎？",
-      "runtime_min": 116,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4523",
-      "title": "無人知曉的孩子們",
-      "runtime_min": 150,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4526",
-      "title": "非常母親",
-      "runtime_min": 129,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4534",
-      "title": "孽子",
-      "runtime_min": 106,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4541",
-      "title": "綿羊偵探團",
-      "runtime_min": 109,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4542",
-      "title": "和我說話",
-      "runtime_min": 69,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4548",
-      "title": "無用之人",
-      "runtime_min": 109,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4560",
-      "title": "南特傑克",
-      "runtime_min": 120,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4563",
-      "title": "南國再見，南國",
-      "runtime_min": 112,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4570",
-      "title": "櫻桃的滋味",
-      "runtime_min": 99,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4572",
-      "title": "盜夢偵探",
-      "runtime_min": 90,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4574",
-      "title": "尤里西斯生命之旅",
-      "runtime_min": 175,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4585",
-      "title": "我就愛搖滾",
-      "runtime_min": 111,
-      "rating": "15+"
     },
     {
       "film_id": "e912-agz1ov",
@@ -712,108 +1091,6 @@
       "rating": ""
     },
     {
-      "film_id": "4414",
-      "title": "女孩",
-      "runtime_min": 124,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4417",
-      "title": "我親愛的怪孩子",
-      "runtime_min": 108,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4423",
-      "title": "愛的對峙",
-      "runtime_min": 135,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4424",
-      "title": "泡泡糖女孩 ( 業界限定場 )",
-      "runtime_min": 99,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4426",
-      "title": "謊言生活",
-      "runtime_min": 110,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4432",
-      "title": "第四幕",
-      "runtime_min": 113,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4434",
-      "title": "就是柳柳的他",
-      "runtime_min": 105,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4441",
-      "title": "沙央",
-      "runtime_min": 100,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4451",
-      "title": "順風順水",
-      "runtime_min": 89,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4457",
-      "title": "果樹下的戀愛夢",
-      "runtime_min": 97,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4460",
-      "title": "一路狂奔",
-      "runtime_min": 92,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4464",
-      "title": "善男信女",
-      "runtime_min": 97,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4468",
-      "title": "失落殘響",
-      "runtime_min": 128,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4492",
-      "title": "牧一：女人村傳奇",
-      "runtime_min": 93,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4496",
-      "title": "搭錯車",
-      "runtime_min": 93,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4514",
-      "title": "不軌劇場",
-      "runtime_min": 87,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4545",
-      "title": "富士子不能輸",
-      "runtime_min": 95,
-      "rating": "0+"
-    },
-    {
       "film_id": "e913-19m7rwm",
       "title": "電影沙龍：電影如何成為我們｜策展人的來訪",
       "runtime_min": 90,
@@ -830,126 +1107,6 @@
       "title": "大師講堂：戴倫艾洛諾夫斯基",
       "runtime_min": 60,
       "rating": ""
-    },
-    {
-      "film_id": "4412",
-      "title": "雙囍",
-      "runtime_min": 130,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4444",
-      "title": "花臉貓：修羅道",
-      "runtime_min": 102,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4516",
-      "title": "狂忘警探 ( 業界限定場 )",
-      "runtime_min": 87,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4521",
-      "title": "我們不是陌生人 ( 業界限定場 )",
-      "runtime_min": 157,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4551",
-      "title": "那道陽光在外明媚",
-      "runtime_min": 84,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4552",
-      "title": "離開即景",
-      "runtime_min": 82,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4553",
-      "title": "嘉翠麗",
-      "runtime_min": 67,
-      "rating": "0+"
-    },
-    {
-      "film_id": "4554",
-      "title": "快要到達家了",
-      "runtime_min": 96,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4556",
-      "title": "魔法星圖",
-      "runtime_min": 85,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4558",
-      "title": "你不在這個蛋糕裡",
-      "runtime_min": 46,
-      "rating": "12+"
-    },
-    {
-      "film_id": "4565",
-      "title": "果",
-      "runtime_min": 56,
-      "rating": "18+"
-    },
-    {
-      "film_id": "4568",
-      "title": "蝶變",
-      "runtime_min": 90,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4573",
-      "title": "理性與感性",
-      "runtime_min": 136,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4576",
-      "title": "凡爾賽拜金女",
-      "runtime_min": 123,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4577",
-      "title": "三隻小豬",
-      "runtime_min": 61,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4579",
-      "title": "追逐蝴蝶",
-      "runtime_min": 118,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4580",
-      "title": "大象",
-      "runtime_min": 81,
-      "rating": "15+"
-    },
-    {
-      "film_id": "4581",
-      "title": "鏡頭之外：凡爾賽拜金女",
-      "runtime_min": 87,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4584",
-      "title": "Pulp：安可要唱哪一首",
-      "runtime_min": 99,
-      "rating": "6+"
-    },
-    {
-      "film_id": "4586",
-      "title": "世界上最寂寞的藍調",
-      "runtime_min": 86,
-      "rating": "6+"
     },
     {
       "film_id": "e913-1sxz7hk",
@@ -974,12 +1131,6 @@
       "title": "電影沙龍：金馬✕奈派克｜亞洲電影新銳面對面C",
       "runtime_min": 60,
       "rating": ""
-    },
-    {
-      "film_id": "4562",
-      "title": "滄海琴聲",
-      "runtime_min": 114,
-      "rating": "6+"
     },
     {
       "film_id": "e912-aeyw6c",

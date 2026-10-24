@@ -16,6 +16,8 @@ export interface Film {
   title: string;
   runtime_min: number;
   rating: string;
+  /** 紙本手冊目次表的頁碼（使用者口中的片號，如 "089"）；沒有對照到者未設 */
+  catalog_no?: string;
 }
 
 export interface Venue {

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ParsedSchedule } from "../../scripts/scrape/parse";
+import type { CatalogNumberEntry } from "../../scripts/scrape/catalog";
+import type { Film } from "../../src/domain/types";
 
 const FIXTURE_DIR = resolve(process.cwd(), "scripts/scrape/fixtures");
 
@@ -13,8 +15,11 @@ export interface ScraperWorld {
   date: string | null;
   html: string | null;
   parsed: ParsedSchedule | null;
+  films: Film[];
+  numbers: CatalogNumberEntry[];
+  numbered: Film[] | null;
 }
 
 export function createScraperWorld(): ScraperWorld {
-  return { date: null, html: null, parsed: null };
+  return { date: null, html: null, parsed: null, films: [], numbers: [], numbered: null };
 }

@@ -569,3 +569,22 @@ Then("手機的選片頁層內順序如下：", async ({ page, world }, dataTabl
   await phone.reload(); // 再讀確認
   await check();
 });
+
+// 官方連結
+When("觀眾打開分享頁", async ({ page, world }) => {
+  await openTab(page, world, "分享");
+  await expect(page.getByTestId("official-links")).toBeVisible();
+});
+
+Then("分享頁的官方連結如下：", async ({ page }, table: DataTable) => {
+  const rows = table.hashes();
+  const links = page.getByTestId("official-links").getByTestId("official-link");
+  await expect(links).toHaveCount(rows.length);
+  for (let i = 0; i < rows.length; i++) {
+    const a = links.nth(i);
+    await expect(a).toHaveText(rows[i]["名稱"]);
+    await expect(a).toHaveAttribute("href", rows[i]["網址"]);
+    await expect(a).toHaveAttribute("target", "_blank");
+    await expect(a).toHaveAttribute("rel", /noopener/);
+  }
+});

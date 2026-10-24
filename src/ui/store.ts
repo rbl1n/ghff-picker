@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { sortFilmsByCatalogOrder } from "../domain/catalog-order";
 import type { Catalog, DuoItineraryEntry, FilmPreference, ItineraryEntry, PartnerData, UnscheduledMustFilm, UserState } from "../domain/types";
 import { buildItinerary } from "../domain/schedule";
 import { scheduleDuo } from "../domain/duo";
@@ -153,7 +154,7 @@ export async function loadCatalog(): Promise<void> {
     if (!res.ok) throw new Error("bad status");
     const data = (await res.json()) as Catalog;
     if (!Array.isArray(data.films) || !Array.isArray(data.sessions)) throw new Error("bad shape");
-    set({ catalog: { status: "ready", catalog: data } });
+    set({ catalog: { status: "ready", catalog: { ...data, films: sortFilmsByCatalogOrder(data.films) } } });
     if (pendingSelfRanks || pendingPartnerRanks) {
       // 名次初始化完成後，把轉成 3 的內容寫回（測試與搶票頁都以保存內容為準）
       const done = withPendingRanks(snap.user);

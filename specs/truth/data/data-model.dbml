@@ -41,8 +41,9 @@ Table films {
   title varchar
   runtime_min int [note: '片長（分）']
   rating varchar [note: '分級，例：普、12+、15+']
+  catalog_no varchar [null, note: '紙本手冊目次表的頁碼（片號），三位數字字串，例：089；使用者以此稱呼影片。由 scripts/scrape/catalog-numbers.json 對照產生，沒有對照到者為空。films 陣列依手冊順序排列：片號由小到大、同號依目次表位置、沒有片號者接在最後（保持原順序）；所有「影片順序」（同分決勝、層內名次初始化）都以此順序為準。']
 
-  Note: '影片；擁有一或多個場次。使用者以影片為單位分層（FR-002、FR-004）。'
+  Note: '影片；擁有一或多個場次。短片單元在官網以第一部短片的片名上架，片號取該單元的起始頁。使用者以影片為單位分層（FR-002、FR-004）。'
 }
 
 Table venues {

@@ -4,6 +4,8 @@ import { isSessionAvailable } from "../domain/availability";
 import { appendToTier, moveWithinTier, removeFromTier, tierOrder } from "../domain/order";
 import { sessionStartAbs } from "../domain/time";
 import { CatalogGate } from "./CatalogGate";
+import { CatNo } from "./CatNo";
+import { filmDetailUrl } from "./links";
 import { LEGEND, MARK_LABEL, TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime } from "./format";
 import { runSchedule, updateUser, useStore } from "./store";
 
@@ -68,7 +70,7 @@ function moveInTier(filmId: string, direction: -1 | 1): void {
 
 /** 層內順序檢視：依三層列出已標記影片，上移／下移調整自己的順序（兩人模式也只調整自己的） */
 function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPreference[] }) {
-  const titleOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f.title])), [catalog]);
+  const filmOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
   if (prefs.length === 0) return null;
   return (
     <details className="card tierorder" open>
@@ -85,9 +87,12 @@ function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPrefer
             </h3>
             {list.length === 0 && <p className="hint">這一層還沒有影片</p>}
             {list.map((p, i) => (
-              <div key={p.film_id} className="oitem" data-testid="tier-order-item" data-title={titleOf.get(p.film_id) ?? p.film_id}>
+              <div key={p.film_id} className="oitem" data-testid="tier-order-item" data-title={filmOf.get(p.film_id)?.title ?? p.film_id}>
                 <span className="rk mono">{i + 1}</span>
-                <span className="ttl">{titleOf.get(p.film_id) ?? p.film_id}</span>
+                <span className="ttl">
+                  <CatNo no={filmOf.get(p.film_id)?.catalog_no} />
+                  <span data-testid="film-title">{filmOf.get(p.film_id)?.title ?? p.film_id}</span>
+                </span>
                 <button className="mv" aria-label="上移" disabled={i === 0} onClick={() => moveInTier(p.film_id, -1)}>
                   ↑
                 </button>
@@ -124,7 +129,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
   const counts = TIERS.map((t) => user.film_preferences.filter((p) => p.tier === t).length);
   const q = query.trim();
   const shown = catalog.films.filter((f) => {
-    if (q && !f.title.includes(q)) return false;
+    if (q && !f.title.includes(q) && !(f.catalog_no ?? "").includes(q)) return false;
     const isSkipped = skipped.has(f.film_id);
     if (filter === "skipped") return isSkipped;
     if (isSkipped) return false; // 不看的片只在「不看」篩選列出
@@ -202,6 +207,7 @@ const FilmCard = memo(function FilmCard(props: {
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
       <div className="row">
+        <CatNo no={film.catalog_no} />
         <h2>{film.title}</h2>
         <span className="tag">{film.rating}</span>
         {pref?.is_hot && (
@@ -210,6 +216,11 @@ const FilmCard = memo(function FilmCard(props: {
           </span>
         )}
         <span className="sp" />
+        {filmDetailUrl(film.film_id) && (
+          <a className="offlink" data-testid="film-official-link" href={filmDetailUrl(film.film_id)} target="_blank" rel="noopener noreferrer">
+            官網介紹
+          </a>
+        )}
         <span className="hint">{sessions.length} 場</span>
       </div>
       <div className="tiers" role="group" aria-label={`${film.title} 的層級`}>

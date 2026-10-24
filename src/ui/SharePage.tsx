@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { buildShareUrl, qrDataUrl } from "../state/share";
+import { OFFICIAL_LINKS } from "./links";
 import { useStore } from "./store";
 
 export function SharePage() {
@@ -31,6 +32,7 @@ export function SharePage() {
   };
 
   return (
+    <>
     <section className="card">
       {user.partner && (
         <p style={{ margin: "0 0 8px", textAlign: "center" }}>
@@ -64,5 +66,18 @@ export function SharePage() {
         {toast}
       </div>
     </section>
+    <section className="card" data-testid="official-links" aria-label="官方連結">
+      <h2 style={{ margin: "0 0 8px", fontSize: 16 }}>官方連結</h2>
+      <ul className="offlinks">
+        {OFFICIAL_LINKS.map((l) => (
+          <li key={l.key}>
+            <a data-testid="official-link" data-key={l.key} href={l.url} target="_blank" rel="noopener noreferrer">
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+    </>
   );
 }

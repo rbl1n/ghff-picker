@@ -2,6 +2,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { Catalog, Film, Session, Venue } from "../../src/domain/types";
+import { applyCatalogNumbers, loadCatalogNumbers } from "./catalog";
 import { parseSchedulePage } from "./parse";
 
 export const SCHEDULE_URL = "https://www.goldenhorse.org.tw/film/programme/schedule/";
@@ -73,7 +74,11 @@ export async function scrapeAll(dates: string[], outFile = resolve(process.cwd()
     festival_year: FESTIVAL_YEAR,
     source_url: SCHEDULE_URL,
     fetched_at: new Date().toISOString(),
-    films: [...films.values()].sort((a, b) => Number(a.film_id) - Number(b.film_id)),
+    // 影片依紙本手冊目次順序排列（片號由小到大）；沒有片號者接在最後，依 film_id
+    films: applyCatalogNumbers(
+      [...films.values()].sort((a, b) => Number(a.film_id) - Number(b.film_id)),
+      loadCatalogNumbers(),
+    ),
     venues: [...venues.values()],
     sessions,
   };

@@ -1,0 +1,760 @@
+{
+  "_comment": "影片 film_id -> 紙本手冊目次表的頁碼（使用者口中的片號）。陣列順序 = 目次表出現順序（同號時的決勝）。片單改版或重抓後由 scraper 套用；未列在此的影片沒有片號、排在最後。",
+  "films": [
+    {
+      "film_id": "4430",
+      "catalog_no": "084",
+      "title": "告別的年代"
+    },
+    {
+      "film_id": "4444",
+      "catalog_no": "086",
+      "title": "花臉貓：修羅道"
+    },
+    {
+      "film_id": "4410",
+      "catalog_no": "089",
+      "title": "死亡賭局"
+    },
+    {
+      "film_id": "4414",
+      "catalog_no": "090",
+      "title": "女孩"
+    },
+    {
+      "film_id": "4417",
+      "catalog_no": "091",
+      "title": "我親愛的怪孩子"
+    },
+    {
+      "film_id": "4420",
+      "catalog_no": "092",
+      "title": "我們不是什麼"
+    },
+    {
+      "film_id": "4424",
+      "catalog_no": "093",
+      "title": "泡泡糖女孩 ( 業界限定場 )"
+    },
+    {
+      "film_id": "4427",
+      "catalog_no": "094",
+      "title": "功夫"
+    },
+    {
+      "film_id": "4432",
+      "catalog_no": "095",
+      "title": "第四幕"
+    },
+    {
+      "film_id": "4436",
+      "catalog_no": "096",
+      "title": "UFO離奇命案"
+    },
+    {
+      "film_id": "4441",
+      "catalog_no": "097",
+      "title": "沙央"
+    },
+    {
+      "film_id": "4408",
+      "catalog_no": "098",
+      "title": "泥娃娃"
+    },
+    {
+      "film_id": "4412",
+      "catalog_no": "100",
+      "title": "雙囍"
+    },
+    {
+      "film_id": "4426",
+      "catalog_no": "101",
+      "title": "謊言生活"
+    },
+    {
+      "film_id": "4438",
+      "catalog_no": "102",
+      "title": "陽光女子合唱團"
+    },
+    {
+      "film_id": "4464",
+      "catalog_no": "103",
+      "title": "善男信女"
+    },
+    {
+      "film_id": "4480",
+      "catalog_no": "104",
+      "title": "那張照片裡的我們"
+    },
+    {
+      "film_id": "4499",
+      "catalog_no": "105",
+      "title": "熊山記 Sinisusu Tua Pucumayan"
+    },
+    {
+      "film_id": "4508",
+      "catalog_no": "106",
+      "title": "日光"
+    },
+    {
+      "film_id": "4516",
+      "catalog_no": "107",
+      "title": "狂忘警探 ( 業界限定場 )"
+    },
+    {
+      "film_id": "4521",
+      "catalog_no": "108",
+      "title": "我們不是陌生人 ( 業界限定場 )"
+    },
+    {
+      "film_id": "4530",
+      "catalog_no": "109",
+      "title": "黑潮"
+    },
+    {
+      "film_id": "4547",
+      "catalog_no": "110",
+      "title": "獨奏者之舞"
+    },
+    {
+      "film_id": "4551",
+      "catalog_no": "111",
+      "title": "那道陽光在外明媚"
+    },
+    {
+      "film_id": "4552",
+      "catalog_no": "112",
+      "title": "離開即景"
+    },
+    {
+      "film_id": "4554",
+      "catalog_no": "113",
+      "title": "快要到達家了"
+    },
+    {
+      "film_id": "4555",
+      "catalog_no": "114",
+      "title": "迴山"
+    },
+    {
+      "film_id": "4556",
+      "catalog_no": "115",
+      "title": "魔法星圖"
+    },
+    {
+      "film_id": "4557",
+      "catalog_no": "116",
+      "title": "歡迎來到朵莉之家"
+    },
+    {
+      "film_id": "4562",
+      "catalog_no": "117",
+      "title": "滄海琴聲"
+    },
+    {
+      "film_id": "4565",
+      "catalog_no": "118",
+      "title": "果"
+    },
+    {
+      "film_id": "4577",
+      "catalog_no": "120",
+      "title": "三隻小豬"
+    },
+    {
+      "film_id": "4540",
+      "catalog_no": "121",
+      "title": "月亮上的業餘者"
+    },
+    {
+      "film_id": "4553",
+      "catalog_no": "123",
+      "title": "嘉翠麗"
+    },
+    {
+      "film_id": "4558",
+      "catalog_no": "124",
+      "title": "你不在這個蛋糕裡"
+    },
+    {
+      "film_id": "4496",
+      "catalog_no": "128",
+      "title": "搭錯車"
+    },
+    {
+      "film_id": "4534",
+      "catalog_no": "129",
+      "title": "孽子"
+    },
+    {
+      "film_id": "4543",
+      "catalog_no": "130",
+      "title": "兩個油漆匠"
+    },
+    {
+      "film_id": "4445",
+      "catalog_no": "132",
+      "title": "中場休息 ( 含10分鐘中場休息 )"
+    },
+    {
+      "film_id": "4451",
+      "catalog_no": "133",
+      "title": "順風順水"
+    },
+    {
+      "film_id": "4455",
+      "catalog_no": "134",
+      "title": "明月共此時"
+    },
+    {
+      "film_id": "4460",
+      "catalog_no": "135",
+      "title": "一路狂奔"
+    },
+    {
+      "film_id": "4466",
+      "catalog_no": "136",
+      "title": "歌舞的我們"
+    },
+    {
+      "film_id": "4470",
+      "catalog_no": "137",
+      "title": "我的意思是"
+    },
+    {
+      "film_id": "4478",
+      "catalog_no": "138",
+      "title": "我們的藍調時光：第1-2集"
+    },
+    {
+      "film_id": "4484",
+      "catalog_no": "139",
+      "title": "急診室的奇蹟：第1-2集"
+    },
+    {
+      "film_id": "4497",
+      "catalog_no": "140",
+      "title": "刺水"
+    },
+    {
+      "film_id": "4514",
+      "catalog_no": "142",
+      "title": "不軌劇場"
+    },
+    {
+      "film_id": "4542",
+      "catalog_no": "144",
+      "title": "和我說話"
+    },
+    {
+      "film_id": "4409",
+      "catalog_no": "147",
+      "title": "完美家庭風暴"
+    },
+    {
+      "film_id": "4411",
+      "catalog_no": "148",
+      "title": "野馬九號"
+    },
+    {
+      "film_id": "4413",
+      "catalog_no": "149",
+      "title": "雙生狂花"
+    },
+    {
+      "film_id": "4416",
+      "catalog_no": "150",
+      "title": "克里姆林宮的巫師"
+    },
+    {
+      "film_id": "4418",
+      "catalog_no": "151",
+      "title": "橘子味婚禮"
+    },
+    {
+      "film_id": "4421",
+      "catalog_no": "152",
+      "title": "親密怪物"
+    },
+    {
+      "film_id": "4422",
+      "catalog_no": "153",
+      "title": "豪宅女僕日記"
+    },
+    {
+      "film_id": "4429",
+      "catalog_no": "154",
+      "title": "瘋癲老人日記"
+    },
+    {
+      "film_id": "4435",
+      "catalog_no": "155",
+      "title": "假如愛有如果"
+    },
+    {
+      "film_id": "4415",
+      "catalog_no": "157",
+      "title": "我們的救贖"
+    },
+    {
+      "film_id": "4419",
+      "catalog_no": "158",
+      "title": "醉愛每一天"
+    },
+    {
+      "film_id": "4423",
+      "catalog_no": "159",
+      "title": "愛的對峙"
+    },
+    {
+      "film_id": "4428",
+      "catalog_no": "160",
+      "title": "蝴蝶果醬的滋味"
+    },
+    {
+      "film_id": "4437",
+      "catalog_no": "161",
+      "title": "愛到舞春"
+    },
+    {
+      "film_id": "4443",
+      "catalog_no": "162",
+      "title": "你不屬於這裡"
+    },
+    {
+      "film_id": "4449",
+      "catalog_no": "163",
+      "title": "熱帶莊園魅影"
+    },
+    {
+      "film_id": "4456",
+      "catalog_no": "164",
+      "title": "崩塌之家"
+    },
+    {
+      "film_id": "4469",
+      "catalog_no": "165",
+      "title": "NAZA：附帶損傷"
+    },
+    {
+      "film_id": "4477",
+      "catalog_no": "166",
+      "title": "革命練習曲"
+    },
+    {
+      "film_id": "4483",
+      "catalog_no": "167",
+      "title": "我蓋了一座小屋想妳"
+    },
+    {
+      "film_id": "4491",
+      "catalog_no": "168",
+      "title": "噤聲：她們的故事"
+    },
+    {
+      "film_id": "4501",
+      "catalog_no": "170",
+      "title": "當戀愛顯化時"
+    },
+    {
+      "film_id": "4505",
+      "catalog_no": "171",
+      "title": "行過微光之路"
+    },
+    {
+      "film_id": "4512",
+      "catalog_no": "172",
+      "title": "愛╳死╳藝術家"
+    },
+    {
+      "film_id": "4517",
+      "catalog_no": "173",
+      "title": "餘燼青春"
+    },
+    {
+      "film_id": "4525",
+      "catalog_no": "174",
+      "title": "親愛的不速之客"
+    },
+    {
+      "film_id": "4528",
+      "catalog_no": "175",
+      "title": "破碎之後我們相擁"
+    },
+    {
+      "film_id": "4538",
+      "catalog_no": "176",
+      "title": "藍色是太陽的顏色"
+    },
+    {
+      "film_id": "4431",
+      "catalog_no": "178",
+      "title": "腥紅女爵"
+    },
+    {
+      "film_id": "4450",
+      "catalog_no": "179",
+      "title": "夢迴險路"
+    },
+    {
+      "film_id": "4462",
+      "catalog_no": "180",
+      "title": "靈魂未知數"
+    },
+    {
+      "film_id": "4473",
+      "catalog_no": "181",
+      "title": "紅岩小鬼大激鬥"
+    },
+    {
+      "film_id": "4489",
+      "catalog_no": "182",
+      "title": "人間壞格"
+    },
+    {
+      "film_id": "4442",
+      "catalog_no": "184",
+      "title": "迷霧中的大象"
+    },
+    {
+      "film_id": "4448",
+      "catalog_no": "185",
+      "title": "燃燒幻夢"
+    },
+    {
+      "film_id": "4454",
+      "catalog_no": "186",
+      "title": "通靈少年神遊中"
+    },
+    {
+      "film_id": "4457",
+      "catalog_no": "187",
+      "title": "果樹下的戀愛夢"
+    },
+    {
+      "film_id": "4461",
+      "catalog_no": "188",
+      "title": "菲律賓女孩"
+    },
+    {
+      "film_id": "4468",
+      "catalog_no": "189",
+      "title": "失落殘響"
+    },
+    {
+      "film_id": "4474",
+      "catalog_no": "190",
+      "title": "沙河下的祕密"
+    },
+    {
+      "film_id": "4476",
+      "catalog_no": "191",
+      "title": "最初的世界"
+    },
+    {
+      "film_id": "4507",
+      "catalog_no": "193",
+      "title": "當風吹來奈義町"
+    },
+    {
+      "film_id": "4519",
+      "catalog_no": "194",
+      "title": "尼爾森先生，你殺過人嗎？"
+    },
+    {
+      "film_id": "4523",
+      "catalog_no": "195",
+      "title": "無人知曉的孩子們"
+    },
+    {
+      "film_id": "4535",
+      "catalog_no": "196",
+      "title": "事到如今還談什麼愛"
+    },
+    {
+      "film_id": "4545",
+      "catalog_no": "197",
+      "title": "富士子不能輸"
+    },
+    {
+      "film_id": "4548",
+      "catalog_no": "198",
+      "title": "無用之人"
+    },
+    {
+      "film_id": "4482",
+      "catalog_no": "200",
+      "title": "有用的人"
+    },
+    {
+      "film_id": "4487",
+      "catalog_no": "201",
+      "title": "暗影天使 ( 司法講堂 )"
+    },
+    {
+      "film_id": "4490",
+      "catalog_no": "202",
+      "title": "首爾守護者 ( 司法講堂 )"
+    },
+    {
+      "film_id": "4498",
+      "catalog_no": "203",
+      "title": "檢察追緝令 ( 司法講堂 )"
+    },
+    {
+      "film_id": "4503",
+      "catalog_no": "204",
+      "title": "破碎十七 ( 司法講堂 )"
+    },
+    {
+      "film_id": "4506",
+      "catalog_no": "205",
+      "title": "無處安放的青春 ( 司法講堂 )"
+    },
+    {
+      "film_id": "4433",
+      "catalog_no": "207",
+      "title": "生命中最美好的夏令營"
+    },
+    {
+      "film_id": "4439",
+      "catalog_no": "208",
+      "title": "池畔的夏日憂傷"
+    },
+    {
+      "film_id": "4446",
+      "catalog_no": "209",
+      "title": "家的形狀"
+    },
+    {
+      "film_id": "4453",
+      "catalog_no": "210",
+      "title": "雲朵上的點點名"
+    },
+    {
+      "film_id": "4494",
+      "catalog_no": "214",
+      "title": "跨出溫室的愛戀"
+    },
+    {
+      "film_id": "4500",
+      "catalog_no": "215",
+      "title": "以你的記憶審判我"
+    },
+    {
+      "film_id": "4504",
+      "catalog_no": "216",
+      "title": "紐約同志情與慾"
+    },
+    {
+      "film_id": "4509",
+      "catalog_no": "217",
+      "title": "男優阿虎"
+    },
+    {
+      "film_id": "4515",
+      "catalog_no": "218",
+      "title": "超派妖姬救地球"
+    },
+    {
+      "film_id": "4520",
+      "catalog_no": "219",
+      "title": "裝扮遊戲"
+    },
+    {
+      "film_id": "4531",
+      "catalog_no": "220",
+      "title": "高檔貨"
+    },
+    {
+      "film_id": "4583",
+      "catalog_no": "222",
+      "title": "綠洲合唱團：莫帶憤怒回首"
+    },
+    {
+      "film_id": "4584",
+      "catalog_no": "223",
+      "title": "Pulp：安可要唱哪一首"
+    },
+    {
+      "film_id": "4586",
+      "catalog_no": "224",
+      "title": "世界上最寂寞的藍調"
+    },
+    {
+      "film_id": "4585",
+      "catalog_no": "225",
+      "title": "我就愛搖滾"
+    },
+    {
+      "film_id": "4434",
+      "catalog_no": "227",
+      "title": "就是柳柳的他"
+    },
+    {
+      "film_id": "4440",
+      "catalog_no": "228",
+      "title": "肚皮拉警報"
+    },
+    {
+      "film_id": "4452",
+      "catalog_no": "229",
+      "title": "終極殺鎮"
+    },
+    {
+      "film_id": "4463",
+      "catalog_no": "230",
+      "title": "暗夜魔嬰"
+    },
+    {
+      "film_id": "4475",
+      "catalog_no": "231",
+      "title": "瘦怨"
+    },
+    {
+      "film_id": "4481",
+      "catalog_no": "232",
+      "title": "坂本日常"
+    },
+    {
+      "film_id": "4488",
+      "catalog_no": "233",
+      "title": "鼠門秀"
+    },
+    {
+      "film_id": "4492",
+      "catalog_no": "234",
+      "title": "牧一：女人村傳奇"
+    },
+    {
+      "film_id": "4563",
+      "catalog_no": "236",
+      "title": "南國再見，南國"
+    },
+    {
+      "film_id": "4568",
+      "catalog_no": "237",
+      "title": "蝶變"
+    },
+    {
+      "film_id": "4572",
+      "catalog_no": "238",
+      "title": "盜夢偵探"
+    },
+    {
+      "film_id": "4573",
+      "catalog_no": "239",
+      "title": "理性與感性"
+    },
+    {
+      "film_id": "4576",
+      "catalog_no": "240",
+      "title": "凡爾賽拜金女"
+    },
+    {
+      "film_id": "4581",
+      "catalog_no": "241",
+      "title": "鏡頭之外：凡爾賽拜金女"
+    },
+    {
+      "film_id": "4582",
+      "catalog_no": "242",
+      "title": "克里斯馬克：未來式鄉愁"
+    },
+    {
+      "film_id": "4560",
+      "catalog_no": "246",
+      "title": "南特傑克"
+    },
+    {
+      "film_id": "4570",
+      "catalog_no": "247",
+      "title": "櫻桃的滋味"
+    },
+    {
+      "film_id": "4574",
+      "catalog_no": "248",
+      "title": "尤里西斯生命之旅"
+    },
+    {
+      "film_id": "4579",
+      "catalog_no": "249",
+      "title": "追逐蝴蝶"
+    },
+    {
+      "film_id": "4580",
+      "catalog_no": "250",
+      "title": "大象"
+    },
+    {
+      "film_id": "4458",
+      "catalog_no": "254",
+      "title": "豬與軍艦"
+    },
+    {
+      "film_id": "4467",
+      "catalog_no": "255",
+      "title": "日本昆蟲記"
+    },
+    {
+      "film_id": "4471",
+      "catalog_no": "256",
+      "title": "赤色殺意"
+    },
+    {
+      "film_id": "4486",
+      "catalog_no": "257",
+      "title": "人類學入門"
+    },
+    {
+      "film_id": "4493",
+      "catalog_no": "258",
+      "title": "我要復仇"
+    },
+    {
+      "film_id": "4495",
+      "catalog_no": "259",
+      "title": "黑雨"
+    },
+    {
+      "film_id": "4510",
+      "catalog_no": "260",
+      "title": "鰻魚"
+    },
+    {
+      "film_id": "4513",
+      "catalog_no": "261",
+      "title": "紅橋下的暖流"
+    },
+    {
+      "film_id": "4518",
+      "catalog_no": "265",
+      "title": "駭人怪物"
+    },
+    {
+      "film_id": "4526",
+      "catalog_no": "265",
+      "title": "非常母親"
+    },
+    {
+      "film_id": "4527",
+      "catalog_no": "267",
+      "title": "死亡密碼"
+    },
+    {
+      "film_id": "4533",
+      "catalog_no": "267",
+      "title": "黑天鵝"
+    },
+    {
+      "film_id": "4537",
+      "catalog_no": "268",
+      "title": "笑之大學"
+    },
+    {
+      "film_id": "4541",
+      "catalog_no": "269",
+      "title": "綿羊偵探團"
+    }
+  ]
+}
