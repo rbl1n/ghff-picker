@@ -1,5 +1,5 @@
 import type { DataTable } from "playwright-bdd";
-import { Given, When, Then, expect, reapplyState, storedOrDefault, filmIdOf } from "../../support/web-a-helpers";
+import { Given, When, Then, expect, openTab, reapplyState, storedOrDefault, filmIdOf } from "../../support/web-a-helpers";
 import {
   arrangeAndOpenTickets,
   backupTexts,
@@ -18,6 +18,7 @@ import {
   waitItineraryReady,
   waitTicketRows,
 } from "../../support/web-b-helpers";
+import { hasPartner, readState } from "../../support/web-duo-helpers";
 
 const canon = (spec: string): string => {
   const { date, time, star } = parseSessionSpec(spec);
@@ -257,4 +258,26 @@ Then("行程頁中 {string} 排在 {string}", async ({ page, world }, title: str
   expect(entry && sessionSpecOf(eng.sessionById(entry.session_id)), `${title} 引擎行程場次`).toBe(canon(session));
   const got = eng.state.ticket_marks.filter((m) => m.result === "got" && eng.sessionById(m.session_id).film_id === fid);
   for (const g of got) expect(g.session_id, `${title} 已搶到場次不變`).toBe(entry!.session_id);
+});
+
+// T051
+Then("搶票清單每列顯示 {string}", async ({ page, world }, quantity: string) => {
+  await openTab(page, world, "搶票");
+  const rows = ticketRows(page);
+  await expect(rows.first()).toBeVisible();
+  const texts = (await rows.evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ")))) as string[];
+  // 呈現結果：未處理區與已完成區的每一列都帶有張數，不得有缺
+  texts.forEach((t, i) => expect(t, `第 ${i + 1} 列應含「${quantity}」`).toContain(quantity));
+  // 權威狀態：本機保存有同伴資料（兩人模式）
+  expect(hasPartner(await readState(page)), "兩人模式：本機保存有同伴資料").toBe(true);
+});
+
+// T052
+Then("搶票清單不顯示張數", async ({ page, world }) => {
+  await openTab(page, world, "搶票");
+  const rows = ticketRows(page);
+  await expect(rows.first()).toBeVisible();
+  const texts = (await rows.evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ")))) as string[];
+  texts.forEach((t, i) => expect(t, `第 ${i + 1} 列不應有張數`).not.toMatch(/買\s*\d+\s*張/));
+  expect(hasPartner(await readState(page)), "個人模式：本機保存沒有同伴資料").toBe(false);
 });

@@ -3,7 +3,7 @@ import { buildItinerary } from "../../../src/domain/schedule";
 import { markSession, clearMark } from "../../../src/domain/tickets";
 import { areSessionsCompatible } from "../../../src/domain/compat";
 import type { Session, TicketListItem } from "../../../src/domain/types";
-import type { PlannerWorld } from "../../support/planner-world";
+import { effectiveState, type PlannerWorld } from "../../support/planner-world";
 import {
   getWorld, Given, When, Then, expect, need, rebuildList, getTicketList, filmIdByTitle, titleOf,
   sessionById, findSession, formatSession, cinemaOfVenue,
@@ -107,8 +107,9 @@ When("觀眾撤銷 {string} 的沒搶到標記", async ({}, title: string) => {
 // T054
 When("觀眾重新排程", async () => {
   const world = getWorld();
-  const { catalog, state } = need(world);
-  world.lastResult = buildItinerary(catalog, state);
+  const { catalog } = need(world);
+  // 有同伴時輸入為兩人合併結果加上自己的搶票標記
+  world.lastResult = buildItinerary(catalog, effectiveState(world));
 });
 
 // T055

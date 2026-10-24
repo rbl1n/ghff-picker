@@ -7,6 +7,7 @@ import { dateDisp, navLink, openTab, pressSchedule, storedOrDefault, type WebWor
 import { buildItinerary } from "../../src/domain/schedule";
 import { buildTicketList } from "../../src/domain/tickets";
 import { minToHhmm } from "./tables";
+import { planStateOf } from "./web-duo-helpers";
 
 // ---------------------------------------------------------------- 每個測試一份的暫存（以 page 為 key）
 export interface TicketSnapshotRow {
@@ -266,9 +267,11 @@ export async function engineOf(page: Page, world: WebWorld, opts: { replanned?: 
   const state = await storedOrDefault(page);
   const catalog = world.catalog;
   if (!catalog) throw new Error("缺少場次快照");
-  const planState = opts.replanned ? state : { ...state, ticket_marks: [] };
+  // 兩人模式：排程與搶票清單的輸入為合併結果；個人模式原樣（planStateOf 回傳同一物件）
+  const effective = planStateOf(catalog, state);
+  const planState = opts.replanned ? effective : { ...effective, ticket_marks: [] };
   const { itinerary, unscheduled } = buildItinerary(catalog, planState);
-  const tickets = buildTicketList(catalog, state, itinerary);
+  const tickets = buildTicketList(catalog, effective, itinerary);
   const sessionById = (id: string) => {
     const s = catalog.sessions.find((x) => x.session_id === id);
     if (!s) throw new Error(`unknown session ${id}`);

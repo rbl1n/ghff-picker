@@ -10,6 +10,7 @@ import {
   unscheduledBox,
   waitItineraryReady,
 } from "../../support/web-b-helpers";
+import { hasPartner, readState, singleSideTitles } from "../../support/web-duo-helpers";
 
 // T097
 Given("觀眾已排好行程，之後又把 {string} 標為 {string}", async ({ page, world }, title: string, tier: string) => {
@@ -128,4 +129,29 @@ Then("行程頁顯示提示 {string}", async ({ page }, hint: string) => {
   if (hint === EMPTY_ITINERARY_TEXT) {
     await expect(itineraryItems(page)).toHaveCount(0);
   }
+});
+
+// T049
+Then("行程頁頂部顯示單方標記統計 {string}", async ({ page, world }, stats: string) => {
+  await openTab(page, world, "行程");
+  const box = page.getByTestId("single-side-stats");
+  await expect(box).toBeVisible();
+  expect(norm(await box.innerText())).toBe(stats);
+  // 權威狀態：兩個數字 = 各自只有單方分層、對方沒有、且存在於場次快照的影片數，且這些影片不在行程中
+  const st = (await readState(page))!;
+  const single = singleSideTitles(world.catalog!, st);
+  const nums = [...stats.matchAll(/標記：(\d+) 部/g)].map((m) => Number(m[1]));
+  expect(nums, "統計文字含兩個數字").toHaveLength(2);
+  expect(nums).toEqual([single.self.length, single.partner.length]);
+  for (const t of [...single.self, ...single.partner]) {
+    await expect(itineraryItems(page).filter({ hasText: t }), `${t} 不應在行程中`).toHaveCount(0);
+  }
+});
+
+// T050
+Then("行程頁不顯示單方標記統計", async ({ page, world }) => {
+  await openTab(page, world, "行程");
+  await expect(page.getByTestId("single-side-stats")).toHaveCount(0);
+  await expect(page.getByText(/只有 .+ 標記/)).toHaveCount(0);
+  expect(hasPartner(await readState(page)), "個人模式：本機保存沒有同伴資料").toBe(false);
 });

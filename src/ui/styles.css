@@ -161,3 +161,13 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
   .app-tickets{max-width:960px}
   .app-tickets [data-testid=ticket-pending],.app-tickets [data-testid=ticket-done]{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}
 }
+
+/* 002 兩人模式：沿用既有色彩與元件 */
+.acts3{grid-template-columns:1fr}
+.field{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+.field .input{margin-top:4px;color:var(--text)}
+.duo-banner{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid var(--gold);background:var(--panel-2);border-radius:12px;padding:8px 12px;margin-bottom:12px}
+.duo-banner b{font-size:14px;min-width:0;overflow-wrap:anywhere}
+.duo-banner .btn{min-height:36px;padding:0 12px;flex:none}
+.stat{margin:0 0 12px;text-align:center;font-size:13px;color:var(--muted)}
+.qty{margin-left:6px}

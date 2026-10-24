@@ -23,7 +23,7 @@
 
 **Goal**: 只建立兩人合併所需的型別、版本常數、測試世界容器與 stepdef 落點，讓 Phase 3 不各自發明資料格式。不放任何行為。
 
-- [ ] T001 擴充 domain 型別與合併函式殼
+- [x] T001 擴充 domain 型別與合併函式殼
   - Read:
     - `specs/truth/data/data-model.dbml` -> user_state、partner、partner_film_preferences、partner_unavailable_slots、share_payload、merged_film_preferences、merged_constraints、single_side_counts、ticket_list_items.ticket_quantity
     - `truth-delta.md` -> `/data-plan` 全部列
@@ -31,7 +31,7 @@
   - 只做：`src/domain/types.ts` 的 `UserState` 加入選配 `self_name`、`partner`（`display_name`、`daily_limit`、`film_preferences`、`unavailable_slots`）；新增 `ShareKind`（`personal` | `merged`）、`SharePayload`、`MergedView` 型別；`ticket_list_items` 型別加選配 `ticket_quantity`；新增 `src/domain/merge.ts`，匯出 `mergePartner(...)` 與 `singleSideCounts(...)` 簽章，函式體先 `throw new Error("not implemented")`。
   - 不做：不寫合併邏輯、不改 `src/state/storage.ts` 的驗證與版本行為、不改排程與搶票邏輯。既有型別欄位保持相容，使 001 程式碼仍可編譯。
 
-- [ ] T002 在 planner 測試世界加入同伴資料容器
+- [x] T002 在 planner 測試世界加入同伴資料容器
   - Read:
     - `specs/truth/features/planner/dsl.md` -> 介面共通約定（個人／兩人模式）
     - `specs/truth/features/planner/兩人合併/dsl.md` -> 兩人合併定義
@@ -39,7 +39,7 @@
   - 只做：`planner-world.ts` 加入選配 `partner`（分層、熱門、不可看時段、每日上限）、`lastMerged`（最近一次合併結果）、`baseline`（Given 完成時的雙方設定快照）欄位；加入 `effectiveState(world)` helper 簽章：沒有 partner 回傳自己的使用者狀態，有 partner 回傳合併後的排程輸入（實作先呼叫 `src/domain/merge.ts`）。
   - 不做：不寫任何 stepdef 語意；`effectiveState` 在沒有 partner 時必須原樣回傳，不得改變 001 的 planner 測試行為。
 
-- [ ] T003 在 web 測試 fixture 加入兩人模式預載與分享連結種類 helper
+- [x] T003 在 web 測試 fixture 加入兩人模式預載與分享連結種類 helper
   - Read:
     - `specs/truth/features/web/dsl.md` -> 介面共通約定、同伴 Given
     - `specs/truth/features/web/兩人模式/dsl.md` -> 開頭說明
@@ -48,7 +48,7 @@
   - 只做：`web-fixtures.ts` 加入「待載入的同伴資料」容器、預載 `self_name`／`partner`（schema_version 2）的 state fixture 選項、自己設定基準快照 helper、以資料編成 `personal`／`merged` 分享連結的 helper（含 001 版本格式連結與 v1 格式保存內容的 helper）、讀取目前本機保存同伴資料的 helper。
   - 不做：不寫任何 stepdef 語意；既有 state fixture 預設行為（沒有同伴）不得改變。
 
-- [ ] T004 預留新模組 stepdef 落點
+- [x] T004 預留新模組 stepdef 落點
   - Read:
     - `tests/steps/planner/shared.steps.ts`
     - `tests/steps/web/shared.steps.ts`
@@ -96,108 +96,108 @@
 
 #### planner/（介面根） → `tests/steps/planner/shared.steps.ts`
 
-- [ ] T005 [P] [BDD-RED] `Given: 同伴的分層如下：`
-- [ ] T006 [P] [BDD-RED] `Given: 同伴已設定不可看時段如下：`
-- [ ] T007 [P] [BDD-RED] `Given: 同伴的每日上限已設為 {上限} 部`
-- [ ] T008 [P] [BDD-ALIGN] `When: 觀眾執行排程`
+- [x] T005 [P] [BDD-RED] `Given: 同伴的分層如下：`
+- [x] T006 [P] [BDD-RED] `Given: 同伴已設定不可看時段如下：`
+- [x] T007 [P] [BDD-RED] `Given: 同伴的每日上限已設為 {上限} 部`
+- [x] T008 [P] [BDD-ALIGN] `When: 觀眾執行排程`
   - Read: `tests/steps/planner/shared.steps.ts`
-- [ ] T009 [P] [BDD-ALIGN] `Given: 觀眾已執行排程並開啟搶票清單`
+- [x] T009 [P] [BDD-ALIGN] `Given: 觀眾已執行排程並開啟搶票清單`
   - Read: `tests/steps/planner/shared.steps.ts`
-- [ ] T010 [P] [BDD-ALIGN] `Then: 行程中沒有 "{片名}"`（權威位置由最佳行程上提到介面根，語意不變）
+- [x] T010 [P] [BDD-ALIGN] `Then: 行程中沒有 "{片名}"`（權威位置由最佳行程上提到介面根，語意不變）
   - Read: `tests/steps/planner/最佳行程.steps.ts`（搬到 `shared.steps.ts`）
-- [ ] T011 [P] [BDD-ALIGN] `Then: 行程沒有任何場次`（權威位置由最佳行程上提到介面根，語意不變）
+- [x] T011 [P] [BDD-ALIGN] `Then: 行程沒有任何場次`（權威位置由最佳行程上提到介面根，語意不變）
   - Read: `tests/steps/planner/最佳行程.steps.ts`（搬到 `shared.steps.ts`）
 
 #### planner/兩人合併 → `tests/steps/planner/兩人合併.steps.ts`
 
-- [ ] T012 [P] [BDD-RED] `When: 觀眾查看兩人合併結果`
-- [ ] T013 [P] [BDD-RED] `Then: 合併後參與排程的影片如下：`
-- [ ] T014 [P] [BDD-RED] `Then: 合併後的不可看時段如下：`
-- [ ] T015 [P] [BDD-RED] `Then: 合併後的每日上限為 "{上限}"`
-- [ ] T016 [P] [BDD-RED] `Then: 單方標記的影片數如下：`
-- [ ] T017 [P] [BDD-RED] `Then: 雙方原始設定與合併前相同`
+- [x] T012 [P] [BDD-RED] `When: 觀眾查看兩人合併結果`
+- [x] T013 [P] [BDD-RED] `Then: 合併後參與排程的影片如下：`
+- [x] T014 [P] [BDD-RED] `Then: 合併後的不可看時段如下：`
+- [x] T015 [P] [BDD-RED] `Then: 合併後的每日上限為 "{上限}"`
+- [x] T016 [P] [BDD-RED] `Then: 單方標記的影片數如下：`
+- [x] T017 [P] [BDD-RED] `Then: 雙方原始設定與合併前相同`
 
 #### planner/搶票順序與備案 → `tests/steps/planner/搶票順序與備案.steps.ts`
 
-- [ ] T018 [P] [BDD-ALIGN] `When: 觀眾執行排程並開啟搶票清單`
+- [x] T018 [P] [BDD-ALIGN] `When: 觀眾執行排程並開啟搶票清單`
   - Read: `tests/steps/planner/搶票順序與備案.steps.ts`
 
 #### planner/搶票切換 → `tests/steps/planner/搶票切換.steps.ts`
 
-- [ ] T019 [P] [BDD-ALIGN] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為沒搶到`
+- [x] T019 [P] [BDD-ALIGN] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為沒搶到`
   - Read: `tests/steps/planner/搶票切換.steps.ts`
-- [ ] T020 [P] [BDD-ALIGN] `When: 觀眾重新排程`
+- [x] T020 [P] [BDD-ALIGN] `When: 觀眾重新排程`
   - Read: `tests/steps/planner/搶票切換.steps.ts`
 
 #### web/（介面根） → `tests/steps/web/shared.steps.ts`
 
-- [ ] T021 [P] [BDD-RED] `Given: 同伴的分層如下：`
-- [ ] T022 [P] [BDD-RED] `Given: 同伴已設定不可看時段如下：`
-- [ ] T023 [P] [BDD-RED] `Given: 同伴的每日上限已設為 {上限} 部`
-- [ ] T024 [P] [BDD-RED] `Given: 觀眾已加入同伴，自己名稱為 "{自己}"、同伴名稱為 "{同伴}"`
+- [x] T021 [P] [BDD-RED] `Given: 同伴的分層如下：`
+- [x] T022 [P] [BDD-RED] `Given: 同伴已設定不可看時段如下：`
+- [x] T023 [P] [BDD-RED] `Given: 同伴的每日上限已設為 {上限} 部`
+- [x] T024 [P] [BDD-RED] `Given: 觀眾已加入同伴，自己名稱為 "{自己}"、同伴名稱為 "{同伴}"`
 
 #### web/兩人模式 → `tests/steps/web/兩人模式.steps.ts`
 
-- [ ] T025 [P] [BDD-RED] `Given: 同伴傳來個人分享連結，同伴名稱為 "{名稱}"`
-- [ ] T026 [P] [BDD-RED] `Given: 同伴傳來個人分享連結`
-- [ ] T027 [P] [BDD-RED] `Given: 同伴傳來的個人分享連結內容已損毀`
-- [ ] T028 [P] [BDD-RED] `Given: 觀眾已開啟同伴的個人分享連結`
-- [ ] T029 [P] [BDD-RED] `Given: 觀眾已選擇當作同伴加入`
-- [ ] T030 [P] [BDD-RED] `When: 觀眾開啟同伴的個人分享連結`
-- [ ] T031 [P] [BDD-RED] `When: 觀眾選擇當作同伴加入`
-- [ ] T032 [P] [BDD-RED] `When: 觀眾選擇取代我的設定`
-- [ ] T033 [P] [BDD-RED] `When: 觀眾輸入自己名稱 "{自己}"、同伴名稱 "{同伴}" 並確認`
-- [ ] T034 [P] [BDD-RED] `When: 觀眾確認取代同伴`
-- [ ] T035 [P] [BDD-RED] `When: 觀眾移除同伴並確認`
-- [ ] T036 [P] [BDD-RED] `When: 觀眾切到 "{頁面}" 頁`
-- [ ] T037 [P] [BDD-RED] `Then: 畫面顯示個人連結對話 "{標題}"`
-- [ ] T038 [P] [BDD-RED] `Then: 畫面要求輸入自己與同伴的名稱，預設為 "{自己}" 與 "{同伴}"`
-- [ ] T039 [P] [BDD-RED] `Then: 畫面顯示取代同伴確認 "{確認}"`
-- [ ] T040 [P] [BDD-RED] `Then: 頂部顯示 "{橫幅}"`
-- [ ] T041 [P] [BDD-RED] `Then: 頂部不顯示兩人模式`
-- [ ] T042 [P] [BDD-RED] `Then: 此裝置沒有同伴資料`
-- [ ] T043 [P] [BDD-RED] `Then: 已保存的同伴分層如下：`
-- [ ] T044 [P] [BDD-RED] `Then: 已保存的同伴不可看時段如下：`
-- [ ] T045 [P] [BDD-RED] `Then: 已保存的同伴每日上限為 "{上限}"`
-- [ ] T046 [P] [BDD-RED] `Then: 自己已保存的分層如下：`
-- [ ] T047 [P] [BDD-RED] `Then: 自己的分層、不可看時段與每日上限維持加入前的內容`
-- [ ] T048 [P] [BDD-RED] `Then: 已保存的搶票標記如下：`
+- [x] T025 [P] [BDD-RED] `Given: 同伴傳來個人分享連結，同伴名稱為 "{名稱}"`
+- [x] T026 [P] [BDD-RED] `Given: 同伴傳來個人分享連結`
+- [x] T027 [P] [BDD-RED] `Given: 同伴傳來的個人分享連結內容已損毀`
+- [x] T028 [P] [BDD-RED] `Given: 觀眾已開啟同伴的個人分享連結`
+- [x] T029 [P] [BDD-RED] `Given: 觀眾已選擇當作同伴加入`
+- [x] T030 [P] [BDD-RED] `When: 觀眾開啟同伴的個人分享連結`
+- [x] T031 [P] [BDD-RED] `When: 觀眾選擇當作同伴加入`
+- [x] T032 [P] [BDD-RED] `When: 觀眾選擇取代我的設定`
+- [x] T033 [P] [BDD-RED] `When: 觀眾輸入自己名稱 "{自己}"、同伴名稱 "{同伴}" 並確認`
+- [x] T034 [P] [BDD-RED] `When: 觀眾確認取代同伴`
+- [x] T035 [P] [BDD-RED] `When: 觀眾移除同伴並確認`
+- [x] T036 [P] [BDD-RED] `When: 觀眾切到 "{頁面}" 頁`
+- [x] T037 [P] [BDD-RED] `Then: 畫面顯示個人連結對話 "{標題}"`
+- [x] T038 [P] [BDD-RED] `Then: 畫面要求輸入自己與同伴的名稱，預設為 "{自己}" 與 "{同伴}"`
+- [x] T039 [P] [BDD-RED] `Then: 畫面顯示取代同伴確認 "{確認}"`
+- [x] T040 [P] [BDD-RED] `Then: 頂部顯示 "{橫幅}"`
+- [x] T041 [P] [BDD-RED] `Then: 頂部不顯示兩人模式`
+- [x] T042 [P] [BDD-RED] `Then: 此裝置沒有同伴資料`
+- [x] T043 [P] [BDD-RED] `Then: 已保存的同伴分層如下：`
+- [x] T044 [P] [BDD-RED] `Then: 已保存的同伴不可看時段如下：`
+- [x] T045 [P] [BDD-RED] `Then: 已保存的同伴每日上限為 "{上限}"`
+- [x] T046 [P] [BDD-RED] `Then: 自己已保存的分層如下：`
+- [x] T047 [P] [BDD-RED] `Then: 自己的分層、不可看時段與每日上限維持加入前的內容`
+- [x] T048 [P] [BDD-RED] `Then: 已保存的搶票標記如下：`
 
 #### web/行程 → `tests/steps/web/行程.steps.ts`
 
-- [ ] T049 [P] [BDD-RED] `Then: 行程頁頂部顯示單方標記統計 "{統計}"`
-- [ ] T050 [P] [BDD-RED] `Then: 行程頁不顯示單方標記統計`
+- [x] T049 [P] [BDD-RED] `Then: 行程頁頂部顯示單方標記統計 "{統計}"`
+- [x] T050 [P] [BDD-RED] `Then: 行程頁不顯示單方標記統計`
 
 #### web/搶票 → `tests/steps/web/搶票.steps.ts`
 
-- [ ] T051 [P] [BDD-RED] `Then: 搶票清單每列顯示 "{張數}"`
-- [ ] T052 [P] [BDD-RED] `Then: 搶票清單不顯示張數`
+- [x] T051 [P] [BDD-RED] `Then: 搶票清單每列顯示 "{張數}"`
+- [x] T052 [P] [BDD-RED] `Then: 搶票清單不顯示張數`
 
 #### web/分享與保存 → `tests/steps/web/分享與保存.steps.ts`
 
-- [ ] T053 [P] [BDD-ALIGN] `Then: 手機畫面顯示確認 "{確認}"`
+- [x] T053 [P] [BDD-ALIGN] `Then: 手機畫面顯示確認 "{確認}"`
   - Read: `tests/steps/web/分享與保存.steps.ts`
-- [ ] T054 [P] [BDD-ALIGN] `When: 觀眾用手機開啟該分享連結並確認取代`
+- [x] T054 [P] [BDD-ALIGN] `When: 觀眾用手機開啟該分享連結並確認取代`
   - Read: `tests/steps/web/分享與保存.steps.ts`
-- [ ] T055 [P] [BDD-ALIGN] `Given: 手機已用分享連結匯入設定`
+- [x] T055 [P] [BDD-ALIGN] `Given: 手機已用分享連結匯入設定`
   - Read: `tests/steps/web/分享與保存.steps.ts`
-- [ ] T056 [P] [BDD-ALIGN] `Given: 電腦上已產生分享連結`
+- [x] T056 [P] [BDD-ALIGN] `Given: 電腦上已產生分享連結`
   - Read: `tests/steps/web/分享與保存.steps.ts`
-- [ ] T057 [P] [BDD-ALIGN] `Then: 手機的搶票清單與電腦完全相同（順序、排定場次、備案場次）`
+- [x] T057 [P] [BDD-ALIGN] `Then: 手機的搶票清單與電腦完全相同（順序、排定場次、備案場次）`
   - Read: `tests/steps/web/分享與保存.steps.ts`
-- [ ] T058 [P] [BDD-RED] `Given: 電腦上已產生合併結果連結`
-- [ ] T059 [P] [BDD-RED] `Given: 手機已用合併結果連結取代並開啟`
-- [ ] T060 [P] [BDD-RED] `Given: 裝置上保存的是 001 版本格式的設定，分層如下：`
-- [ ] T061 [P] [BDD-RED] `Given: 手機收到 001 版本格式的個人分享連結`
-- [ ] T062 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結並選擇取代並開啟`
-- [ ] T063 [P] [BDD-RED] `Then: 手機畫面的分享連結選項為 "{選項}"`
-- [ ] T064 [P] [BDD-RED] `Then: 分享畫面標示為合併結果連結，並提供 QR code 與「複製連結」`
-- [ ] T065 [P] [BDD-RED] `Then: 手機畫面顯示合併結果確認 "{確認}"`
-- [ ] T066 [P] [BDD-RED] `Then: 手機進入兩人模式並顯示 "{橫幅}"`
-- [ ] T067 [P] [BDD-RED] `Then: 手機的行程與電腦完全相同`
-- [ ] T068 [P] [BDD-RED] `Then: 重新開啟後仍為兩人模式並顯示 "{橫幅}"`
+- [x] T058 [P] [BDD-RED] `Given: 電腦上已產生合併結果連結`
+- [x] T059 [P] [BDD-RED] `Given: 手機已用合併結果連結取代並開啟`
+- [x] T060 [P] [BDD-RED] `Given: 裝置上保存的是 001 版本格式的設定，分層如下：`
+- [x] T061 [P] [BDD-RED] `Given: 手機收到 001 版本格式的個人分享連結`
+- [x] T062 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結並選擇取代並開啟`
+- [x] T063 [P] [BDD-RED] `Then: 手機畫面的分享連結選項為 "{選項}"`
+- [x] T064 [P] [BDD-RED] `Then: 分享畫面標示為合併結果連結，並提供 QR code 與「複製連結」`
+- [x] T065 [P] [BDD-RED] `Then: 手機畫面顯示合併結果確認 "{確認}"`
+- [x] T066 [P] [BDD-RED] `Then: 手機進入兩人模式並顯示 "{橫幅}"`
+- [x] T067 [P] [BDD-RED] `Then: 手機的行程與電腦完全相同`
+- [x] T068 [P] [BDD-RED] `Then: 重新開啟後仍為兩人模式並顯示 "{橫幅}"`
 
-- [ ] T069 subagent review (phase quality gate)
+- [x] T069 subagent review (phase quality gate)
 
 ## Phase 4A: ADD Feature File - planner/兩人合併/共同影片與層級合併.feature
 
@@ -216,8 +216,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/兩人合併/共同影片與層級合併.feature`（project：planner）
 
-- [ ] T070 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T071 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T070 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T071 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4B: ADD Feature File - planner/兩人合併/不可看時段與每日上限合併.feature
 
@@ -236,8 +236,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/兩人合併/不可看時段與每日上限合併.feature`（project：planner）
 
-- [ ] T072 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T073 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T072 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T073 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4C: ADD Feature File - planner/兩人合併/兩人合併排程.feature
 
@@ -256,8 +256,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/兩人合併/兩人合併排程.feature`（project：planner）
 
-- [ ] T074 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T075 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T074 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T075 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4D: ADD Feature File - planner/搶票順序與備案/兩人搶票清單.feature
 
@@ -276,8 +276,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票順序與備案/兩人搶票清單.feature`（project：planner）
 
-- [ ] T076 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T077 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T076 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T077 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4E: ADD Feature File - planner/搶票切換/兩人沒搶到切換備案.feature
 
@@ -296,8 +296,8 @@
 **Test Scope**:
 - `specs/truth/features/planner/搶票切換/兩人沒搶到切換備案.feature`（project：planner）
 
-- [ ] T078 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T079 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T078 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T079 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4F: ADD Feature File - web/兩人模式/加入同伴.feature
 
@@ -318,8 +318,8 @@
 **Test Scope**:
 - `specs/truth/features/web/兩人模式/加入同伴.feature`（project：web-desktop、web-mobile）
 
-- [ ] T080 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T081 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T080 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T081 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4G: ADD Feature File - web/兩人模式/取代與移除同伴.feature
 
@@ -339,8 +339,8 @@
 **Test Scope**:
 - `specs/truth/features/web/兩人模式/取代與移除同伴.feature`（project：web-desktop、web-mobile）
 
-- [ ] T082 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T083 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T082 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T083 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4H: ADD Feature File - web/兩人模式/兩人模式橫幅.feature
 
@@ -360,8 +360,8 @@
 **Test Scope**:
 - `specs/truth/features/web/兩人模式/兩人模式橫幅.feature`（project：web-desktop、web-mobile）
 
-- [ ] T084 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T085 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T084 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T085 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4I: ADD Feature File - web/行程/兩人行程.feature
 
@@ -382,8 +382,8 @@
 **Test Scope**:
 - `specs/truth/features/web/行程/兩人行程.feature`（project：web-desktop、web-mobile）
 
-- [ ] T086 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T087 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T086 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T087 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4J: ADD Feature File - web/行程/兩人行程的時段與上限.feature
 
@@ -403,8 +403,8 @@
 **Test Scope**:
 - `specs/truth/features/web/行程/兩人行程的時段與上限.feature`（project：web-desktop、web-mobile）
 
-- [ ] T088 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T089 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T088 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T089 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4K: ADD Feature File - web/搶票/兩人搶票清單.feature
 
@@ -425,8 +425,8 @@
 **Test Scope**:
 - `specs/truth/features/web/搶票/兩人搶票清單.feature`（project：web-desktop、web-mobile）
 
-- [ ] T090 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T091 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T090 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T091 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4L: MODIFY Feature File - web/分享與保存/跨裝置分享.feature
 
@@ -447,8 +447,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/跨裝置分享.feature`（project：web-desktop、web-mobile）
 
-- [ ] T092 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T093 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T092 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T093 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4M: ADD Feature File - web/分享與保存/合併結果分享.feature
 
@@ -469,8 +469,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/合併結果分享.feature`（project：web-desktop、web-mobile）
 
-- [ ] T094 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T095 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T094 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T095 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4N: ADD Feature File - web/分享與保存/兩人設定保存.feature
 
@@ -490,8 +490,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/兩人設定保存.feature`（project：web-desktop、web-mobile）
 
-- [ ] T096 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T097 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T096 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T097 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4O: ADD Feature File - web/分享與保存/舊版相容.feature
 
@@ -511,8 +511,8 @@
 **Test Scope**:
 - `specs/truth/features/web/分享與保存/舊版相容.feature`（project：web-desktop、web-mobile）
 
-- [ ] T098 [BDD-GREEN] 讓 Test Scope 全綠
-- [ ] T099 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+- [x] T098 [BDD-GREEN] 讓 Test Scope 全綠
+- [x] T099 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
 ## Phase 4Z: ui quality gate
 
@@ -528,7 +528,7 @@
 - 檢查新增元素（橫幅、三選項／兩選項對話、名稱輸入畫面、取代／移除確認、統計列、張數標籤）沿用既有 token 與元件樣式，沒有另創視覺語言；手機 390px 走完 加入同伴 → 行程 → 搶票 → 分享 不需水平捲動；個人模式畫面與 001 一致（無橫幅、無張數、無統計）。
 - 已知 001 雛形瑕疵不照抄：時間輸入用 24 小時制；無備案時顯示「無不衝堂備案」；標籤多時排序按鈕不換行。
 
-- [ ] T100 subagent review (ui quality gate)
+- [x] T100 subagent review (ui quality gate)
 
 ## Phase 5: 完整回歸（SC-205）
 
@@ -542,6 +542,6 @@
 - 不改 truth、不改 feature；只修產品碼或測試 helper 中的真實缺陷。
 - 任何 001 既有 Example 失敗都視為本輪迴歸，必須修產品碼，不得改既有 feature、DSL 或把既有 stepdef 放寬成可通過。
 
-- [ ] T101 [REGRESSION] 執行 `npx tsc --noEmit` 與 `npm run build`，確認型別與靜態建置通過
-- [ ] T102 [REGRESSION] 執行完整套件 `npm test`（`bddgen && playwright test`，四個 project：planner、scraper、web-desktop、web-mobile），全部 feature 通過；記錄總 Example 數與失敗數（失敗數必須為 0）
-- [ ] T103 subagent review (full regression gate)：獨立重跑完整套件一次，並抽查 001 的 `分享與保存/跨裝置分享.feature`、`搶票/搶票標記與切換備案.feature`、`行程/行程呈現.feature` 在個人模式下通過
+- [x] T101 [REGRESSION] 執行 `npx tsc --noEmit` 與 `npm run build`，確認型別與靜態建置通過
+- [x] T102 [REGRESSION] 執行完整套件 `npm test`（`bddgen && playwright test`，四個 project：planner、scraper、web-desktop、web-mobile），全部 feature 通過；記錄總 Example 數與失敗數（失敗數必須為 0）
+- [x] T103 subagent review (full regression gate)：獨立重跑完整套件一次，並抽查 001 的 `分享與保存/跨裝置分享.feature`、`搶票/搶票標記與切換備案.feature`、`行程/行程呈現.feature` 在個人模式下通過

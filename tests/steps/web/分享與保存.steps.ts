@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { createBdd, type DataTable } from "playwright-bdd";
-import { Given, When, Then, expect, filmCard, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
+import { Given, When, Then, buildState, expect, filmCard, reapplyState, navLink, openTab, storedOrDefault, storedState, test } from "../../support/web-a-helpers";
 import { TIER_LABEL_TO_ENUM } from "../../support/tables";
 import {
   applyManualOrder,
@@ -16,7 +16,24 @@ import {
   snapshotTickets,
   ticketRows,
   waitTicketRows,
+  gotoTab,
 } from "../../support/web-b-helpers";
+import {
+  buildV1Link,
+  decodePayload,
+  desktopDuo,
+  duoOf,
+  expectBanner,
+  hasPartner,
+  readState,
+  sameSelfFields,
+  samePartnerFields,
+  setDesktopDuo,
+  snapshotItinerary,
+  ticketQuantities,
+} from "../../support/web-duo-helpers";
+import type { Browser } from "@playwright/test";
+import type { WebWorld } from "../../support/web-a-helpers";
 
 const { After } = createBdd(test);
 
@@ -42,7 +59,8 @@ async function confirmDialog(phone: Page) {
 async function phoneImport(phone: Page, url: string) {
   await phone.goto(url);
   const dlg = await confirmDialog(phone);
-  await dlg.getByRole("button", { name: /取代/ }).click();
+  // 個人連結對話另有「當作同伴加入」，這裡一律選「取代我的設定」
+  await dlg.getByRole("button", { name: "取代我的設定", exact: true }).click();
   await waitTicketRows(phone);
 }
 
@@ -64,9 +82,13 @@ Given("電腦上已產生分享連結", async ({ page, world, browser, baseURL }
   const s = bState(page);
   s.desktopSnapshot = await snapshotTickets(page);
   s.desktopState = await storedOrDefault(page);
+  // 電腦為個人模式（沒有同伴資料）
+  expect(hasPartner(s.desktopState), "電腦應為個人模式").toBe(false);
   await page.getByRole("link", { name: "分享", exact: true }).or(page.getByRole("button", { name: "分享", exact: true })).first().click();
   const urlEl = page.getByTestId("share-url");
   await urlEl.waitFor({ state: "visible" });
+  // 連結種類為個人分享連結（不是合併結果連結）
+  await expect(page.getByText("合併結果連結")).toHaveCount(0);
   const raw = ((await urlEl.inputValue().catch(() => "")) || (await urlEl.innerText())).trim();
   s.shareUrl = new URL(raw, baseURL ?? page.url()).toString();
   s.phoneUrl = s.shareUrl;
@@ -187,7 +209,8 @@ Then("手機畫面顯示確認 {string}", async ({ page }, text: string) => {
   const dlg = await confirmDialog(phone);
   await expect(dlg).toContainText(text);
   expect(text).toBe(CONFIRM_TEXT);
-  await expect(dlg.getByRole("button", { name: /取代/ })).toBeVisible();
+  // 個人連結對話：取代與取消選項（「當作同伴加入」由「手機畫面的分享連結選項為」驗證）
+  await expect(dlg.getByRole("button", { name: "取代我的設定", exact: true })).toBeVisible();
   await expect(dlg.getByRole("button", { name: "取消", exact: true })).toBeVisible();
   // 權威狀態：確認前手機本機保存沒有被改寫
   const state = await storedState(phone);
@@ -211,6 +234,11 @@ Then("手機的搶票清單與電腦完全相同（順序、排定場次、備�
       expect(norm(snap[i].session), `${row.title} 排定場次`).toBe(norm(row.session));
       expect(snap[i].backups, `${row.title} 備案場次`).toEqual(row.backups);
     });
+    // 兩人模式時另逐列比對張數
+    const dq = desktopDuo(page);
+    if (dq && hasPartner(dq.state)) {
+      expect(await ticketQuantities(phone), "各列張數").toEqual(dq.quantities);
+    }
     const ps = await storedOrDefault(phone);
     const ds = s.desktopState;
     const byId = <T extends { film_id: string }>(a: T[] | undefined) =>
@@ -223,4 +251,191 @@ Then("手機的搶票清單與電腦完全相同（順序、排定場次、備�
   await compare();
   await phone.reload(); // 再讀確認
   await compare();
+});
+
+/* ------------------------- 合併結果分享（002） ------------------------- */
+
+const MERGED_CONFIRM_NOTE = "開啟後會取代此裝置目前的設定。";
+
+async function openShareScreen(page: Page): Promise<void> {
+  await page.getByRole("link", { name: "分享", exact: true }).or(page.getByRole("button", { name: "分享", exact: true })).first().click();
+  await page.getByTestId("share-url").waitFor({ state: "visible" });
+}
+
+async function readShareUrl(page: Page, baseURL: string | undefined): Promise<string> {
+  const urlEl = page.getByTestId("share-url");
+  const raw = ((await urlEl.inputValue().catch(() => "")) || (await urlEl.innerText())).trim();
+  return new URL(raw, baseURL ?? page.url()).toString();
+}
+
+async function phoneBanner(phone: Page, text: string): Promise<void> {
+  await expectBanner(phone, text);
+}
+
+async function phoneOpenMerged(phone: Page, url: string): Promise<void> {
+  await phone.goto(url);
+  const dlg = await confirmDialog(phone);
+  await dlg.getByRole("button", { name: "取代並開啟", exact: true }).click();
+  await phone.getByTestId("duo-banner").waitFor({ state: "visible" });
+  await waitTicketRows(phone);
+}
+
+function sortedMarks(s: { ticket_marks: { session_id: string; result: string }[] }) {
+  return [...s.ticket_marks].sort((a, b) => a.session_id.localeCompare(b.session_id));
+}
+
+// T058
+Given("電腦上已產生合併結果連結", async ({ page, world, browser, baseURL }: { page: Page; world: WebWorld; browser: Browser; baseURL: string | undefined }) => {
+  await arrangeAndOpenTickets(page, world);
+  const s = bState(page);
+  // 含 Given 設定的手動順序（搶票標記已隨預載狀態進入）
+  if (s.pendingOrderTitles) {
+    await applyManualOrder(page, world, s.pendingOrderTitles);
+    await waitTicketRows(page);
+  }
+  s.desktopSnapshot = await snapshotTickets(page);
+  const quantities = await ticketQuantities(page);
+  const state = await storedOrDefault(page);
+  expect(hasPartner(state), "電腦應為兩人模式").toBe(true);
+  s.desktopState = state;
+  await gotoTab(page, "行程");
+  const itinerary = await snapshotItinerary(page);
+  await gotoTab(page, "搶票");
+  await waitTicketRows(page);
+  setDesktopDuo(page, { itinerary, quantities, state, selfName: state.self_name ?? null, partnerName: state.partner?.display_name ?? null });
+  await openShareScreen(page);
+  s.shareUrl = await readShareUrl(page, baseURL);
+  s.phoneUrl = s.shareUrl;
+  const phone = await createPhone(browser, baseURL, world.catalog!);
+  s.phoneContext = phone.context;
+  s.phonePage = phone.page;
+  redirectPageTo(page, phone.page);
+  // 手機是乾淨環境：根 steps 的「使用者狀態未被改動」比對基準改為空狀態
+  world.prefs = [];
+  world.slots = [];
+  world.dailyLimit = null;
+  world.marks = [];
+});
+
+// T059
+Given("手機已用合併結果連結取代並開啟", async ({ page }) => {
+  await phoneOpenMerged(phoneOf(page), bState(page).phoneUrl!);
+});
+
+// T060
+Given("裝置上保存的是 001 版本格式的設定，分層如下：", async ({ page, world }, dataTable: DataTable) => {
+  // 001 格式（schema_version 1、沒有自己名稱與同伴資料）：根 steps 的預載一律以 v1 格式寫入，不經 002 的寫入程式
+  for (const r of dataTable.hashes()) {
+    world.prefs.push({ title: r["片名"], tier: TIER_LABEL_TO_ENUM[r["層級"]], is_hot: false });
+  }
+  await reapplyState(page, world, "選片");
+});
+
+// T061
+Given("手機收到 001 版本格式的個人分享連結", async ({ page, world, browser, baseURL }: { page: Page; world: WebWorld; browser: Browser; baseURL: string | undefined }) => {
+  const film = world.catalog!.films[0];
+  const v1 = buildState({ ...world, prefs: [{ title: film.title, tier: "must", is_hot: false }], slots: [], dailyLimit: null, marks: [] });
+  const url = new URL(buildV1Link(v1), baseURL ?? "http://127.0.0.1:4173").toString();
+  const s = bState(page);
+  s.shareUrl = url;
+  s.phoneUrl = url;
+  const phone = await createPhone(browser, baseURL, world.catalog!);
+  s.phoneContext = phone.context;
+  s.phonePage = phone.page;
+  redirectPageTo(page, phone.page);
+});
+
+// T062
+When("觀眾用手機開啟該分享連結並選擇取代並開啟", async ({ page }) => {
+  await phoneOpenMerged(phoneOf(page), bState(page).phoneUrl!);
+});
+
+// T063
+Then("手機畫面的分享連結選項為 {string}", async ({ page }, options: string) => {
+  const phone = phoneOf(page);
+  const dlg = await confirmDialog(phone);
+  const expected = options.split("、").map((x) => x.trim()).sort();
+  await expect.poll(async () => (await dlg.getByRole("button").allInnerTexts()).map(norm).sort()).toEqual(expected);
+  // 權威狀態：選擇之前手機本機保存沒有被改寫
+  const st = await storedState(phone);
+  expect(st === null || (st.film_preferences.length === 0 && !hasPartner(st)), "選擇前手機本機保存不得改寫").toBe(true);
+});
+
+// T064
+Then("分享畫面標示為合併結果連結，並提供 QR code 與「複製連結」", async ({ page }) => {
+  await expect(page.getByText("合併結果連結").first()).toBeVisible();
+  const qr = page.getByTestId("share-qr");
+  await expect(qr).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR/ })).toBeVisible();
+  const copy = page.getByRole("button", { name: "複製連結", exact: true });
+  await expect(copy).toBeVisible();
+  await expect(copy).toBeEnabled();
+  const urlEl = page.getByTestId("share-url");
+  const linkUrl = ((await urlEl.inputValue().catch(() => "")) || (await urlEl.innerText())).trim();
+  expect(await qr.getAttribute("data-url"), "QR code 與複製連結網址相同").toBe(linkUrl);
+  // 權威狀態：網址內容的種類為合併結果（含兩人資料與姓名）
+  const payload = decodePayload(linkUrl);
+  expect(payload.kind, "連結種類").toBe("merged");
+  expect(payload.state?.partner, "含同伴資料").toBeTruthy();
+  expect(payload.state?.self_name, "含自己名稱").toBeTruthy();
+  expect(payload.state?.partner?.display_name, "含同伴名稱").toBeTruthy();
+});
+
+// T065
+Then("手機畫面顯示合併結果確認 {string}", async ({ page }, text: string) => {
+  const phone = phoneOf(page);
+  const dlg = await confirmDialog(phone);
+  await expect(dlg).toContainText(text);
+  await expect(dlg).toContainText(MERGED_CONFIRM_NOTE);
+  const st = await storedState(phone);
+  expect(st === null || (st.film_preferences.length === 0 && !hasPartner(st)), "確認前手機本機保存不得改寫").toBe(true);
+});
+
+// T066
+Then("手機進入兩人模式並顯示 {string}", async ({ page }, banner: string) => {
+  const phone = phoneOf(page);
+  const dd = desktopDuo(page);
+  if (!dd) throw new Error("缺少電腦快照（需先有「電腦上已產生合併結果連結」）");
+  const check = async () => {
+    await phoneBanner(phone, banner);
+    const ps = (await readState(phone))!;
+    samePartnerFields(ps, dd.state, "手機與電腦的");
+  };
+  await check();
+  await phone.reload(); // 再讀確認
+  await check();
+});
+
+// T067
+Then("手機的行程與電腦完全相同", async ({ page }) => {
+  const phone = phoneOf(page);
+  const dd = desktopDuo(page);
+  if (!dd) throw new Error("缺少電腦快照（需先有「電腦上已產生合併結果連結」）");
+  const check = async () => {
+    await gotoTab(phone, "行程");
+    const rows = await snapshotItinerary(phone);
+    expect(rows.length, "行程列數").toBe(dd.itinerary.length);
+    dd.itinerary.forEach((row, i) => {
+      expect(rows[i].date, `第 ${i + 1} 列日期`).toBe(row.date);
+      expect(rows[i].tier, `第 ${i + 1} 列層級`).toBe(row.tier);
+      expect(rows[i].text, `第 ${i + 1} 列內容`).toBe(row.text);
+    });
+    const ps = (await readState(phone))!;
+    sameSelfFields(ps, dd.state, "手機與電腦的");
+    expect(ps.manual_order ?? null, "手動順序").toEqual(dd.state.manual_order ?? null);
+    expect(sortedMarks(ps), "搶票標記").toEqual(sortedMarks(dd.state));
+  };
+  await check();
+  await phone.reload(); // 再讀確認
+  await check();
+});
+
+// T068
+Then("重新開啟後仍為兩人模式並顯示 {string}", async ({ page, world }, banner: string) => {
+  await expectBanner(page, banner);
+  const c = duoOf(world);
+  const st = (await readState(page))!;
+  expect(st.self_name ?? null, "自己名稱").toBe(c.selfName);
+  expect(st.partner, "同伴資料").toBeTruthy();
+  samePartnerFields(st, { ...st, self_name: c.selfName, partner: c.preloaded }, "重新開啟前後的");
 });

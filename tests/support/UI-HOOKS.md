@@ -83,3 +83,73 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 
 - 使用者狀態：`localStorage[STORAGE_KEY]`（`src/state/storage.ts`），JSON 為 `UserState`；狀態改變後同步寫入，Then 不重新載入也能讀到。
 - 場次快照：`GET **/data/sessions.json`（steps 以 route 攔截）。
+
+## 002 兩人模式
+
+唯一來源：`tests/support/web-duo-helpers.ts`、`tests/steps/web/兩人模式.steps.ts`、`行程.steps.ts`、`搶票.steps.ts`、`分享與保存.steps.ts`。
+所有對話一律 `role=dialog`，同一時間最多一個可見。確認／取消按鈕名稱皆 exact。
+
+### 頂部橫幅（五個分頁都有；個人模式完全不渲染）
+
+| 定位點 | 說明 |
+| --- | --- |
+| `data-testid=duo-banner` | 兩人模式時每頁頂部渲染；個人模式不得存在 |
+| `data-testid=duo-banner-text` | 文字完全等於 `兩人模式：{自己} ＋ {同伴}`（全形 `：`、`＋`，前後各一個空白） |
+| button `移除同伴`（exact，位於橫幅內） | 按下開確認對話：文字 `要移除同伴「{同伴名稱}」嗎？`，button `確認`、`取消`；確認後清除 partner 與 self_name（truth：兩人名稱一併清除），保留 ticket_marks 與自己的設定 |
+| 個人模式 | 頁面不得出現文字 `兩人模式`，也不得有 `移除同伴` 按鈕 |
+
+### 個人分享連結對話（`#/import?d=…`，payload kind=personal 或缺 kind 的 v1）
+
+| 定位點 | 說明 |
+| --- | --- |
+| heading（exact） | `這是「{名稱}」的選片。`；連結沒有名稱時 `這是同伴的選片。` |
+| 說明文字 | 含 `要用這份設定取代此裝置的設定嗎？` |
+| buttons（exact，且只有這三個） | `當作同伴加入`、`取代我的設定`、`取消` |
+| `取代我的設定` | 不需第二次確認；完成後進 `#/tickets` 且 ticket-row 已顯示；不進兩人模式 |
+| `當作同伴加入` | 此裝置沒有同伴 → 名稱輸入畫面；已有同伴 → 取代同伴確認 |
+| 損毀連結 | 沿用 001：文字 `這個分享連結無法讀取，請在原裝置重新產生`，不出現 dialog |
+
+### 名稱輸入畫面
+
+| 定位點 | 說明 |
+| --- | --- |
+| `data-testid=name-dialog`（role=dialog） | 首次當作同伴加入、此裝置沒有同伴時出現 |
+| input，label（exact）`自己名稱`、`同伴名稱` | 預設值：自己 `我`；同伴 = 連結 sender_name，沒有則 `同伴` |
+| button `確認`（exact，dialog 內） | 寫入 self_name、partner；完成後橫幅出現。確認之前本機保存不得有 partner／self_name |
+
+### 取代同伴確認
+
+| 定位點 | 說明 |
+| --- | --- |
+| `data-testid=replace-partner-dialog`（role=dialog） | 已有同伴時選 `當作同伴加入` 後出現 |
+| 文字 | `要用這份取代目前的同伴嗎？` |
+| buttons `確認`、`取消`（exact） | 確認後同伴資料換成新連結內容（自己的設定不動）；確認之前本機保存的 partner 仍是舊的 |
+
+### 行程頁 / 搶票頁
+
+| 頁面 | 定位點 | 說明 |
+| --- | --- | --- |
+| 行程 | `data-testid=single-side-stats` | 僅兩人模式且行程頁顯示；文字完全等於 `只有 {自己} 標記：{n} 部、只有 {同伴} 標記：{m} 部（不排入）`；個人模式不得渲染，頁面也不得有 `只有 … 標記` 文字 |
+| 行程 | 兩人沒有共同標記 | 沿用 `行程頁顯示提示`：完整文字 `兩人沒有共同標記的片，先到選片頁一起挑`（getByText exact） |
+| 搶票 | `data-testid=ticket-quantity`（位於 ticket-row 內） | 兩人模式每列（pending 與 done 區）文字含 `買 2 張`；個人模式任何列都不得出現 `買 N 張` |
+
+### 分享頁（合併結果）
+
+| 定位點 | 說明 |
+| --- | --- |
+| 文字 `合併結果連結` | 僅兩人模式的分享畫面出現（個人模式分享畫面不得含此文字）；仍須有 `share-url`、`share-qr`（`data-url` 相同）、button `複製連結` |
+| `share-url` 的連結內容 | `#/import?d=` + lz-string `compressToEncodedURIComponent(JSON.stringify(payload))`；merged：`payload = { kind: "merged", schema_version: 2, state }`，`state` 含 `self_name`、`partner`（display_name、daily_limit、film_preferences、unavailable_slots）、manual_order、ticket_marks；personal：`{ kind: "personal", schema_version: 2, sender_name, state }`；001 版連結 = 直接是 schema_version 1 的 UserState（沒有 kind，視為 personal） |
+
+### 合併結果連結對話
+
+| 定位點 | 說明 |
+| --- | --- |
+| heading（exact） | `這是「{自己} ＋ {同伴}」的合併結果。` |
+| 說明文字 | `開啟後會取代此裝置目前的設定。` |
+| buttons（exact，且只有這兩個） | `取代並開啟`、`取消`；不得有 `當作同伴加入` |
+| `取代並開啟` | 完成後進入兩人模式（橫幅出現）且搶票頁 ticket-row 已顯示；手動順序與搶票標記一併取代 |
+
+### 資料契約補充
+
+- 使用者狀態寫入 `schema_version: 2`，新增 `self_name`（string|null）與 `partner`（`{ display_name, daily_limit, film_preferences[], unavailable_slots[] }`｜null）；讀取接受 1（個人模式）與 2。
+- 同伴分層的 `film_id` 可以不在場次快照中（steps 用 `__not_in_catalog__:<片名>` 合成 id）；合併時須忽略。

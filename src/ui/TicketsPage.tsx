@@ -3,7 +3,7 @@ import type { Catalog, Session, Tier, TicketListItem, UserState } from "../domai
 import { buildTicketList, clearMark, markSession } from "../domain/tickets";
 import { CatalogGate } from "./CatalogGate";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
-import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
+import { effectiveUser, ensureSchedule, runSchedule, updateUser, useStore } from "./store";
 
 type RowState = "pending" | "got" | "dead";
 
@@ -23,9 +23,10 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
+  const eff = useMemo(() => effectiveUser(catalog, user), [catalog, user]);
   const items = useMemo(
-    () => (schedule ? buildTicketList(catalog, user, schedule.itinerary) : []),
-    [catalog, user, schedule],
+    () => (schedule ? buildTicketList(catalog, eff, schedule.itinerary, user.partner ? 2 : undefined) : []),
+    [catalog, eff, user.partner, schedule],
   );
 
   if (!schedule) {
@@ -36,8 +37,8 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
     );
   }
 
-  const tierOf = new Map<string, Tier>(user.film_preferences.map((p) => [p.film_id, p.tier]));
-  const hotOf = new Map(user.film_preferences.map((p) => [p.film_id, p.is_hot]));
+  const tierOf = new Map<string, Tier>(eff.film_preferences.map((p) => [p.film_id, p.tier]));
+  const hotOf = new Map(eff.film_preferences.map((p) => [p.film_id, p.is_hot]));
   const gotSessionOf = (filmId: string): string | undefined =>
     user.ticket_marks.find((m) => m.result === "got" && sessionById.get(m.session_id)?.film_id === filmId)?.session_id;
   const stateOf = (it: TicketListItem): RowState => (gotSessionOf(it.film_id) ? "got" : it.exhausted ? "dead" : "pending");
@@ -111,6 +112,11 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
             <h2>{film?.title}</h2>
             {tier && <span className={`tag ${TIER_TAG_CLASS[tier]}`}>{TIER_LABEL[tier]}</span>}
             {hotOf.get(it.film_id) && <span className="tag tag-star">熱門</span>}
+            {it.ticket_quantity !== undefined && (
+              <span className="tag tag-want qty" data-testid="ticket-quantity">
+                買 {it.ticket_quantity} 張
+              </span>
+            )}
           </div>
           {state === "pending" && (
             <div className="tmove">

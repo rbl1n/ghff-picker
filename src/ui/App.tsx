@@ -5,6 +5,7 @@ import { ItineraryPage } from "./ItineraryPage";
 import { TicketsPage } from "./TicketsPage";
 import { SharePage } from "./SharePage";
 import { ImportPage } from "./ImportPage";
+import { DuoBanner } from "./DuoBanner";
 
 export const ROUTES = [
   { path: "pick", label: "選片", Page: PickPage, icon: "M3 4h18v16H3zM3 9h18M8 4v5M16 4v5" },
@@ -44,6 +45,7 @@ export function App() {
             </a>
           )}
         </header>
+        <DuoBanner />
         <main>
           <Page />
         </main>

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
-import type { Catalog, ItineraryEntry, UnscheduledMustFilm, UserState } from "../domain/types";
+import type { Catalog, ItineraryEntry, PartnerData, UnscheduledMustFilm, UserState } from "../domain/types";
 import { buildItinerary } from "../domain/schedule";
+import { mergePartner } from "../domain/merge";
 import { SCHEMA_VERSION, loadState, saveState } from "../state/storage";
 
 export type CatalogState =
@@ -73,6 +74,30 @@ export function replaceUser(next: UserState): void {
   set({ user: next, schedule: null, scheduling: false });
 }
 
+/** 加入／取代同伴：同伴資料另存，自己的設定一律不動 */
+export function setPartner(partner: PartnerData, selfName: string): void {
+  const next: UserState = { ...snap.user, self_name: selfName, partner, updated_at: new Date().toISOString() };
+  saveState(next);
+  set({ user: next, schedule: null, scheduling: false });
+}
+
+/** 移除同伴：清除同伴與兩人名稱；自己的設定與搶票標記保留 */
+export function removePartner(): void {
+  const next: UserState = { ...snap.user, self_name: null, partner: null, updated_at: new Date().toISOString() };
+  saveState(next);
+  set({ user: next, schedule: null, scheduling: false });
+}
+
+/**
+ * 排程與搶票清單的輸入：沒有同伴時原樣回傳（與 001 相同）；
+ * 有同伴時以合併結果取代分層、不可看時段與每日上限（手動順序與搶票標記仍是自己的）。
+ */
+export function effectiveUser(catalog: Catalog, user: UserState): UserState {
+  if (!user.partner) return user;
+  const m = mergePartner(catalog, user, user.partner);
+  return { ...user, film_preferences: m.film_preferences, unavailable_slots: m.unavailable_slots, daily_limit: m.daily_limit };
+}
+
 /* ------------------------------ 場次快照 ------------------------------ */
 
 export async function loadCatalog(): Promise<void> {
@@ -95,22 +120,24 @@ export async function loadCatalog(): Promise<void> {
 /** 影響行程的輸入條件指紋（分層、不可看時段、每日上限）；搶票標記由搶票頁即時處理，不算條件變更 */
 export function scheduleSignature(u: UserState): string {
   const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
-  return JSON.stringify([
-    u.film_preferences.map((p) => `${p.film_id}:${p.tier}`).sort(cmp),
-    u.unavailable_slots.map((s) => `${s.date}|${s.start_min}|${s.end_min}`).sort(cmp),
-    u.daily_limit,
-  ]);
+  const own = (x: Pick<UserState, "film_preferences" | "unavailable_slots" | "daily_limit">) => [
+    x.film_preferences.map((p) => `${p.film_id}:${p.tier}`).sort(cmp),
+    x.unavailable_slots.map((s) => `${s.date}|${s.start_min}|${s.end_min}`).sort(cmp),
+    x.daily_limit,
+  ];
+  // 沒有同伴時與 001 的指紋完全相同
+  return JSON.stringify(u.partner ? [...own(u), own(u.partner)] : own(u));
 }
 
 function compute(): void {
   wantSchedule = false;
   if (snap.catalog.status !== "ready") return;
   const { catalog } = snap.catalog;
-  const user = snap.user;
+  const user = effectiveUser(catalog, snap.user);
   // 一般排程只看分層、時段與上限；「依搶到結果重新排程」才把搶票標記納入
   const result = buildItinerary(catalog, wantMarks ? user : { ...user, ticket_marks: [] });
   wantMarks = false;
-  set({ schedule: { sig: scheduleSignature(user), ...result }, scheduling: false });
+  set({ schedule: { sig: scheduleSignature(snap.user), ...result }, scheduling: false });
 }
 
 /** 依目前條件重新排程；先讓畫面顯示「排程中」再計算。withMarks：保留已搶到、避開沒搶到的場次 */

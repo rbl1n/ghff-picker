@@ -63,8 +63,20 @@ export interface TicketMark {
   result: TicketResult;
 }
 
+/** 同伴資料（partner 與其子表；002）。最多一位。 */
+export interface PartnerData {
+  display_name: string;
+  daily_limit: number | null;
+  film_preferences: FilmPreference[];
+  unavailable_slots: UnavailableSlot[];
+}
+
 export interface UserState {
   schema_version: number;
+  /** 自己的顯示名稱；null／未設 = 個人模式且從未設定（002） */
+  self_name?: string | null;
+  /** 同伴；null／未設 = 個人模式（002） */
+  partner?: PartnerData | null;
   daily_limit: number | null;
   manual_order: string[] | null;
   updated_at: string;
@@ -91,4 +103,33 @@ export interface TicketListItem {
   current_session_id: string;
   backup_session_ids: string[];
   exhausted: boolean;
+  /** 兩人模式 = 2；個人模式 = null／未設（002） */
+  ticket_quantity?: number | null;
+}
+
+/** 分享連結種類（002） */
+export type ShareKind = "personal" | "merged";
+
+/** 分享連結內容（不落地；002） */
+export interface SharePayload {
+  kind: ShareKind;
+  schema_version: number;
+  sender_name?: string | null;
+  state: UserState;
+}
+
+/** 只有單方標記而不排入的影片數（衍生；002） */
+export interface SingleSideCounts {
+  self: number;
+  partner: number;
+}
+
+/** 兩人合併結果（衍生、不保存；002）。film_preferences 只含共同影片，tier 取高、is_hot 任一。 */
+export interface MergedView {
+  film_preferences: FilmPreference[];
+  /** 兩人不可看時段的聯集（原樣保留，不合併區間） */
+  unavailable_slots: UnavailableSlot[];
+  /** 有設定者最小；皆未設定 = null */
+  daily_limit: number | null;
+  single_side_counts: SingleSideCounts;
 }

@@ -98,26 +98,6 @@ Then("行程中 {string} 只出現 {int} 次", async ({}, title: string, n: numb
   expect(itinerary().filter((e) => sessionById(e.session_id).film_id === fid)).toHaveLength(n);
 });
 
-// 行程中沒有 "{片名}"
-Then("行程中沒有 {string}", async ({}, title: string) => {
-  const cat = requireCatalog();
-  const film = cat.films.find((f) => f.title === title);
-  const it = itinerary();
-  if (!film) return; // 片名不在場次表，行程自然沒有
-  expect(it.filter((e) => sessionById(e.session_id).film_id === film.film_id)).toHaveLength(0);
-});
-
-// 行程沒有任何場次
-Then("行程沒有任何場次", async () => {
-  const result = getCtx().world.lastResult;
-  expect(result, "尚未執行排程").not.toBeNull();
-  expect(result!.itinerary).toHaveLength(0);
-  const mustIds = new Set(ensureState().film_preferences.filter((p) => p.tier === "must").map((p) => p.film_id));
-  for (const u of result!.unscheduled) {
-    expect(mustIds.has(u.film_id), "未排入清單只能含必看片").toBe(true);
-  }
-});
-
 // 行程的排程目標不劣於窮舉所有可行組合
 Then("行程的排程目標不劣於窮舉所有可行組合", async () => {
   const catalog = requireCatalog();

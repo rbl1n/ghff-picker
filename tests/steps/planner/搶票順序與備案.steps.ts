@@ -3,6 +3,7 @@ import { buildItinerary } from "../../../src/domain/schedule";
 import { moveFilmInOrder, buildTicketList } from "../../../src/domain/tickets";
 import { isSessionWatchable } from "../../../src/domain/availability";
 import { areSessionsCompatible } from "../../../src/domain/compat";
+import { effectiveState } from "../../support/planner-world";
 import {
   getWorld, Given, When, Then, expect, need, rebuildList, setTicketList, getTicketList, filmIdByTitle, titleOf,
   sessionById, formatSession, cinemaOfVenue,
@@ -12,9 +13,11 @@ import {
 // T042
 When("觀眾執行排程並開啟搶票清單", async () => {
   const world = getWorld();
-  const { catalog, state } = need(world);
-  world.lastResult = buildItinerary(catalog, state);
-  setTicketList(world, buildTicketList(catalog, state, world.lastResult.itinerary));
+  const { catalog } = need(world);
+  // 有同伴資料時，排程與清單的輸入都是兩人合併結果
+  const input = effectiveState(world);
+  world.lastResult = buildItinerary(catalog, input);
+  setTicketList(world, buildTicketList(catalog, input, world.lastResult.itinerary));
 });
 
 // T043
@@ -63,7 +66,8 @@ Then("搶票清單的排定場次如下：", async ({}, table: DataTable) => {
 // T046
 Then("搶票清單的備案場次如下：", async ({}, table: DataTable) => {
   const world = getWorld();
-  const { catalog, state } = need(world);
+  const { catalog } = need(world);
+  const state = effectiveState(world); // 兩人模式：可看與每日上限皆為合併值
   const list = getTicketList(world);
   const itinerary = world.lastResult!.itinerary;
   for (const row of table.hashes()) {

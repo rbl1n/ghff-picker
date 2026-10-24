@@ -11,7 +11,7 @@ const TIER_RANK = { must: 0, want: 1, maybe: 2 } as const;
  * - backup_session_ids：可看、未被標沒搶到、與行程中其他影片及已搶到場次相容、不使當天超過每日上限；影人出席優先再依時間。
  * 順序：手動順序（manual_order，以索引為固定名次，"" 為空位）優先，其餘依層級、熱門、可看場次少、★、影片順序。
  */
-export function buildTicketList(catalog: Catalog, state: UserState, itinerary: ItineraryEntry[]): TicketListItem[] {
+export function buildTicketList(catalog: Catalog, state: UserState, itinerary: ItineraryEntry[], ticketQuantity?: number): TicketListItem[] {
   const cinemaOf = cinemaResolver(catalog);
   const compat = (a: Session, b: Session) => areSessionsCompatibleEitherOrder(a, b, cinemaOf);
   const sessionById = new Map(catalog.sessions.map((s) => [s.session_id, s]));
@@ -68,7 +68,7 @@ export function buildTicketList(catalog: Catalog, state: UserState, itinerary: I
   );
 
   const ordered = applyManualOrder(rows.map((r) => r.item), state.manual_order);
-  return ordered.map((item, i) => ({ ...item, order: i + 1 }));
+  return ordered.map((item, i) => ({ ...item, order: i + 1, ...(ticketQuantity !== undefined ? { ticket_quantity: ticketQuantity } : {}) }));
 }
 
 function applyManualOrder(items: TicketListItem[], manual: string[] | null): TicketListItem[] {

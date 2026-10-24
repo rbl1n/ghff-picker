@@ -23,6 +23,14 @@ import {
 } from "../../support/web-a-helpers";
 import { minToHhmm, TIER_ENUM_TO_LABEL } from "../../support/tables";
 import { engineOf } from "../../support/web-b-helpers";
+import {
+  addPendingSlots,
+  armDuoPreload,
+  duoOf,
+  pendingToPartner,
+  planStateOf,
+  selfSnapshotOf,
+} from "../../support/web-duo-helpers";
 
 /* ------------------------------ Given ------------------------------ */
 
@@ -62,6 +70,35 @@ Given("觀眾已把下列場次標記為搶到：", async ({ page, world }, tabl
   }
   await reapplyState(page, world, "搶票");
   if (world.opened) await page.getByTestId("ticket-row").first().waitFor();
+});
+
+// T021
+Given("同伴的分層如下：", async ({ world }, table: DataTable) => {
+  for (const r of table.hashes()) {
+    duoOf(world).pending.prefs.push({ title: r["片名"], tier: TIER_LABEL_TO_ENUM[r["層級"]], is_hot: (r["熱門"] ?? "").trim() === "是" });
+  }
+});
+
+// T022
+Given("同伴已設定不可看時段如下：", async ({ world }, table: DataTable) => {
+  addPendingSlots(world, table.hashes());
+});
+
+// T023
+Given("同伴的每日上限已設為 {int} 部", async ({ world }, limit: number) => {
+  duoOf(world).pending.dailyLimit = limit;
+});
+
+// T024
+Given("觀眾已加入同伴，自己名稱為 {string}、同伴名稱為 {string}", async ({ page, world }, self: string, partner: string) => {
+  const c = duoOf(world);
+  c.selfName = self;
+  c.partnerName = partner;
+  c.preloaded = pendingToPartner(world, partner);
+  c.baseline = selfSnapshotOf(buildState(world));
+  // 待載入的同伴資料已預載；之後的同伴 Given 重新累積（供同伴連結使用）
+  c.pending = { prefs: [], slots: [], dailyLimit: null };
+  await armDuoPreload(page, world);
 });
 
 /* ------------------------------ Then ------------------------------- */
@@ -197,7 +234,7 @@ Then("行程頁依日期顯示以下場次：", async ({ page, world }, table: D
   }
   // 權威狀態：畫面行程 = 由目前使用者狀態算出的行程
   const st = await storedOrDefault(page);
-  const { itinerary } = buildItinerary(world.catalog!, st);
+  const { itinerary } = buildItinerary(world.catalog!, planStateOf(world.catalog!, st));
   const byId = new Map(world.catalog!.sessions.map((s) => [s.session_id, s]));
   const titleOf = new Map(world.catalog!.films.map((f) => [f.film_id, f.title]));
   const computed = itinerary

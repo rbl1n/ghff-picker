@@ -32,6 +32,11 @@ export function SharePage() {
 
   return (
     <section className="card">
+      {user.partner && (
+        <p style={{ margin: "0 0 8px", textAlign: "center" }}>
+          <span className="tag tag-want">合併結果連結</span>
+        </p>
+      )}
       <p style={{ margin: 0, textAlign: "center" }}>用手機掃描，在手機上打開同一份清單</p>
       <div className="qrbox" data-testid="share-qr" data-url={url}>
         {qr && qr !== "failed" && qr.url === url ? (

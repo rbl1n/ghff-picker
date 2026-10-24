@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from "react";
+import { singleSideCounts } from "../domain/merge";
 import type { Catalog, ItineraryEntry, Session, UnscheduledMustFilm } from "../domain/types";
 import { CatalogGate } from "./CatalogGate";
 import { TIERS, TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
-import { ensureSchedule, runSchedule, scheduleSignature, useStore } from "./store";
+import { effectiveUser, ensureSchedule, runSchedule, scheduleSignature, useStore } from "./store";
 
 const REASON_TEXT = {
   no_available_session: () => "沒有可看場次",
@@ -25,12 +26,21 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
+  const eff = useMemo(() => effectiveUser(catalog, user), [catalog, user]);
+  const partner = user.partner;
+  const stats = partner ? singleSideCounts(catalog, user, partner) : null;
+  const statsEl = partner && stats && (
+    <p className="stat" data-testid="single-side-stats">
+      {`只有 ${user.self_name || "我"} 標記：${stats.self} 部、只有 ${partner.display_name} 標記：${stats.partner} 部（不排入）`}
+    </p>
+  );
 
-  if (user.film_preferences.length === 0 && !scheduling) {
+  if (eff.film_preferences.length === 0 && !scheduling) {
     return (
       <>
+        {statsEl}
         <p className="empty" data-testid="itinerary-empty">
-          先到選片頁標記想看的片
+          {partner ? "兩人沒有共同標記的片，先到選片頁一起挑" : "先到選片頁標記想看的片"}
         </p>
         <a className="btn btn-primary btn-block" href="#/pick">
           去選片
@@ -70,9 +80,10 @@ function ItineraryContent({ catalog }: { catalog: Catalog }) {
           </div>
         </div>
       )}
+      {statsEl}
       <div className="sum">
         {TIERS.map((t) => {
-          const total = user.film_preferences.filter((p) => p.tier === t).length;
+          const total = eff.film_preferences.filter((p) => p.tier === t).length;
           const done = schedule.itinerary.filter((e) => e.tier === t).length;
           return (
             <div key={t} data-testid={`itinerary-summary-${t}`}>
