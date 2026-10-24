@@ -806,7 +806,7 @@
 **Boundary**:
 - 不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 
-- [ ] T187 subagent review (research quality gate)
+- [x] T187 subagent review (research quality gate)
 
 ## Phase 4Z: ui quality gate
 
@@ -821,4 +821,4 @@
 - 不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 - 已知雛形瑕疵不照抄：時間輸入用 24 小時制；無備案時顯示「無不衝堂備案」；標籤多時排序按鈕不換行。
 
-- [ ] T188 subagent review (ui quality gate)
+- [x] T188 subagent review (ui quality gate)

@@ -176,7 +176,7 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
                 沒搶到
               </button>
             </div>
-            <details>
+            <details open={backups.length === 0}>
               <summary>全部備案（{backups.length}）</summary>
               <ul className="bk">
                 {backups.map((s) => (
