@@ -81,6 +81,22 @@ export function toggleHour(availability: DayAvailability[], date: string, hour: 
     : subtractInterval(availability, date, from, to);
 }
 
+export type MultiHourState = HourCellState | "mixed";
+
+/** 多日合併後的小時格子狀態：各日相同 = 該狀態；不同 = 不一致（mixed） */
+export function combinedHourState(availability: DayAvailability[], dates: string[], hour: number): MultiHourState {
+  const states = dates.map((d) => hourCellState(availability, d, hour));
+  return states.every((s) => s === states[0]) ? (states[0] ?? "available") : "mixed";
+}
+
+/** 多日點擊小時格子：所有日期的該小時都沒空 -> 全部有空；其餘（含不一致）-> 全部沒空 */
+export function toggleHourMulti(availability: DayAvailability[], dates: string[], hour: number): DayAvailability[] {
+  const from = hour * 60;
+  const to = from + 60;
+  const allBusy = dates.length > 0 && dates.every((d) => hourCellState(availability, d, hour) === "unavailable");
+  return dates.reduce((acc, d) => (allBusy ? addInterval(acc, d, from, to) : subtractInterval(acc, d, from, to)), availability);
+}
+
 function nextDate(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);

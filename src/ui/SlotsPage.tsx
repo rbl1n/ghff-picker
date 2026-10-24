@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { addInterval, complementOf, hourCellState, subtractInterval, toggleHour, type HourCellState } from "../domain/availability";
+import { addInterval, combinedHourState, complementOf, hourCellState, subtractInterval, toggleHour, toggleHourMulti, type HourCellState, type MultiHourState } from "../domain/availability";
 import { formatTime, parseTime } from "../domain/time";
 import type { DayAvailability, UnavailableSlot } from "../domain/types";
 import { dateLabel, weekdayLabel } from "./format";
@@ -35,22 +35,35 @@ const slotLabel = (s: UnavailableSlot): string =>
 
 const NONE: DayAvailability[] = [];
 
-const HOUR_TEXT: Record<HourCellState, string> = { available: "有空", unavailable: "沒空", partial: "部分沒空" };
-const HOUR_ATTR: Record<HourCellState, string> = { available: "free", unavailable: "busy", partial: "partial" };
+const HOUR_TEXT: Record<MultiHourState, string> = { available: "有空", unavailable: "沒空", partial: "部分沒空", mixed: "不一致" };
+const HOUR_ATTR: Record<MultiHourState, string> = { available: "free", unavailable: "busy", partial: "partial", mixed: "mixed" };
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
-/** 單日 24 小時格子：點擊切換有空／沒空（多日選取時同步各日同一小時），格子同時以文字標示狀態 */
-function HourGrid({ date, availability, onToggle }: { date: string; availability: DayAvailability[]; onToggle: (hour: number) => void }) {
+/** 格子標題：明確寫出正在編輯哪幾天 */
+function editingText(dates: string[]): string {
+  return dates.length === 1 ? `正在編輯：${dateLabel(dates[0])}` : `正在編輯 ${dates.length} 天：${dates.map(dateLabel).join("、")}`;
+}
+
+/** 24 小時格子：單日（testid hour-cell）或多日合併（testid multi-hour-cell，各日不同顯示「不一致」），格子同時以文字標示狀態 */
+function HourGrid({ dates, multi, availability, onToggle }: { dates: string[]; multi: boolean; availability: DayAvailability[]; onToggle: (hour: number) => void }) {
   return (
     <div className="hourday">
-      <p className="hint" style={{ margin: "10px 0 6px" }}>
-        {dateLabel(date)}
+      <p className="editing" data-testid="editing-label" data-dates={dates.join(",")}>
+        {editingText(dates)}
       </p>
-      <div className="hours" role="group" aria-label={`${dateLabel(date)} 小時格子`}>
+      <div className="hours" role="group" aria-label={`${dates.map(dateLabel).join("、")} 小時格子`}>
         {HOURS.map((h) => {
-          const st = hourCellState(availability, date, h);
+          const st: MultiHourState = multi ? combinedHourState(availability, dates, h) : hourCellState(availability, dates[0], h);
           return (
-            <button key={h} className="hour" data-testid="hour-cell" data-date={date} data-hour={h} data-state={HOUR_ATTR[st]} onClick={() => onToggle(h)}>
+            <button
+              key={h}
+              className="hour"
+              data-testid={multi ? "multi-hour-cell" : "hour-cell"}
+              data-date={multi ? undefined : dates[0]}
+              data-hour={h}
+              data-state={HOUR_ATTR[st]}
+              onClick={() => onToggle(h)}
+            >
               <b className="mono">{String(h).padStart(2, "0")}:00</b>
               <span>{HOUR_TEXT[st]}</span>
             </button>
@@ -63,7 +76,9 @@ function HourGrid({ date, availability, onToggle }: { date: string; availability
 
 export function SlotsPage() {
   const { user, catalog } = useStore();
+  /** 正在編輯的日期（依點選順序，最後一個是最近點的）；單選模式最多一天 */
   const [picked, setPicked] = useState<string[]>([]);
+  const [multi, setMulti] = useState(false);
   const [startText, setStartText] = useState("09:00");
   const [endText, setEndText] = useState("18:00");
   const [limitText, setLimitText] = useState(user.daily_limit === null ? "" : String(user.daily_limit));
@@ -86,7 +101,18 @@ export function SlotsPage() {
   const orderBad = !formatBad && end <= start;
   const canApply = !formatBad && !orderBad && picked.length > 0;
 
-  const togglePicked = (d: string) => setPicked((p) => (p.includes(d) ? p.filter((x) => x !== d) : [...p, d]));
+  const tapDate = (d: string) =>
+    setPicked((p) => (!multi ? [d] : p.includes(d) ? p.filter((x) => x !== d) : [...p, d]));
+  const toggleMulti = () => {
+    if (multi) setPicked((p) => p.slice(-1));
+    setMulti(!multi);
+  };
+  const selectSameWeekday = () => {
+    const last = picked[picked.length - 1];
+    if (!last) return;
+    const wd = weekdayLabel(last);
+    setPicked([...dates.filter((x) => x !== last && weekdayLabel(x) === wd), last]);
+  };
 
   const setAvailability = (change: (a: DayAvailability[]) => DayAvailability[]) =>
     updateUser((s) => ({ ...s, availability: change(s.availability ?? NONE) }));
@@ -105,7 +131,8 @@ export function SlotsPage() {
     setAvailability((a) => addInterval(a, slot.date, slot.start_min ?? 0, slot.end_min ?? 1440));
 
   const pickedSorted = useMemo(() => [...picked].sort(), [picked]);
-  const toggleHourOnPicked = (hour: number) => setAvailability((a) => pickedSorted.reduce((acc, d) => toggleHour(acc, d, hour), a));
+  const toggleHourOnPicked = (hour: number) =>
+    setAvailability((a) => (multi ? toggleHourMulti(a, pickedSorted, hour) : pickedSorted.reduce((acc, d) => toggleHour(acc, d, hour), a)));
 
   const commitLimit = () => {
     const text = limitText.trim();
@@ -132,7 +159,7 @@ export function SlotsPage() {
       <section className="card">
         <h2>選擇日期</h2>
         <p className="hint" style={{ margin: 0 }}>
-          可多選
+          {multi ? "多選中：點日期加入或取消" : "點日期切換要編輯的那一天"}
         </p>
         <div className="grid" role="group" aria-label="影展日期">
           {dates.map((d) => (
@@ -142,16 +169,24 @@ export function SlotsPage() {
               data-testid="day-cell"
               data-date={d}
               aria-pressed={picked.includes(d)}
-              aria-label={dateLabel(d)}
-              onClick={() => togglePicked(d)}
+              aria-label={availability.some((r) => r.date === d) ? `${dateLabel(d)}，有設定` : dateLabel(d)}
+              onClick={() => tapDate(d)}
             >
               <span className="hint">{weekdayLabel(d)}</span>
               <b className="mono">{Number(d.slice(8))}</b>
-              {availability.some((r) => r.date === d) && <i />}
+              {availability.some((r) => r.date === d) && <i data-testid="day-marker" aria-hidden="true" />}
             </button>
           ))}
         </div>
         <div className="row">
+          <button className="btn" data-testid="multi-toggle" aria-pressed={multi} onClick={toggleMulti}>
+            多選日期
+          </button>
+          {multi && (
+            <button className="btn" disabled={picked.length === 0} onClick={selectSameWeekday}>
+              同星期幾
+            </button>
+          )}
           <button className="btn sp" disabled={picked.length === 0} onClick={() => addSlots({ start_min: null, end_min: null })}>
             整天不可看
           </button>
@@ -161,11 +196,13 @@ export function SlotsPage() {
       <section className="card">
         <h2>小時格子</h2>
         <p className="hint" style={{ margin: 0 }}>
-          {pickedSorted.length > 0 ? "點一格切換有空／沒空；選了多天會一起切換" : "先在上方選擇日期，就會出現當天的 24 格"}
+          {pickedSorted.length === 0
+            ? "先在上方選擇日期，就會出現當天的 24 格"
+            : multi
+              ? "點一格會把所有被選日期的該小時設成同一狀態（不一致的格子會變成沒空）"
+              : "點一格切換有空／沒空"}
         </p>
-        {pickedSorted.map((d) => (
-          <HourGrid key={d} date={d} availability={availability} onToggle={toggleHourOnPicked} />
-        ))}
+        {pickedSorted.length > 0 && <HourGrid dates={pickedSorted} multi={multi} availability={availability} onToggle={toggleHourOnPicked} />}
       </section>
 
       <form

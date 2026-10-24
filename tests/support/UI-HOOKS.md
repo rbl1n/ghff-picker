@@ -32,7 +32,10 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 
 | 定位點 | 屬性 | 說明 | 使用檔 |
 | --- | --- | --- | --- |
-| `data-testid=day-cell` | `data-date`、`aria-pressed` | 日曆格，可多選 | 時段 steps |
+| `data-testid=day-cell` | `data-date`、`aria-pressed`；有設定時內含 `data-testid=day-marker`，accessible name 含 `有設定` | 日曆格；單選模式點日期＝切換編輯日期；多選模式＝加入／移除 | 時段 steps |
+| `data-testid=multi-toggle`（button `多選日期`）、button `同星期幾`（僅多選模式） | `aria-pressed` | 多選日期開關 | 時段 steps |
+| `data-testid=editing-label` | `data-dates`（逗號分隔）；文字 `正在編輯：11/09（一）` 或 `正在編輯 N 天：…` | 格子標題 | 時段 steps |
+| `data-testid=hour-cell`（單日）／`multi-hour-cell`（多選，無 data-date） | `data-hour`、`data-state`=`free` `busy` `partial` `mixed`（不一致） | 小時格子 | 時段 steps |
 | label `開始時間`、`結束時間` | input（可 fill `HH:MM`） | | 時段 steps |
 | 錯誤文字 `結束時間需晚於開始時間` | 結束 ≤ 開始時顯示 | | 時段 steps |
 | button 名稱含 `套用` | 輸入不合法時 disabled（click／Enter 都不得送出） | | 時段 steps |

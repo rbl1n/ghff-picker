@@ -247,11 +247,34 @@ export async function readStateOrEmpty(page: Page): Promise<StateV3> {
 
 export const dayCellOf = (page: Page, date: string): Locator => page.locator(`[data-testid="day-cell"][data-date="${date}"]`);
 
+export const multiToggleOf = (page: Page): Locator => page.getByTestId("multi-toggle");
+
+/** 把多選日期模式切到指定開關（aria-pressed） */
+export async function setMultiMode(page: Page, on: boolean): Promise<void> {
+  const t = multiToggleOf(page);
+  if (((await t.getAttribute("aria-pressed")) === "true") !== on) await t.click();
+  await expect(t).toHaveAttribute("aria-pressed", String(on));
+}
+
+/** 單選模式下切到該日期（若多選模式開著，先離開；點日期 = 切換正在編輯的日期） */
 export async function selectDay(page: Page, date: string): Promise<void> {
+  await setMultiMode(page, false);
   const cell = dayCellOf(page, date);
   if ((await cell.getAttribute("aria-pressed")) !== "true") await cell.click();
   await expect(cell).toHaveAttribute("aria-pressed", "true");
 }
+
+/** 多選模式：依序點日期加入選取（不重複點已選的） */
+export async function multiSelectDays(page: Page, dates: string[]): Promise<void> {
+  await setMultiMode(page, true);
+  for (const d of dates) {
+    const cell = dayCellOf(page, d);
+    if ((await cell.getAttribute("aria-pressed")) !== "true") await cell.click();
+    await expect(cell).toHaveAttribute("aria-pressed", "true");
+  }
+}
+
+export const multiHourCellOf = (page: Page, hour: number): Locator => page.locator(`[data-testid="multi-hour-cell"][data-hour="${hour}"]`);
 
 export const hourCellOf = (page: Page, date: string, hour: number): Locator =>
   page.locator(`[data-testid="hour-cell"][data-date="${date}"][data-hour="${hour}"]`);

@@ -17,6 +17,10 @@ import {
 import {
   availOf,
   hourCellOf,
+  multiHourCellOf,
+  multiSelectDays,
+  setMultiMode,
+  dayCellOf,
   hourStateOf,
   HOUR_STATE_ATTR,
   isSessionAvailable,
@@ -25,14 +29,11 @@ import {
   type HourState,
 } from "../../support/web-003-helpers";
 
-const dayCell = (page: Page, date: string) => page.locator(`[data-testid="day-cell"][data-date="${date}"]`);
 const applyBtn = (page: Page) => page.getByRole("button", { name: /套用/ });
 const limitInput = (page: Page) => page.getByTestId("daily-limit-input");
 
 async function selectDate(page: Page, date: string) {
-  const cell = dayCell(page, date);
-  if ((await cell.getAttribute("aria-pressed")) !== "true") await cell.click();
-  await expect(cell).toHaveAttribute("aria-pressed", "true");
+  await selectDay(page, date);
 }
 
 async function fillRange(page: Page, range: string) {
@@ -53,7 +54,7 @@ When("觀眾在時段頁對 {string} 輸入不可看時段 {string}", async ({ p
 When("觀眾在時段頁選取以下日期並套用不可看時段 {string}：", async ({ page, world }, range: string, table: DataTable) => {
   await openTab(page, world, "時段");
   const dates = table.hashes().map((r) => r["日期"]);
-  for (const d of dates) await selectDate(page, d);
+  await multiSelectDays(page, dates);
   await fillRange(page, range);
   await applyBtn(page).click();
   for (const d of dates) {
@@ -106,12 +107,82 @@ When("觀眾在時段頁點擊 {string} 的 {int} 點格子", async ({ page, wor
   await clickHour(page, date, hour, [date]);
 });
 
-// T046（003）：每個被選日期各自依該日該格的目前狀態切換
+// T046（003）：多選統一規則——全部沒空 → 全部有空；其餘 → 全部沒空
+async function clickMultiHour(page: Page, hour: number, dates: string[]): Promise<void> {
+  const cell = multiHourCellOf(page, hour);
+  await expect(cell).toBeVisible();
+  const before = (await cell.getAttribute("data-state")) ?? "";
+  await cell.click();
+  const want = before === "busy" ? "free" : "busy";
+  await expect(multiHourCellOf(page, hour), `${dates.join("、")} ${hour} 點`).toHaveAttribute("data-state", want);
+}
+
 When("觀眾在時段頁選取以下日期並點擊 {int} 點格子：", async ({ page, world }, hour: number, table: DataTable) => {
   await openTab(page, world, "時段");
   const dates = table.hashes().map((r) => r["日期"]);
-  for (const d of dates) await selectDay(page, d);
-  await clickHour(page, dates[0], hour, dates);
+  await multiSelectDays(page, dates);
+  await clickMultiHour(page, hour, dates);
+});
+
+When("觀眾在時段頁切換編輯到 {string}", async ({ page, world }, date: string) => {
+  await openTab(page, world, "時段");
+  await selectDay(page, date);
+  await expect(page.getByTestId("editing-label")).toHaveAttribute("data-dates", date);
+});
+
+When("觀眾在時段頁多選以下日期：", async ({ page, world }, table: DataTable) => {
+  await openTab(page, world, "時段");
+  await multiSelectDays(
+    page,
+    table.hashes().map((r) => r["日期"]),
+  );
+});
+
+When("觀眾在時段頁離開多選日期模式", async ({ page }) => {
+  await setMultiMode(page, false);
+});
+
+When("觀眾在時段頁按下「同星期幾」", async ({ page }) => {
+  await page.getByRole("button", { name: "同星期幾", exact: true }).click();
+});
+
+When("觀眾在時段頁對已選日期點擊以下小時格子：", async ({ page }, table: DataTable) => {
+  const dates = ((await page.getByTestId("editing-label").getAttribute("data-dates")) ?? "").split(",");
+  for (const r of table.hashes()) await clickMultiHour(page, Number(r["小時"]), dates);
+});
+
+Then("時段頁正在編輯 {string}", async ({ page }, list: string) => {
+  const dates = list.split("、");
+  await expect(page.getByTestId("editing-label")).toHaveAttribute("data-dates", dates.join(","));
+  const label = (d: string) => {
+    const dt = new Date(`${d}T00:00:00Z`);
+    return `${String(dt.getUTCMonth() + 1).padStart(2, "0")}/${String(dt.getUTCDate()).padStart(2, "0")}（${"日一二三四五六"[dt.getUTCDay()]}）`;
+  };
+  const text = dates.length === 1 ? `正在編輯：${label(dates[0])}` : `正在編輯 ${dates.length} 天：${dates.map(label).join("、")}`;
+  await expect(page.getByTestId("editing-label")).toHaveText(text);
+  await expect(page.locator('[data-testid="day-cell"][aria-pressed="true"]')).toHaveCount(dates.length);
+  for (const d of dates) await expect(dayCellOf(page, d)).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(`套用到已選的 ${dates.length} 天`)).toBeVisible();
+});
+
+Then("時段頁多選編輯中的小時格子如下：", async ({ page }, table: DataTable) => {
+  for (const r of table.hashes()) {
+    const cell = multiHourCellOf(page, Number(r["小時"]));
+    const want: Record<string, string> = { 有空: "free", 沒空: "busy", 部分沒空: "partial", 不一致: "mixed" };
+    await expect(cell, `${r["小時"]} 點`).toHaveAttribute("data-state", want[r["狀態"]]);
+    expect(((await cell.textContent()) ?? "").replace(/\s+/g, " ")).toContain(r["狀態"]);
+  }
+});
+
+Then("時段頁日期 {string} 顯示有設定標示", async ({ page }, date: string) => {
+  await expect(dayCellOf(page, date).getByTestId("day-marker")).toHaveCount(1);
+  await expect(dayCellOf(page, date)).toHaveAccessibleName(/有設定/);
+  expect(availOf(await storedOrDefault(page)).some((r) => r.date === date)).toBe(true);
+});
+
+Then("時段頁日期 {string} 不顯示有設定標示", async ({ page }, date: string) => {
+  await expect(dayCellOf(page, date).getByTestId("day-marker")).toHaveCount(0);
+  expect(availOf(await storedOrDefault(page)).some((r) => r.date === date)).toBe(false);
 });
 
 // T047（003）

@@ -99,7 +99,7 @@ main{min-width:0}
 
 /* ---- 時段 ---- */
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0 12px}
-.day{min-height:52px;min-width:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:0}
+.day{min-height:52px;min-width:0;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:0}
 .day b{font-size:17px}.day i{position:absolute;bottom:5px;width:6px;height:6px;border-radius:50%;background:var(--danger)}
 .day[aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
 .day[aria-pressed=true] .hint{color:var(--gold-ink)}
@@ -190,6 +190,10 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 .hour[data-state=free]{color:var(--text)}
 .hour[data-state=busy]{background:var(--danger-bg);border-color:var(--danger);color:var(--danger)}
 .hour[data-state=partial]{border:2px dashed var(--gold);color:var(--gold);background:repeating-linear-gradient(135deg,transparent 0 6px,var(--panel-2) 6px 12px)}
+.hour[data-state=mixed]{border:2px dotted var(--danger);color:var(--text);background:var(--panel-2);font-style:italic}
+.btn[aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.editing{margin:10px 0 6px;font-weight:700;overflow-wrap:anywhere}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .hour:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media (min-width:600px){.hours{grid-template-columns:repeat(6,1fr)}}
 
