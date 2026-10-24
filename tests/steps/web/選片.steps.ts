@@ -317,6 +317,20 @@ Then("層內順序檢視中 {string} 的片號顯示為 {string}", async ({ page
   await expect(item.getByTestId("catalog-no")).toHaveText(no);
 });
 
+Then("層內順序檢視中 {string} 的備註顯示為 {string}", async ({ page, world }, title: string, note: string) => {
+  await openTab(page, world, "選片");
+  const item = page.locator(`[data-testid="tier-order-item"][data-title="${title}"]`);
+  await expect(item.getByTestId("order-note")).toHaveText(note);
+  expect((await storedOrDefault(page)).film_notes?.[filmIdOf(world, title)]).toBe(note);
+});
+
+Then("層內順序檢視中 {string} 沒有備註", async ({ page, world }, title: string) => {
+  await openTab(page, world, "選片");
+  const item = page.locator(`[data-testid="tier-order-item"][data-title="${title}"]`);
+  await expect(item).toBeVisible();
+  await expect(item.getByTestId("order-note")).toHaveCount(0);
+});
+
 // 官網連結
 Then("選片頁 {string} 有官網介紹連結 {string}", async ({ page, world }, title: string, url: string) => {
   await openTab(page, world, "選片");

@@ -121,7 +121,7 @@ const A11Y = {
   },
 };
 
-function OrderRow({ id, tier, rank, title, catNo, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; overlay?: boolean }) {
+function OrderRow({ id, tier, rank, title, catNo, note, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; note?: string; overlay?: boolean }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = overlay ? undefined : { transform: CSS.Transform.toString(transform), transition };
   return (
@@ -147,6 +147,7 @@ function OrderRow({ id, tier, rank, title, catNo, overlay }: { id: string; tier:
       <span className="ttl">
         <CatNo no={catNo} />
         <span data-testid="film-title">{title}</span>
+        {note && <span className="onote" data-testid="order-note">{note}</span>}
       </span>
       {!overlay && (
         <div className="rowtier" role="group" aria-label={`${title} 改層級`}>
@@ -164,7 +165,7 @@ function OrderRow({ id, tier, rank, title, catNo, overlay }: { id: string; tier:
   );
 }
 
-function TierGroup({ tier, ids, filmOf, dragging }: { tier: Tier; ids: string[]; filmOf: Map<string, Film>; dragging: boolean }) {
+function TierGroup({ tier, ids, filmOf, notes, dragging }: { tier: Tier; ids: string[]; filmOf: Map<string, Film>; notes: Record<string, string>; dragging: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id: CONTAINER + tier });
   return (
     <div className="tgroup" data-testid="tier-order-group" data-tier={tier}>
@@ -174,7 +175,7 @@ function TierGroup({ tier, ids, filmOf, dragging }: { tier: Tier; ids: string[];
       <div ref={setNodeRef} data-testid={ids.length === 0 ? "tier-drop-zone" : undefined} className={`dropzone${ids.length === 0 ? " empty" : ""}${isOver && dragging ? " over" : ""}`}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           {ids.map((id, i) => (
-            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} />
+            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} note={notes[id]} />
           ))}
         </SortableContext>
         {ids.length === 0 && (
@@ -186,7 +187,7 @@ function TierGroup({ tier, ids, filmOf, dragging }: { tier: Tier; ids: string[];
 }
 
 /** 層內順序檢視：拖曳 ⋮⋮ 把手調整順序，也能放進別層（觸控、滑鼠、鍵盤皆可；兩人模式也只調整自己的） */
-function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPreference[] }) {
+function TierOrderView({ catalog, prefs, notes }: { catalog: Catalog; prefs: FilmPreference[]; notes: Record<string, string> }) {
   const filmOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
   const [draft, setDraft] = useState<Lists | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -280,11 +281,11 @@ function TierOrderView({ catalog, prefs }: { catalog: Catalog; prefs: FilmPrefer
         onDragCancel={onDragCancel}
       >
         {TIERS.map((t) => (
-          <TierGroup key={t} tier={t} ids={lists[t]} filmOf={filmOf} dragging={activeId !== null} />
+          <TierGroup key={t} tier={t} ids={lists[t]} filmOf={filmOf} notes={notes} dragging={activeId !== null} />
         ))}
         <DragOverlay>
           {activeId ? (
-            <OrderRow id={activeId} tier={TIERS.find((t) => lists[t].includes(activeId)) ?? "must"} rank={(TIERS.map((t) => lists[t].indexOf(activeId)).find((i) => i >= 0) ?? 0) + 1} title={filmOf.get(activeId)?.title ?? activeId} catNo={filmOf.get(activeId)?.catalog_no} overlay />
+            <OrderRow id={activeId} tier={TIERS.find((t) => lists[t].includes(activeId)) ?? "must"} rank={(TIERS.map((t) => lists[t].indexOf(activeId)).find((i) => i >= 0) ?? 0) + 1} title={filmOf.get(activeId)?.title ?? activeId} catNo={filmOf.get(activeId)?.catalog_no} note={notes[activeId]} overlay />
           ) : null}
         </DragOverlay>
       </DndContext>
@@ -356,7 +357,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           ))}
         </ul>
       </details>
-      <TierOrderView catalog={catalog} prefs={user.film_preferences} />
+      <TierOrderView catalog={catalog} prefs={user.film_preferences} notes={user.film_notes ?? NO_NOTES} />
       <input
         className="input"
         type="search"
