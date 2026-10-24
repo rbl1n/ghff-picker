@@ -17,20 +17,20 @@
 
 **Goal**: 起始專案，新增全部技術：Vite + React + TypeScript 前端、tsx + cheerio 抓資料腳本、lz-string + QR 產生器、playwright-bdd 單一 BDD runner。最後用 smoke-test 確認 runner 能跑到 planner、scraper、web 三種 project。不寫 DSL 語意，不寫產品行為。
 
-- [ ] T001 初始化 Node 專案與前端建置
+- [x] T001 初始化 Node 專案與前端建置
   - Read:
     - `specs/truth/techstack.md` -> 前端
     - `plan.md` -> 原始碼結構
   - `package.json`（type module、Node 20+）、TypeScript strict、Vite + React（`@vitejs/plugin-react`）、`src/main.tsx` 空殼、`.gitignore`。
   - `vite.config.ts` 的 `base` 預留給 GitHub Pages 子路徑（以環境變數設定）。
 
-- [ ] T002 加入抓資料與跨裝置相關套件
+- [x] T002 加入抓資料與跨裝置相關套件
   - Read:
     - `specs/truth/techstack.md` -> 資料與媒體處理、前端
   - 加入 `tsx`、`cheerio`（devDependencies）、`lz-string`、`qrcode`（含型別）。
   - `package.json` script：`scrape` = `tsx scripts/scrape/scrape.ts`。
 
-- [ ] T003 設定 playwright-bdd 與四個 Playwright project
+- [x] T003 設定 playwright-bdd 與四個 Playwright project
   - Read:
     - `specs/truth/techstack.md` -> 測試與驗證
     - `research.md` -> 決策 7
@@ -38,7 +38,7 @@
   - project：`planner`、`scraper`（不開瀏覽器）、`web-desktop`（Desktop Chrome）、`web-mobile`（390×844 手機 viewport）；web project 以 `webServer` 啟動 `vite preview`。
   - scripts：`test` = `bddgen && playwright test`。
 
-- [ ] T004 smoke-test 確認 runner 能跑到三個介面
+- [x] T004 smoke-test 確認 runner 能跑到三個介面
   - Read:
     - `specs/truth/techstack.md` -> 測試與驗證
   - 暫放一份 smoke feature（不在 `specs/truth/**`），planner／scraper／web 各一個空 step，確認 `bddgen` 與 `playwright test` 都跑得到，web project 能開啟 Vite 首頁。完成即刪除 smoke feature。
@@ -48,42 +48,42 @@
 
 **Goal**: 只建立後續實作程式、測試共用元件、入口、fixture、helper 與落點骨架，讓 Phase 3 不各自發明資料格式與測試世界。語意對齊不放這裡。
 
-- [ ] T005 建立 domain 型別與模組殼
+- [x] T005 建立 domain 型別與模組殼
   - Read:
     - `specs/truth/data/data-model.dbml`
     - `plan.md` -> 原始碼結構 `src/domain/`
   - 只做：`src/domain/types.ts` 依 data-model 定義 Film、Session、Venue、Cinema、SessionMark、Tier、UserState、TicketResult、ItineraryEntry、UnscheduledMustFilm、TicketListItem；`time.ts`、`availability.ts`、`compat.ts`、`schedule.ts`、`tickets.ts` 匯出函式簽章，函式體先 `throw new Error("not implemented")`。
   - 不做：不寫任何排程、相容、順序邏輯。
 
-- [ ] T006 建立 state 模組殼
+- [x] T006 建立 state 模組殼
   - Read:
     - `specs/truth/data/data-model.dbml` -> user_state
     - `research.md` -> 決策 5
   - 只做：`src/state/storage.ts`（load/save/clear 簽章、schema_version 常數）、`src/state/share.ts`（encode/decode/qr 簽章）。
   - 不做：不寫實際編碼、localStorage 存取或版本遷移。
 
-- [ ] T007 建立 scraper 模組殼與 HTML 樣本落點
+- [x] T007 建立 scraper 模組殼與 HTML 樣本落點
   - Read:
     - `research.md` -> 決策 2、官網勘查
     - `plan.md` -> `scripts/scrape/`
   - 只做：`scripts/scrape/parse.ts`（`parseSchedulePage(html, date)` 簽章）、`scripts/scrape/scrape.ts`（逐日抓取殼）、`scripts/scrape/fixtures/` 目錄；存一份 2026-11-06 官網場次頁原始 HTML 當樣本。
   - 不做：不寫解析邏輯。
 
-- [ ] T008 建立 planner 與 scraper 測試 world 與 fixture
+- [x] T008 建立 planner 與 scraper 測試 world 與 fixture
   - Read:
     - `specs/truth/features/planner/dsl.md`
     - `specs/truth/features/scraper/場次解析/dsl.md`
   - 只做：`tests/support/planner-world.ts`（場次快照、使用者狀態、最後一次排程結果、耗時的容器；影廳 → 影城對照 helper：含「信義威秀」→ xinyi_vieshow，「TITAN」或含「松仁威秀」→ songren_muvie，其他 → unknown）；`tests/support/scraper-world.ts`（HTML 樣本載入 helper）；`tests/support/tables.ts`（日期、HH:MM、標記符號 ⇄ enum 轉換）。
   - 不做：不寫各句 StepDef 語意。
 
-- [ ] T009 建立 web 測試 fixture 與畫面殼
+- [x] T009 建立 web 測試 fixture 與畫面殼
   - Read:
     - `specs/truth/features/web/dsl.md`
     - `ui/ui-plan.md` -> 畫面與流程、前端實作切分建議
   - 只做：`tests/support/web-fixtures.ts`（以測試用場次快照取代 `/data/sessions.json` 的路由攔截、預載 localStorage 使用者狀態、讀取目前 localStorage 的 helper、第二個 browser context 代表「另一台裝置」）；`src/ui/` 下 App 與 5 個頁面元件空殼與底部分頁路由；畫面可空白。
   - 不做：不寫任何畫面行為與樣式，不寫 StepDef 語意。
 
-- [ ] T010 預留 stepdef 落點
+- [x] T010 預留 stepdef 落點
   - Read:
     - `plan.md` -> `tests/steps/`
   - 只做：為每個介面根與模組建立空的 `tests/steps/<介面>/shared.steps.ts` 與 `tests/steps/<介面>/<模組>.steps.ts`（共 15 個檔）。
