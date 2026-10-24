@@ -765,7 +765,7 @@
 - `specs/truth/features/planner/兩人合併/兩人各自片單排程.feature`、`一起看的取捨.feature`、`兩人行程最佳性.feature`（project：planner）
 - `specs/truth/features/planner/可看判定/場次可看判定.feature`、`最佳行程/**`、`未排入原因/**`、`搶票順序與備案/**`、`搶票切換/**`（project：planner）
 
-- [ ] T117 [CODE-REMOVE] 移除只服務舊行為的產品碼與殘留 helper
+- [x] T117 [CODE-REMOVE] 移除只服務舊行為的產品碼與殘留 helper
 - [x] T118 [REGRESSION] 跑 Test Scope，確認新版 truth 成立
 
 ## Phase 4Z: ui quality gate
@@ -782,7 +782,7 @@
 - 檢查新增元素（24 小時格子與三種狀態、層內上移／下移按鈕、一起／{名字} 自己標籤、篩選分段控制、買 1／2 張標籤、紅框的人名）沿用既有 token 與元件樣式，沒有另創視覺語言；格子三種狀態不只靠顏色（有文字或圖示）；觸控目標至少 44px；手機 390px 走完 時段 → 選片層內順序 → 行程 → 搶票 → 分享 不需水平捲動；個人模式畫面與 001 一致（無一起／自己標示、無篩選、無張數）。
 - 已知 001 雛形瑕疵不照抄：時間輸入用 24 小時制；無備案時顯示「無不衝堂備案」；標籤多時排序按鈕不換行。
 
-- [ ] T119 subagent review (ui quality gate)
+- [x] T119 subagent review (ui quality gate)
 
 ## Phase 5: 完整回歸（SC-305）
 
@@ -798,6 +798,6 @@
 - 任何 001 既有 Example 失敗都視為本輪迴歸，必須修產品碼，不得改既有 feature、DSL 或把既有 stepdef 放寬成可通過。
 - 稽核：`python3 ~/.claude/skills/gherkin-and-dsl/scripts/audit_feature_dsl_topology.py --root specs/truth/features/<planner|web|scraper>` 三個介面必須 PASS（本檔產出時已 PASS）。
 
-- [ ] T120 [REGRESSION] 執行 `npx tsc --noEmit` 與 `npm run build`，確認型別與靜態建置通過；全文搜尋 `mergePartner`、`singleSideCounts`、`unavailable_slots` 在 `src`、`tests` 已無殘留
-- [ ] T121 [REGRESSION] 執行完整套件 `npm test`（`bddgen && playwright test`，四個 project：planner、scraper、web-desktop、web-mobile），全部 feature 通過；記錄總 Example 數與失敗數（失敗數必須為 0）
-- [ ] T122 subagent review (full regression gate)：獨立重跑完整套件一次，並抽查 001 的 `web/分享與保存/跨裝置分享.feature`、`web/搶票/搶票標記與切換備案.feature`、`web/行程/行程呈現.feature` 在個人模式下通過，以及 `planner/最佳行程/排程目標優先序.feature` 的層級數優先規則
+- [x] T120 [REGRESSION] 執行 `npx tsc --noEmit` 與 `npm run build`，確認型別與靜態建置通過；全文搜尋 `mergePartner`、`singleSideCounts`、`unavailable_slots` 在 `src`、`tests` 已無殘留
+- [x] T121 [REGRESSION] 執行完整套件 `npm test`（`bddgen && playwright test`，四個 project：planner、scraper、web-desktop、web-mobile），全部 feature 通過；記錄總 Example 數與失敗數（失敗數必須為 0）
+- [x] T122 subagent review (full regression gate)：獨立重跑完整套件一次，並抽查 001 的 `web/分享與保存/跨裝置分享.feature`、`web/搶票/搶票標記與切換備案.feature`、`web/行程/行程呈現.feature` 在個人模式下通過，以及 `planner/最佳行程/排程目標優先序.feature` 的層級數優先規則
