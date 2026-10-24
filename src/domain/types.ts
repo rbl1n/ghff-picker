@@ -138,6 +138,10 @@ export interface UserState {
   session_marks?: Record<string, SessionPref>;
   /** 取捨決定（005）：film_id → 看自己的優先場；等同該片「只看這場」限定在優先場。選填 */
   pinned_choices?: Record<string, PinnedChoice>;
+  /** 插播（置頂）：層級 → 依序置頂的 film_id；永遠等於該層順序開頭連續一段，名次仍以 tier_rank 為準。選填；分享連結帶著，當作同伴加入時丟棄。不是 pinned_choices（場次取捨） */
+  top_pins?: Partial<Record<Tier, string[]>>;
+  /** 尚未分層就先勾的熱門：film_id 清單；選了層級時套用為 is_hot 並移除，標不看或取消勾選也移除。選填；分享連結帶著，當作同伴加入時丟棄 */
+  pending_hot_film_ids?: string[];
   /** 院線標記：film_id → 使用者手動設定的旗標（選填）；沒有值時依 theatrical.json 的 status。只影響顯示與篩選；分享連結帶著，當作同伴加入時丟棄 */
   theatrical_overrides?: Record<string, boolean>;
   /** 保存版次：每次寫入 +1，用來偵測別的分頁已寫入較新的內容（舊資料沒有 = 0）；不進分享連結 */

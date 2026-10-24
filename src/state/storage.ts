@@ -42,6 +42,12 @@ function isNotes(value: unknown): boolean {
   );
 }
 
+function isTopPins(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return Object.entries(value).every(([k, v]) => ["must", "want", "maybe"].includes(k) && Array.isArray(v) && v.every((x) => typeof x === "string"));
+}
+
 function isRecordOf(value: unknown, ok: (v: unknown) => boolean): boolean {
   return value === undefined || (typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every(ok));
 }
@@ -93,6 +99,8 @@ export function isUserState(value: unknown): value is UserState {
     isSessionMarks(v.session_marks) &&
     isPinnedChoices(v.pinned_choices) &&
     isTheatricalOverrides(v.theatrical_overrides) &&
+    isTopPins(v.top_pins) &&
+    isSkipped(v.pending_hot_film_ids) &&
     (v.revision === undefined || (typeof v.revision === "number" && Number.isInteger(v.revision) && v.revision >= 0)) &&
     Array.isArray(v.ticket_marks)
   );
@@ -130,7 +138,7 @@ const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !
 /** 本版本認得的頂層欄位；其餘（較新版本加的）一律從最新保存原樣保留 */
 const USER_KEYS = [
   "schema_version", "self_name", "partner", "daily_limit", "manual_order", "updated_at", "film_preferences", "unavailable_slots",
-  "availability", "skipped_film_ids", "film_notes", "session_marks", "pinned_choices", "theatrical_overrides", "revision",
+  "availability", "skipped_film_ids", "film_notes", "session_marks", "pinned_choices", "theatrical_overrides", "top_pins", "pending_hot_film_ids", "revision",
   "written_by_build", "ticket_marks",
 ];
 const PARTNER_KEYS = [

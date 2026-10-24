@@ -96,6 +96,8 @@ Table user_state {
   film_notes "map<film_id, text>" [null, note: '影片備註（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → 自己寫的備註文字，空字串等於刪除（不保存空值）；只屬於自己，包含在分享連結裡（取代我的設定時帶過去），但當作同伴加入時同伴連結裡的 film_notes 一律丟棄，不寫入 partner 也不顯示']
   session_marks "map<session_id, prefer|only>" [null, note: '場次偏好（005，選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：prefer = 優先（軟偏好）、only = 只看這場（硬限制）；沒有標記的場次不保存、沒有任何標記時不寫欄位；包含在分享連結，當作同伴加入時帶入 partner.session_marks（同伴的標記用於排程，不是私人資料）']
   pinned_choices "map<film_id, prefer_session>" [null, note: '取捨決定（005，選填）：film_id → prefer_session = 該人的這部片限定在自己的「優先」場次（效果等同只看這場）；由行程頁取捨卡片寫入、「改回一起看」移除；沒有優先標記的片，決定不生效；移除同伴時一併清除；包含在分享連結']
+  pending_hot_film_ids "film_id[]" [null, note: '尚未分層就先勾的熱門（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：勾熱門永遠不會建立層級紀錄；之後選了任一層級時該片 is_hot 設為 true 並從此清單移除，標不看或取消勾選也移除。不排程、不進層內順序與搶票；分享連結帶著，當作同伴加入時丟棄']
+  top_pins "map<tier, film_id[]>" [null, note: '插播／置頂（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：層級（must／want／maybe）→ 依置頂先後的 film_id；永遠等於該層順序（tier_rank）開頭連續一段，名次以 tier_rank 為準。改層、不看、拖到未置頂者之後即移除；分享連結帶著，當作同伴加入時丟棄。與 pinned_choices（場次取捨）無關']
   theatrical_overrides "map<film_id, boolean>" [null, note: '院線標記（選填，schema 仍為 3；舊資料沒有此欄位照常讀入）：film_id → true／false，使用者手動切換選片卡片上的「院線」後寫入；有效院線旗標 = 此欄位有值就用它，否則只有 theatrical.status = confirmed 為開。只影響顯示與篩選，不影響排程與搶票；包含在分享連結，當作同伴加入時丟棄']
   updated_at timestamp
 

@@ -186,8 +186,10 @@ When("觀眾把 {string} 標為熱門", async ({ page, world }, title: string) =
   expect(await card.locator("details").first().evaluate((e) => (e as HTMLDetailsElement).open), "卡片應維持收合").toBe(false);
   const box = await card.getByRole("checkbox", { name: /熱門/ }).locator("xpath=ancestor::label").boundingBox();
   expect(box!.height, "觸控目標 ≥ 44px").toBeGreaterThanOrEqual(44);
+  const tierBefore = await card.getAttribute("data-tier");
   await card.getByRole("checkbox", { name: /熱門/ }).check();
-  await expect(card.getByTestId("hot-badge")).toBeVisible();
+  await expect(card.getByRole("checkbox", { name: /熱門/ })).toBeChecked();
+  expect(await card.getAttribute("data-tier"), "熱門不得改變層級").toBe(tierBefore);
   expect(await card.locator("details").first().evaluate((e) => (e as HTMLDetailsElement).open), "卡片仍收合").toBe(false);
 });
 
@@ -512,4 +514,102 @@ Then("層內順序檢視中 {string} 顯示院線標籤", async ({ page }, title
 Then("層內順序檢視中 {string} 沒有院線標籤", async ({ page }, title: string) => {
   await expect(tierItemOf(page, title)).toBeVisible();
   await expect(tierItemOf(page, title).getByTestId("order-theatrical")).toHaveCount(0);
+});
+
+/* ------------------------------------------------------------ 插播（置頂） */
+
+type PinState = { top_pins?: Partial<Record<string, string[]>> };
+
+/** 權威狀態：top_pins 每層都等於該層順序（tier_rank）開頭連續一段 */
+async function expectPinsArePrefix(page: Page): Promise<Partial<Record<string, string[]>>> {
+  const st = (await readStateOrEmpty(page)) as PinState;
+  const byTier = orderByTier(prefsOf(st));
+  const pins = st.top_pins ?? {};
+  for (const [t, ids] of Object.entries(pins)) {
+    expect(ids!.length, `${t} 置頂單不得為空`).toBeGreaterThan(0);
+    expect(byTier[t as keyof typeof byTier].slice(0, ids!.length)).toEqual(ids);
+  }
+  return pins;
+}
+
+async function clickPin(page: Page, world: WebWorld, title: string, name: "置頂" | "取消置頂"): Promise<void> {
+  await openTab(page, world, "選片");
+  const item = tierItemOf(page, title);
+  await expect(item).toBeVisible();
+  const btn = item.getByTestId("tier-pin-button");
+  await expect(btn).toHaveAccessibleName(name);
+  await btn.click();
+  const fid = filmIdOf(world, title);
+  await expect
+    .poll(async () => {
+      const pins = ((await readStateOrEmpty(page)) as PinState).top_pins ?? {};
+      return Object.values(pins).some((ids) => ids?.includes(fid));
+    })
+    .toBe(name === "置頂");
+  expectContiguousRanks(prefsOf(await readStateOrEmpty(page)));
+  await expectPinsArePrefix(page);
+}
+
+When("觀眾在層內順序把 {string} 置頂", async ({ page, world }, title: string) => {
+  await clickPin(page, world, title, "置頂");
+});
+
+When("觀眾在層內順序把 {string} 取消置頂", async ({ page, world }, title: string) => {
+  await clickPin(page, world, title, "取消置頂");
+});
+
+Then("層內順序檢視中 {string} 顯示置頂標記 {string}", async ({ page, world }, title: string, mark: string) => {
+  const check = async () => {
+    await expect(tierItemOf(page, title).getByTestId("order-pin-mark")).toHaveText(mark);
+    const n = Number(mark.replace(/\D/g, ""));
+    const prefs = prefsOf(await readStateOrEmpty(page));
+    const tier = prefs.find((p) => p.film_id === filmIdOf(world, title))!.tier;
+    const pins = await expectPinsArePrefix(page);
+    expect(pins[tier]?.[n - 1]).toBe(filmIdOf(world, title));
+  };
+  await openTab(page, world, "選片");
+  await check();
+  await page.reload();
+  await check();
+});
+
+Then("層內順序檢視中 {string} 沒有置頂標記", async ({ page, world }, title: string) => {
+  const check = async () => {
+    await expect(tierItemOf(page, title)).toBeVisible();
+    await expect(tierItemOf(page, title).getByTestId("order-pin-mark")).toHaveCount(0);
+    const pins = await expectPinsArePrefix(page);
+    expect(Object.values(pins).flat()).not.toContain(filmIdOf(world, title));
+  };
+  await openTab(page, world, "選片");
+  await check();
+  await page.reload();
+  await check();
+});
+
+Then("層內順序檢視中 {string} 的置頂按鈕為 {string}", async ({ page, world }, title: string, name: string) => {
+  await openTab(page, world, "選片");
+  const btn = tierItemOf(page, title).getByTestId("tier-pin-button");
+  await expect(btn).toHaveAccessibleName(name);
+  const box = (await btn.boundingBox())!;
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  const vw = page.viewportSize()?.width ?? 390;
+  expect(box.x + box.width).toBeLessThanOrEqual(vw);
+});
+
+Then("選片頁 {string} 的熱門尚未生效，提示 {string}", async ({ page, world }, title: string, hint: string) => {
+  const check = async () => {
+    const card = filmCard(page, title);
+    await expect(card.getByRole("checkbox", { name: /熱門/ })).toBeChecked();
+    await expect(card.getByTestId("hot-badge")).toHaveCount(0);
+    await expect(card.getByTestId("hot-pending-hint")).toHaveText(hint);
+    await expect(tierItemOf(page, title)).toHaveCount(0);
+    const fid = filmIdOf(world, title);
+    const st = (await readStateOrEmpty(page)) as { pending_hot_film_ids?: string[] };
+    expect(prefsOf(st).some((p) => p.film_id === fid)).toBe(false);
+    expect(st.pending_hot_film_ids).toContain(fid);
+  };
+  await openTab(page, world, "選片");
+  await check();
+  await page.reload();
+  await check();
 });

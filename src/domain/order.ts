@@ -84,3 +84,62 @@ export function removeFromTier(prefs: FilmPreference[], filmId: string): FilmPre
 export function tierOrder(prefs: FilmPreference[], tier: Tier): FilmPreference[] {
   return sortedTier(prefs, tier);
 }
+
+/** 插播（置頂）：每層一份有序的片單，永遠等於該層順序的開頭連續一段 */
+export type TopPins = Partial<Record<Tier, string[]>>;
+
+/** 整理置頂：每層只保留「該層順序開頭連續、且在原置頂單內」的片；空層與空欄位移除（回傳 undefined = 沒有置頂） */
+export function sanitizePins(prefs: FilmPreference[], pins: TopPins | undefined): TopPins | undefined {
+  if (!pins) return undefined;
+  const out: TopPins = {};
+  for (const t of TIERS) {
+    const set = new Set(pins[t] ?? []);
+    const kept: string[] = [];
+    for (const p of sortedTier(prefs, t)) {
+      if (!set.has(p.film_id)) break;
+      kept.push(p.film_id);
+    }
+    if (kept.length) out[t] = kept;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** 置頂：排到該層已置頂的片之後（第一部 = 第 1 名，第二部 = 第 2 名…）；已置頂或找不到時原樣回傳 */
+export function pinToTop(prefs: FilmPreference[], pins: TopPins | undefined, filmId: string): { prefs: FilmPreference[]; pins: TopPins } | null {
+  const target = prefs.find((p) => p.film_id === filmId);
+  if (!target) return null;
+  const pinned = (pins?.[target.tier] ?? []).filter((id) => id !== filmId);
+  if ((pins?.[target.tier] ?? []).includes(filmId)) return null;
+  return { prefs: moveFilmTo(prefs, filmId, target.tier, pinned.length), pins: { ...pins, [target.tier]: [...pinned, filmId] } };
+}
+
+/** 取消置頂：從置頂單移除，放在其餘置頂的片之後，其他順序不變 */
+export function unpin(prefs: FilmPreference[], pins: TopPins | undefined, filmId: string): { prefs: FilmPreference[]; pins: TopPins | undefined } | null {
+  const target = prefs.find((p) => p.film_id === filmId);
+  if (!target || !(pins?.[target.tier] ?? []).includes(filmId)) return null;
+  const rest = (pins![target.tier] ?? []).filter((id) => id !== filmId);
+  const next = moveFilmTo(prefs, filmId, target.tier, rest.length);
+  return { prefs: next, pins: sanitizePins(next, { ...pins, [target.tier]: rest }) };
+}
+
+/**
+ * 拖曳後重算置頂：被拖的片若原本沒置頂、放進置頂區中間（後面還有置頂的片）就變成置頂；
+ * 原本置頂的片被拖到未置頂的片後面就取消。換層一律先移除原層置頂。
+ */
+export function pinsAfterDrag(prefs: FilmPreference[], pins: TopPins | undefined, draggedId: string): TopPins | undefined {
+  if (!pins) return undefined;
+  const dragged = prefs.find((p) => p.film_id === draggedId);
+  const base: TopPins = {};
+  for (const t of TIERS) {
+    const list = (pins[t] ?? []).filter((id) => id !== draggedId || dragged?.tier === t);
+    if (list.length) base[t] = list;
+  }
+  if (!dragged) return sanitizePins(prefs, base);
+  const t = dragged.tier;
+  const old = base[t] ?? [];
+  if (old.includes(draggedId) || old.length === 0) return sanitizePins(prefs, base);
+  const order = sortedTier(prefs, t).map((p) => p.film_id);
+  const idx = order.indexOf(draggedId);
+  const pinnedAfter = old.some((id) => order.indexOf(id) > idx);
+  return sanitizePins(prefs, pinnedAfter ? { ...base, [t]: [...old, draggedId] } : base);
+}

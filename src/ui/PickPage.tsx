@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { appendToTier, moveFilmTo, removeFromTier, tierOrder } from "../domain/order";
+import { appendToTier, moveFilmTo, pinsAfterDrag, pinToTop, removeFromTier, sanitizePins, tierOrder, unpin, type TopPins } from "../domain/order";
 import { sessionStartAbs } from "../domain/time";
 import { isTheatrical, type TheatricalEntry, type TheatricalMap } from "../domain/theatrical";
 import { CatalogGate } from "./CatalogGate";
@@ -47,20 +47,53 @@ export function PickPage() {
   return <CatalogGate>{(catalog) => <PickContent catalog={catalog} />}</CatalogGate>;
 }
 
+/** 尚未分層的熱門：加入／移除待生效清單；沒有任何一筆時整個欄位移除 */
+function withPending(s: UserState, filmId: string, on: boolean): UserState {
+  const { pending_hot_film_ids: prev, ...rest } = s;
+  const ids = (prev ?? []).filter((x) => x !== filmId);
+  if (on) ids.push(filmId);
+  return ids.length ? { ...rest, pending_hot_film_ids: ids } : rest;
+}
+
+function dropPin(pins: TopPins | undefined, filmId: string): TopPins | undefined {
+  if (!pins) return pins;
+  const out: TopPins = {};
+  for (const [t, ids] of Object.entries(pins)) out[t as Tier] = ids.filter((x) => x !== filmId);
+  return out;
+}
+
 /** 去掉某部片的不看；沒有不看紀錄時回傳原物件，避免多寫一個空欄位 */
 function without(skipped: string[] | undefined, filmId: string): string[] | undefined {
   return skipped?.includes(filmId) ? skipped.filter((id) => id !== filmId) : skipped;
 }
 
+/** 排序變動後把置頂整理成各層開頭連續一段；沒有置頂時整個欄位移除 */
+function withPins(s: UserState, film_preferences: FilmPreference[], pins: TopPins | undefined): UserState {
+  const { top_pins: _old, ...rest } = s;
+  const clean = sanitizePins(film_preferences, pins);
+  return clean ? { ...rest, film_preferences, top_pins: clean } : { ...rest, film_preferences };
+}
+
+/** 插播：置頂／取消置頂 */
+function setPinned(filmId: string, on: boolean): void {
+  updateUser((s) => {
+    const r = on ? pinToTop(s.film_preferences, s.top_pins, filmId) : unpin(s.film_preferences, s.top_pins, filmId);
+    return r ? withPins(s, r.prefs, r.pins) : s;
+  });
+}
+
 /** 新標記或改層的影片排在目標層最後，原層與取消標記後名次遞補（domain/order）；標任一層級會清除該片的不看 */
 function setTier(filmId: string, tier: Tier | null): void {
   updateUser((s) => {
-    const next: UserState = {
-      ...s,
-      film_preferences: tier === null ? removeFromTier(s.film_preferences, filmId) : appendToTier(s.film_preferences, filmId, tier),
-    };
+    const prefs = tier === null ? removeFromTier(s.film_preferences, filmId) : appendToTier(s.film_preferences, filmId, tier);
+    const moved = s.film_preferences.find((p) => p.film_id === filmId)?.tier !== tier;
+    const next: UserState = withPins(s, prefs, moved ? dropPin(s.top_pins, filmId) : s.top_pins);
     const skipped = tier === null ? s.skipped_film_ids : without(s.skipped_film_ids, filmId);
     if (skipped !== s.skipped_film_ids) next.skipped_film_ids = skipped;
+    if (tier !== null && s.pending_hot_film_ids?.includes(filmId)) {
+      next.film_preferences = next.film_preferences.map((p) => (p.film_id === filmId ? { ...p, is_hot: true } : p));
+      return withPending(next, filmId, false);
+    }
     return next;
   });
 }
@@ -71,8 +104,7 @@ function setSkipped(filmId: string, skip: boolean): void {
     if (!skip) return { ...s, skipped_film_ids: without(s.skipped_film_ids, filmId) ?? [] };
     const ids = s.skipped_film_ids ?? [];
     return {
-      ...s,
-      film_preferences: removeFromTier(s.film_preferences, filmId),
+      ...withPending(withPins(s, removeFromTier(s.film_preferences, filmId), dropPin(s.top_pins, filmId)), filmId, false),
       skipped_film_ids: ids.includes(filmId) ? ids : [...ids, filmId],
     };
   });
@@ -101,13 +133,12 @@ function setTheatrical(filmId: string, on: boolean, defaultOn: boolean): void {
   });
 }
 
-/** 熱門屬於已分層的片；未標記的片被標熱門時以「想看」排在該層最後建立紀錄 */
+/** 熱門只切換旗標，不會改變或指派層級；未分層的片先記在待生效清單，之後選了層級才套用 */
 function setHot(filmId: string, hot: boolean): void {
   updateUser((s) => {
     const prev = s.film_preferences.find((p) => p.film_id === filmId);
-    if (!prev && !hot) return s;
-    const base = prev ? s.film_preferences : appendToTier(s.film_preferences, filmId, "want");
-    return { ...s, film_preferences: base.map((p) => (p.film_id === filmId ? { ...p, is_hot: hot } : p)) };
+    if (!prev) return withPending(s, filmId, hot);
+    return { ...s, film_preferences: s.film_preferences.map((p) => (p.film_id === filmId ? { ...p, is_hot: hot } : p)) };
   });
 }
 
@@ -137,7 +168,7 @@ const A11Y = {
   },
 };
 
-function OrderRow({ id, tier, rank, title, catNo, note, theatrical, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; note?: string; theatrical?: boolean; overlay?: boolean }) {
+function OrderRow({ id, tier, rank, title, catNo, note, theatrical, pinIndex, overlay }: { id: string; tier: Tier; rank: number; title: string; catNo: string | undefined; note?: string; theatrical?: boolean; pinIndex?: number; overlay?: boolean }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = overlay ? undefined : { transform: CSS.Transform.toString(transform), transition };
   return (
@@ -163,11 +194,15 @@ function OrderRow({ id, tier, rank, title, catNo, note, theatrical, overlay }: {
       <span className="ttl">
         <CatNo no={catNo} />
         <span data-testid="film-title">{title}</span>
+        {pinIndex !== undefined && <span className="tag tag-pin" data-testid="order-pin-mark">置頂 {pinIndex + 1}</span>}
         {theatrical && <span className="tag tag-theatrical" data-testid="order-theatrical">院線</span>}
         {note && <span className="onote" data-testid="order-note">{note}</span>}
       </span>
       {!overlay && (
         <div className="rowtier" role="group" aria-label={`${title} 改層級`}>
+          <button type="button" className="rt pin" data-testid="tier-pin-button" aria-pressed={pinIndex !== undefined} aria-label={pinIndex !== undefined ? "取消置頂" : "置頂"} onClick={() => setPinned(id, pinIndex === undefined)}>
+            {pinIndex !== undefined ? "取消置頂" : "置頂"}
+          </button>
           {TIERS.map((t) => (
             <button key={t} type="button" className="rt" data-t={t} aria-pressed={tier === t} aria-label={TIER_LABEL[t]} onClick={() => tier !== t && setTier(id, t)}>
               {t === "maybe" ? "有空" : TIER_LABEL[t]}
@@ -182,7 +217,7 @@ function OrderRow({ id, tier, rank, title, catNo, note, theatrical, overlay }: {
   );
 }
 
-function TierGroup({ tier, ids, filmOf, notes, theatricalIds, dragging }: { tier: Tier; ids: string[]; filmOf: Map<string, Film>; notes: Record<string, string>; theatricalIds: ReadonlySet<string>; dragging: boolean }) {
+function TierGroup({ tier, ids, pins, filmOf, notes, theatricalIds, dragging }: { tier: Tier; ids: string[]; pins: string[]; filmOf: Map<string, Film>; notes: Record<string, string>; theatricalIds: ReadonlySet<string>; dragging: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id: CONTAINER + tier });
   return (
     <div className="tgroup" data-testid="tier-order-group" data-tier={tier}>
@@ -192,7 +227,7 @@ function TierGroup({ tier, ids, filmOf, notes, theatricalIds, dragging }: { tier
       <div ref={setNodeRef} data-testid={ids.length === 0 ? "tier-drop-zone" : undefined} className={`dropzone${ids.length === 0 ? " empty" : ""}${isOver && dragging ? " over" : ""}`}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           {ids.map((id, i) => (
-            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} note={notes[id]} theatrical={theatricalIds.has(id)} />
+            <OrderRow key={id} id={id} tier={tier} rank={i + 1} title={filmOf.get(id)?.title ?? id} catNo={filmOf.get(id)?.catalog_no} note={notes[id]} theatrical={theatricalIds.has(id)} pinIndex={pins.includes(id) ? pins.indexOf(id) : undefined} />
           ))}
         </SortableContext>
         {ids.length === 0 && (
@@ -204,7 +239,7 @@ function TierGroup({ tier, ids, filmOf, notes, theatricalIds, dragging }: { tier
 }
 
 /** 層內順序檢視：拖曳 ⋮⋮ 把手調整順序，也能放進別層（觸控、滑鼠、鍵盤皆可；兩人模式也只調整自己的） */
-function TierOrderView({ catalog, prefs, notes, theatricalIds }: { catalog: Catalog; prefs: FilmPreference[]; notes: Record<string, string>; theatricalIds: ReadonlySet<string> }) {
+function TierOrderView({ catalog, prefs, pins, notes, theatricalIds }: { catalog: Catalog; prefs: FilmPreference[]; pins: TopPins | undefined; notes: Record<string, string>; theatricalIds: ReadonlySet<string> }) {
   const filmOf = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
   const [draft, setDraft] = useState<Lists | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -275,7 +310,10 @@ function TierOrderView({ catalog, prefs, notes, theatricalIds }: { catalog: Cata
     if (overTier === tier && !String(over.id).startsWith(CONTAINER) && over.id !== active.id) {
       index = base[tier].indexOf(String(over.id));
     }
-    updateUser((s) => ({ ...s, film_preferences: moveFilmTo(s.film_preferences, id, tier, index) }));
+    updateUser((s) => {
+      const prefs = moveFilmTo(s.film_preferences, id, tier, index);
+      return withPins(s, prefs, pinsAfterDrag(prefs, s.top_pins, id));
+    });
   };
   const onDragCancel = () => {
     setDraft(null);
@@ -298,7 +336,7 @@ function TierOrderView({ catalog, prefs, notes, theatricalIds }: { catalog: Cata
         onDragCancel={onDragCancel}
       >
         {TIERS.map((t) => (
-          <TierGroup key={t} tier={t} ids={lists[t]} filmOf={filmOf} notes={notes} theatricalIds={theatricalIds} dragging={activeId !== null} />
+          <TierGroup key={t} tier={t} ids={lists[t]} pins={pins?.[t] ?? []} filmOf={filmOf} notes={notes} theatricalIds={theatricalIds} dragging={activeId !== null} />
         ))}
         <DragOverlay>
           {activeId ? (
@@ -381,7 +419,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           ))}
         </ul>
       </details>
-      <TierOrderView catalog={catalog} prefs={user.film_preferences} notes={user.film_notes ?? NO_NOTES} theatricalIds={theatricalIds} />
+      <TierOrderView catalog={catalog} prefs={user.film_preferences} pins={user.top_pins} notes={user.film_notes ?? NO_NOTES} theatricalIds={theatricalIds} />
       <input
         className="input"
         type="search"
@@ -411,6 +449,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
           theatricalOn={theatricalIds.has(f.film_id)}
           theatricalInfo={theatrical.get(f.film_id)}
           hasGuest={guestIds.has(f.film_id)}
+          pendingHot={!!user.pending_hot_film_ids?.includes(f.film_id)}
         />
       ))}
       {shown.length === 0 && <p className="empty">沒有符合的影片</p>}
@@ -422,6 +461,7 @@ function PickContent({ catalog }: { catalog: Catalog }) {
 }
 
 const FilmCard = memo(function FilmCard(props: {
+  pendingHot: boolean;
   film: Film;
   sessions: Session[];
   pref: FilmPreference | undefined;
@@ -433,7 +473,7 @@ const FilmCard = memo(function FilmCard(props: {
   theatricalInfo: TheatricalEntry | undefined;
   hasGuest: boolean;
 }) {
-  const { film, sessions, pref, skipped, note, availability, marks, theatricalOn, theatricalInfo, hasGuest } = props;
+  const { film, sessions, pref, skipped, note, availability, marks, theatricalOn, theatricalInfo, hasGuest, pendingHot } = props;
   const hint = markHint(sessions, marks);
   return (
     <article className="card film" data-testid="film-card" data-title={film.title} data-tier={pref?.tier ?? ""} data-skipped={skipped ? "true" : undefined}>
@@ -490,8 +530,9 @@ const FilmCard = memo(function FilmCard(props: {
       </div>
       {!skipped && (
         <label className="hotrow">
-          <input type="checkbox" checked={pref?.is_hot ?? false} onChange={(e) => setHot(film.film_id, e.target.checked)} />
+          <input type="checkbox" checked={pref ? pref.is_hot : pendingHot} onChange={(e) => setHot(film.film_id, e.target.checked)} />
           熱門（搶票優先）
+          {!pref && pendingHot && <small className="hint" data-testid="hot-pending-hint"> 選了層級後生效</small>}
         </label>
       )}
       <details>
