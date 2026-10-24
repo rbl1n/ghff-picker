@@ -20,12 +20,14 @@ import {
   storedOrDefault,
   type WebWorld,
 } from "../../support/web-a-helpers";
+import { dragFilm } from "../../support/tier-drag";
 import {
   expectContiguousRanks,
   orderByTier,
   prefsOf,
   readStateOrEmpty,
   shownTierOrder,
+  tierGroupOf,
   tierItemOf,
   TIERS,
   TIER_FROM_LABEL,
@@ -59,7 +61,7 @@ When("觀眾把 {string} 標為 {string}", async ({ page, world }, title: string
   expectContiguousRanks(prefsOf(await readStateOrEmpty(page)));
 });
 
-/** 層內順序檢視：點該片的上移／下移恰好一次，等該片與相鄰者互換 */
+/** 層內順序檢視：用鍵盤（空白鍵拿起、方向鍵一次、空白鍵放下）把該片移一位，等該片與相鄰者互換 */
 async function moveInTier(page: Page, world: WebWorld, title: string, dir: "上移" | "下移"): Promise<void> {
   await openTab(page, world, "選片");
   const item = tierItemOf(page, title);
@@ -72,7 +74,13 @@ async function moveInTier(page: Page, world: WebWorld, title: string, dir: "上�
   expect(swapWith).toBeLessThan(before[tier].length);
   const expected = [...before[tier]];
   [expected[idx], expected[swapWith]] = [expected[swapWith], expected[idx]];
-  await item.getByRole("button", { name: dir, exact: true }).click();
+  const handle = item.getByTestId("tier-drag-handle");
+  await handle.focus();
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(150);
+  await page.keyboard.press(dir === "上移" ? "ArrowUp" : "ArrowDown");
+  await page.waitForTimeout(250);
+  await page.keyboard.press("Space");
   await expect.poll(async () => (await shownTierOrder(page))[tier].join("、")).toBe(expected.join("、"));
   // 權威狀態：該層名次與相鄰者互換，其他層不變
   const prefs = prefsOf(await readStateOrEmpty(page));
@@ -82,14 +90,61 @@ async function moveInTier(page: Page, world: WebWorld, title: string, dir: "上�
   for (const t of TIERS.filter((x) => x !== tier)) expect(byTier[t].map((id) => titleOf(world.catalog, id))).toEqual(before[t]);
 }
 
-// T050（003）
-When("觀眾把 {string} 在層內上移一位", async ({ page, world }, title: string) => {
+When("觀眾用鍵盤把 {string} 在層內上移一位", async ({ page, world }, title: string) => {
   await moveInTier(page, world, title, "上移");
 });
 
-// T051（003）
-When("觀眾把 {string} 在層內下移一位", async ({ page, world }, title: string) => {
+When("觀眾用鍵盤把 {string} 在層內下移一位", async ({ page, world }, title: string) => {
   await moveInTier(page, world, title, "下移");
+});
+
+// 拖曳：桌機用滑鼠；手機尺寸用 CDP 真觸控（touchStart/Move/End），驗證把手在觸控下可拖
+When("觀眾把 {string} 拖曳到 {string} 的第 {int} 位", async ({ page, world }, title: string, tierLabel: string, pos: number) => {
+  await openTab(page, world, "選片");
+  const toTier = TIER_FROM_LABEL[tierLabel];
+  const before = await shownTierOrder(page);
+  const fromTier = TIERS.find((t) => before[t].includes(title))!;
+  const expected = before[toTier].filter((x) => x !== title);
+  expected.splice(pos - 1, 0, title);
+  await dragFilm(page, title, fromTier, toTier, pos - 1);
+  await expect.poll(async () => (await shownTierOrder(page))[toTier].join("、")).toBe(expected.join("、"));
+  await expect(page.locator(".oitem.dragging, [data-testid=tier-order-overlay]")).toHaveCount(0);
+  // 權威狀態：目標層與原層名次皆 1 起連續
+  const prefs = prefsOf(await readStateOrEmpty(page));
+  expectContiguousRanks(prefs);
+  expect(orderByTier(prefs)[toTier].map((id) => titleOf(world.catalog, id))).toEqual(expected);
+});
+
+When("觀眾在層內順序把 {string} 改為 {string}", async ({ page, world }, title: string, label: string) => {
+  await openTab(page, world, "選片");
+  const before = await shownTierOrder(page);
+  const item = tierItemOf(page, title);
+  await expect(item).toBeVisible();
+  const btn = item.getByRole("button", { name: label, exact: true });
+  expect((await btn.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await btn.click();
+  const fid = filmIdOf(world, title);
+  if (label === "不看") {
+    await expect(tierItemOf(page, title)).toHaveCount(0);
+    await expect.poll(async () => (((await readStateOrEmpty(page)) as { skipped_film_ids?: string[] }).skipped_film_ids ?? []).includes(fid)).toBe(true);
+  } else {
+    const to = TIER_FROM_LABEL[label];
+    const expected = [...before[to].filter((x) => x !== title), title];
+    await expect.poll(async () => (await shownTierOrder(page))[to].join("、")).toBe(expected.join("、"));
+  }
+  expectContiguousRanks(prefsOf(await readStateOrEmpty(page)));
+});
+
+Then("選片頁 {string} 層顯示放置區 {string}", async ({ page, world }, tierLabel: string, hint: string) => {
+  await openTab(page, world, "選片");
+  const tier = TIER_FROM_LABEL[tierLabel];
+  const group = tierGroupOf(page, tier);
+  await expect(group.getByTestId("tier-order-item")).toHaveCount(0);
+  const zone = group.getByTestId("tier-drop-zone");
+  await expect(zone).toHaveText(hint);
+  const box = (await zone.boundingBox())!;
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  expect(prefsOf(await readStateOrEmpty(page)).filter((p) => p.tier === tier)).toHaveLength(0);
 });
 
 When("觀眾在選片頁展開 {string}", async ({ page, world }, title: string) => {
@@ -224,23 +279,6 @@ Then("選片頁頁首計數如下：", async ({ page }, table: DataTable) => {
         : st.film_preferences.filter((p) => p.tier === TIER_LABEL_TO_ENUM[r["層級"]]).length;
     expect(n).toBe(Number(r["數量"]));
   }
-});
-
-// T052（003）
-Then("{string} 的層內 {string} 按鈕停用", async ({ page, world }, title: string, dir: string) => {
-  expect(["上移", "下移"]).toContain(dir);
-  await openTab(page, world, "選片");
-  const item = tierItemOf(page, title);
-  await expect(item).toBeVisible();
-  const btn = item.getByRole("button", { name: dir, exact: true });
-  await expect(btn).toBeDisabled();
-  // 權威狀態：嘗試點擊後層內名次不變，也不得出現小於 1 的名次
-  const before = JSON.stringify(prefsOf(await readStateOrEmpty(page)));
-  await btn.click({ force: true });
-  const after = prefsOf(await readStateOrEmpty(page));
-  expect(JSON.stringify(after), "停用按鈕不得讓名次改變").toBe(before);
-  expect(after.every((p) => p.tier_rank >= 1)).toBe(true);
-  expectContiguousRanks(after);
 });
 
 Then("畫面提供重試按鈕", async ({ page }) => {

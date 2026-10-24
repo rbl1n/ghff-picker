@@ -42,6 +42,25 @@ export function moveWithinTier(prefs: FilmPreference[], filmId: string, directio
   return prefs.map((p) => (rank.has(p) ? { ...p, tier_rank: rank.get(p)! } : { ...p }));
 }
 
+/**
+ * 拖曳（FR-305）：把影片放到指定層的指定位置（index 從 0 起，超出範圍夾到邊界）。
+ * 同層 = 層內重排；跨層 = 改層並插入該位置。兩層名次皆重編為 1 起連續；熱門保留。找不到該片時原樣回傳。
+ */
+export function moveFilmTo(prefs: FilmPreference[], filmId: string, tier: Tier, index: number): FilmPreference[] {
+  const target = prefs.find((p) => p.film_id === filmId);
+  if (!target) return prefs;
+  const moved: FilmPreference = { ...target, tier };
+  const rest = prefs.filter((p) => p !== target);
+  const dest = sortedTier(rest, tier);
+  dest.splice(Math.min(Math.max(index, 0), dest.length), 0, moved);
+  const rank = new Map<FilmPreference, number>();
+  for (const t of TIERS) (t === tier ? dest : sortedTier(rest, t)).forEach((p, k) => rank.set(p, k + 1));
+  return prefs.map((p) => {
+    const next = p === target ? moved : p;
+    return { ...next, tier_rank: rank.get(next)! };
+  });
+}
+
 /** 舊資料初始化層內名次：每層依場次表影片順序指派 1, 2, 3…；不在場次表中的接在後面保持原順序 */
 export function initTierRanks(prefs: FilmPreference[], catalogFilmIds: string[]): FilmPreference[] {
   const order = new Map(catalogFilmIds.map((id, i) => [id, i]));

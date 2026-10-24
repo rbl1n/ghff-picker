@@ -178,7 +178,9 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 | --- | --- | --- | --- |
 | `data-testid=tier-order-group` | `data-tier=must|want|maybe` | 三層各一個容器（可無影片）；容器內 `tier-order-item` 依層內名次由前到後排列 | 選片、shared、分享與保存 steps |
 | `data-testid=tier-order-item` | `data-title=<片名>` | 該層每部已標記影片一項 | 同上 |
-| button `上移`／`下移`（item 內，accessible name 完全相符） | 層內第一位的 `上移`、最後一位的 `下移` 為 `disabled`；點擊與相鄰者互換名次並立即更新畫面與保存 | 兩人模式也只調整自己的順序 | 選片 steps |
+| `data-testid=tier-drag-handle`（`<button>`，item 內） | 至少 44×44px、`touch-action:none`；accessible name `拖曳排序 {片名}`；滑鼠／觸控按住拖曳，或聚焦後空白鍵拿起、方向鍵移動、空白鍵放下 | 拖進別層改層並插在放下位置；兩人模式也只調整自己的順序 | 選片 steps |
+| `data-testid=tier-drop-zone` | 空層內的「拖到這裡」放置區；層內有影片時不渲染 | 空層也接受放下 | 選片 steps |
+| `.dragging`（item 的 class） | 拖曳中被拿起的那一列（暫留原處／目標處的佔位） | 放開後移除 | 選片 steps |
 | 既有 `film-card` 的層級按鈕 | 新標記或改層的影片排在目標層最後 | | 選片 steps |
 
 ### 行程頁 `#/itinerary`：一起／自己、篩選、未排入必看片（新增／改版）

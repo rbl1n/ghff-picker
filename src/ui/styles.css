@@ -201,6 +201,18 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 .oitem .rk{width:24px;text-align:center;color:var(--muted);flex:none}
 .oitem .ttl{flex:1;min-width:0;overflow-wrap:anywhere}
 .oitem .mv{flex:none}
+.oitem .dh{touch-action:none;cursor:grab;font-size:18px;letter-spacing:-3px;color:var(--muted);user-select:none;-webkit-user-select:none}
+.oitem{flex-wrap:wrap}
+.rowtier{flex-basis:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 0 6px}
+.rt{min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:14px}
+.rt[data-t=must][aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold);font-weight:700}
+.rt[data-t=want][aria-pressed=true],.rt[data-t=maybe][aria-pressed=true]{border-color:var(--gold);color:var(--gold);font-weight:700}
+.oitem.dragging{opacity:.35}
+.oitem.overlay{background:var(--panel-2);border:1px solid var(--gold);border-radius:10px;box-shadow:var(--shadow);cursor:grabbing}
+.dropzone{border-radius:10px;min-height:8px}
+.dropzone.empty{min-height:56px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center}
+.dropzone.over{background:var(--panel-2);border-color:var(--gold)}
+.dropzone .dropHint,.dropzone .hint{margin:0}
 
 /* 003 行程篩選分段控制與一起標籤 */
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0 0 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
