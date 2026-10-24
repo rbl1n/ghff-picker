@@ -6,6 +6,9 @@ import { CatalogGate } from "./CatalogGate";
 import { decidingKey, type OrderKeyName } from "../domain/order-keys";
 import { CatNo } from "./CatNo";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
+import { FastMode } from "./FastMode";
+import { copyText } from "./clipboard";
+import { buildExportTable, downloadCsv, toCsv, toTsv } from "./ticketExport";
 import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
 
 type RowState = "pending" | "got" | "dead";
@@ -66,6 +69,9 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
   const flashTimer = useRef<number>(0);
   const dragFilm = useRef<string | null>(null);
   useEffect(ensureSchedule, [schedule, scheduling]);
+  const [fast, setFast] = useState<{ toast: string | null; manual: string | null } | null>(null);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
+  const [exportManual, setExportManual] = useState<string | null>(null);
 
   const sessionById = useMemo(() => new Map(catalog.sessions.map((s) => [s.session_id, s])), [catalog]);
   const filmById = useMemo(() => new Map(catalog.films.map((f) => [f.film_id, f])), [catalog]);
@@ -130,6 +136,30 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
   const gotCount = done.length;
   const deadCount = items.filter((it) => stateOf(it) === "dead").length;
   const allHandled = items.length > 0 && gotCount + deadCount === items.length;
+
+  const listName = division && tab === "partner" ? partnerName : selfName;
+  const exportTable = () => buildExportTable(items, filmById, sessionById, gotSessionOf);
+  const onCopySheet = async () => {
+    const tsv = toTsv(exportTable());
+    const ok = await copyText(tsv);
+    setExportManual(ok ? null : tsv);
+    setExportMsg(ok ? `已複製${listName}的搶票清單（${items.length} 筆），到 Google 試算表按貼上即可` : "無法自動複製，請在下方文字框全選後複製");
+  };
+  const onDownloadCsv = () => {
+    downloadCsv(`搶票清單-${listName}.csv`, toCsv(exportTable()));
+    setExportMsg(`已下載 搶票清單-${listName}.csv`);
+  };
+  const onEnterFast = async () => {
+    const first = pending[0];
+    if (!first) return setFast({ toast: null, manual: null });
+    const title = filmById.get(first.film_id)?.title ?? "";
+    const s = sessionById.get(first.current_session_id);
+    const ok = await copyText(title);
+    setFast({
+      toast: ok ? `已複製第一筆：${title}${s ? `（${dateLabel(s.date)}）` : ""}` : `無法自動複製，請手動複製：${title}`,
+      manual: ok ? null : title,
+    });
+  };
 
   const renderRow = (it: TicketListItem | DuoTicketRow, idx: number, list: (TicketListItem | DuoTicketRow)[]) => {
     const duo = "owner" in it ? it : null;
@@ -286,12 +316,50 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
               </button>
             ))}
           </div>
-          <p className="divsum" data-testid="division-summary">
+          <p className="divsum" data-testid="division-summary" hidden={!!fast}>
             {selfName} {division.summary.self.count} 筆 {division.summary.self.tickets} 張・{partnerName} {division.summary.partner.count} 筆{" "}
             {division.summary.partner.tickets} 張
           </p>
         </div>
       )}
+      {items.length > 0 && !fast && (
+        <div className="xbar" data-testid="tickets-tools">
+          <button className="btn btn-primary xfast" data-testid="fast-enter" onClick={() => void onEnterFast()}>
+            搶票模式
+          </button>
+          <div className="xexp">
+            <button className="btn" data-testid="export-copy" onClick={() => void onCopySheet()}>
+              複製到 Google 試算表
+            </button>
+            <button className="btn" data-testid="export-csv" onClick={onDownloadCsv}>
+              下載 CSV
+            </button>
+          </div>
+          {exportMsg && (
+            <p className="note xmsg" role="status" data-testid="export-toast">
+              {exportMsg}
+            </p>
+          )}
+          {exportManual && <textarea className="input xmanual" readOnly rows={4} value={exportManual} aria-label="請手動複製這份清單" data-testid="export-manual" onFocus={(e) => e.currentTarget.select()} />}
+        </div>
+      )}
+      {fast ? (
+        <FastMode
+          key={tab}
+          pending={pending}
+          total={items.length}
+          gotCount={gotCount}
+          deadCount={deadCount}
+          filmById={filmById}
+          sessionById={sessionById}
+          onGot={onGot}
+          onMiss={onMiss}
+          onExit={() => setFast(null)}
+          initialToast={fast.toast}
+          initialManual={fast.manual}
+        />
+      ) : (
+      <>
       <details className="howto" data-testid="order-explain">
         <summary>搶票順序怎麼排</summary>
         <ol data-testid="order-explain-list">
@@ -319,6 +387,8 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
       <div data-testid="ticket-pending">{pending.map(renderRow)}</div>
       {done.length > 0 && <h3>已完成</h3>}
       <div data-testid="ticket-done">{done.map(renderRow)}</div>
+      </>
+      )}
     </>
   );
 }
