@@ -15,7 +15,7 @@ Project "ghff_picker" {
 Enum cinema {
   xinyi_vieshow   // 台北信義威秀
   songren_muvie   // 松仁威秀（官網表頭「MUVIE」，含 TITAN 廳；CL-004）
-  unknown         // 無法對應時，轉場緩衝以 15 分鐘計（FR-010）
+  unknown         // 僅作無法辨識表頭時的保守值，轉場緩衝以 15 分鐘計（FR-010）；台北以外影城不收入（CL-012）
 }
 
 Enum session_mark {

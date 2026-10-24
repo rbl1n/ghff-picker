@@ -28,6 +28,7 @@
 | ADD | `specs/truth/data/data-model.dbml` | 場次快照：catalog、films、venues、sessions；enum cinema（MUVIE = 松仁威秀）、session_mark（含優先特映場） | FR-001、FR-003、FR-010、CL-004、CL-008 |
 | ADD | `specs/truth/data/data-model.dbml` | 使用者狀態：user_state、film_preferences（tier、is_hot）、unavailable_slots、ticket_marks；enum tier、ticket_result | FR-004、FR-005、FR-011、FR-015、FR-018、FR-019、FR-022 |
 | ADD | `specs/truth/data/data-model.dbml` | 衍生結果（不保存）：itinerary_entries、unscheduled_must_films、ticket_list_items；enum unscheduled_reason | FR-008、FR-012～FR-017、FR-020、FR-021 |
+| MODIFY | `specs/truth/data/data-model.dbml` | enum cinema 移除「台北以外」用途說明：unknown 僅作無法辨識時的保守值 | CL-012 |
 
 ## /dsl-refine
 
@@ -48,3 +49,5 @@
 | ADD | `specs/truth/features/web/行程/**（feature + dsl）` | 行程頁：依日期時間軸、摘要、非售票標籤、未標記不出現、空狀態、未排入紅框與原因、條件變更橫幅、重新排程 | FR-012～FR-014；acceptance/排出不衝堂的最佳行程.feature、不可看時段排除場次.feature；ui-plan 行程 |
 | ADD | `specs/truth/features/web/搶票/**（feature + dsl）` | 搶票頁：清單順序與排定場次、備案、無不衝堂備案、⊚ 不列入、手動調整順序、手機不需左右捲動、搶到／沒搶到一次點擊換備案、已無可用場次、撤銷、摘要、依搶到結果重新排程 | FR-015～FR-021、NFR-002、NFR-003；acceptance/搶票順序清單與備案場次.feature、搶票當下標記結果並切換備案.feature |
 | ADD | `specs/truth/features/web/分享與保存/**（feature + dsl）` | 設定保存（分層、熱門、時段、每日上限、手動順序、搶票標記、行程）與跨裝置分享（QR／連結、取代確認、手機清單相同、手機重開保留、連結損毀） | FR-018、FR-022、SC-001；acceptance/電腦排好用手機搶票.feature、看場次表並把影片分成三層.feature（重開保留） |
+| MODIFY | `specs/truth/features/scraper/場次解析/官網場次頁解析.feature` | 新增 Rule：台北以外影城的場次不收入 | CL-012、FR-001 |
+| MODIFY | `specs/truth/features/scraper/場次解析/dsl.md` | 新增 Then：解析出的影廳如下：（確認台北以外影廳不出現） | CL-012、FR-001 |

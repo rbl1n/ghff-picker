@@ -61,6 +61,11 @@ Then("解析出的場次如下：", async ({ world }, table: { hashes(): Record<
   expect(actual.sort()).toEqual(expected.sort());
 });
 
+Then("解析出的影廳如下：", async ({ world }, table: { hashes(): Record<string, string>[] }) => {
+  const expected = table.hashes().map((r) => r["影廳"]);
+  expect(parsedOf(world).venues.map((v) => v.venue_name).sort()).toEqual(expected.sort());
+});
+
 Then("解析出的場次所屬影城如下：", async ({ world }, table: { hashes(): Record<string, string>[] }) => {
   for (const r of table.hashes()) {
     const { venue } = findRow(world, r["片名"], r["開演"]);

@@ -22,6 +22,9 @@ const MARK_BY_TITLE: Array<[RegExp, SessionMark]> = [
   [/優先特映/, "priority_screening"],
 ];
 
+/** 已知的台北以外影城表頭（縣市前綴或商場名）：整段場次不收入（CL-012）；其他無法辨識的表頭仍標 unknown */
+const NON_TAIPEI_HEADER = /^(台中|臺中|高雄|台南|臺南|新竹|桃園|基隆|嘉義|彰化|花蓮|宜蘭|屏東|苗栗|雲林|南投|台東|臺東|澎湖|金門|新北)|遠雄廣場|大遠百/;
+
 export function cinemaOfHeader(header: string): CinemaId {
   return CINEMA_BY_HEADER[header.trim()] ?? "unknown";
 }
@@ -46,6 +49,7 @@ export function parseSchedulePage(html: string, date: string): ParsedSchedule {
 
   $("table.show-list").each((_, table) => {
     const header = $(table).find("th").first().text().trim();
+    if (NON_TAIPEI_HEADER.test(header)) return;
     const cinema = cinemaOfHeader(header);
     let venueName = "";
     $(table)

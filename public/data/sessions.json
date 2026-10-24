@@ -1,7 +1,7 @@
 {
   "festival_year": 2026,
   "source_url": "https://www.goldenhorse.org.tw/film/programme/schedule/",
-  "fetched_at": "2026-10-24T09:21:30.352Z",
+  "fetched_at": "2026-10-24T09:30:36.331Z",
   "films": [
     {
       "film_id": "4408",
@@ -1018,14 +1018,6 @@
     {
       "venue_name": "15廳",
       "cinema": "xinyi_vieshow"
-    },
-    {
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
-      "cinema": "unknown"
-    },
-    {
-      "venue_name": "高雄大遠百威秀11廳",
-      "cinema": "unknown"
     }
   ],
   "sessions": [
@@ -2731,30 +2723,12 @@
       "marks": []
     },
     {
-      "session_id": "4490-2026-11-14-0660",
-      "film_id": "4490",
-      "date": "2026-11-14",
-      "start_min": 660,
-      "end_min": 732,
-      "venue_name": "高雄大遠百威秀11廳",
-      "marks": []
-    },
-    {
       "session_id": "4579-2026-11-14-0740",
       "film_id": "4579",
       "date": "2026-11-14",
       "start_min": 740,
       "end_min": 858,
       "venue_name": "10廳",
-      "marks": []
-    },
-    {
-      "session_id": "4490-2026-11-14-0750",
-      "film_id": "4490",
-      "date": "2026-11-14",
-      "start_min": 750,
-      "end_min": 822,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
       "marks": []
     },
     {
@@ -2778,15 +2752,6 @@
       "marks": []
     },
     {
-      "session_id": "4482-2026-11-14-0760",
-      "film_id": "4482",
-      "date": "2026-11-14",
-      "start_min": 760,
-      "end_min": 871,
-      "venue_name": "高雄大遠百威秀11廳",
-      "marks": []
-    },
-    {
       "session_id": "4515-2026-11-14-0790",
       "film_id": "4515",
       "date": "2026-11-14",
@@ -2805,15 +2770,6 @@
       "marks": [
         "guest_attending"
       ]
-    },
-    {
-      "session_id": "4482-2026-11-14-0860",
-      "film_id": "4482",
-      "date": "2026-11-14",
-      "start_min": 860,
-      "end_min": 971,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
-      "marks": []
     },
     {
       "session_id": "e912-131lvh4-2026-11-14-0880",
@@ -2857,15 +2813,6 @@
       "marks": []
     },
     {
-      "session_id": "4487-2026-11-14-0950",
-      "film_id": "4487",
-      "date": "2026-11-14",
-      "start_min": 950,
-      "end_min": 1079,
-      "venue_name": "高雄大遠百威秀11廳",
-      "marks": []
-    },
-    {
       "session_id": "4466-2026-11-14-0960",
       "film_id": "4466",
       "date": "2026-11-14",
@@ -2883,15 +2830,6 @@
       "start_min": 980,
       "end_min": 1098,
       "venue_name": "12廳",
-      "marks": []
-    },
-    {
-      "session_id": "4487-2026-11-14-1000",
-      "film_id": "4487",
-      "date": "2026-11-14",
-      "start_min": 1000,
-      "end_min": 1129,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
       "marks": []
     },
     {
@@ -3043,24 +2981,6 @@
       "marks": []
     },
     {
-      "session_id": "4498-2026-11-15-0660",
-      "film_id": "4498",
-      "date": "2026-11-15",
-      "start_min": 660,
-      "end_min": 774,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
-      "marks": []
-    },
-    {
-      "session_id": "4498-2026-11-15-0720",
-      "film_id": "4498",
-      "date": "2026-11-15",
-      "start_min": 720,
-      "end_min": 834,
-      "venue_name": "高雄大遠百威秀11廳",
-      "marks": []
-    },
-    {
       "session_id": "4586-2026-11-15-0780",
       "film_id": "4586",
       "date": "2026-11-15",
@@ -3092,15 +3012,6 @@
       ]
     },
     {
-      "session_id": "4506-2026-11-15-0810",
-      "film_id": "4506",
-      "date": "2026-11-15",
-      "start_min": 810,
-      "end_min": 915,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
-      "marks": []
-    },
-    {
       "session_id": "4507-2026-11-15-0830",
       "film_id": "4507",
       "date": "2026-11-15",
@@ -3118,15 +3029,6 @@
       "start_min": 860,
       "end_min": 961,
       "venue_name": "12廳",
-      "marks": []
-    },
-    {
-      "session_id": "4506-2026-11-15-0870",
-      "film_id": "4506",
-      "date": "2026-11-15",
-      "start_min": 870,
-      "end_min": 975,
-      "venue_name": "高雄大遠百威秀11廳",
       "marks": []
     },
     {
@@ -3170,15 +3072,6 @@
       "marks": []
     },
     {
-      "session_id": "4503-2026-11-15-0980",
-      "film_id": "4503",
-      "date": "2026-11-15",
-      "start_min": 980,
-      "end_min": 1086,
-      "venue_name": "台中iFG遠雄廣場威秀3廳",
-      "marks": []
-    },
-    {
       "session_id": "4560-2026-11-15-0990",
       "film_id": "4560",
       "date": "2026-11-15",
@@ -3197,15 +3090,6 @@
       "marks": [
         "guest_attending"
       ]
-    },
-    {
-      "session_id": "4503-2026-11-15-1010",
-      "film_id": "4503",
-      "date": "2026-11-15",
-      "start_min": 1010,
-      "end_min": 1116,
-      "venue_name": "高雄大遠百威秀11廳",
-      "marks": []
     },
     {
       "session_id": "4461-2026-11-15-1060",
