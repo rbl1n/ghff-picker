@@ -131,162 +131,162 @@
 
 #### scraper/場次解析 → `tests/steps/scraper/場次解析.steps.ts`
 
-- [ ] T011 [P] [BDD-RED] `Given: 官網 "{日期}" 的場次頁含以下場次：`
-- [ ] T012 [P] [BDD-RED] `When: 腳本解析該場次頁`
-- [ ] T013 [P] [BDD-RED] `Then: 解析出的場次如下：`
-- [ ] T014 [P] [BDD-RED] `Then: 解析出的場次所屬影城如下：`
-- [ ] T015 [P] [BDD-RED] `Then: 解析出的場次標記如下：`
-- [ ] T016 [P] [BDD-RED] `Then: 解析出的場次散場時間如下：`
-- [ ] T017 [P] [BDD-RED] `Then: 解析結果共有 {影片數} 部影片`
-- [ ] T018 [P] [BDD-RED] `Then: 影片 "{片名}" 有 {場次數} 個場次`
+- [x] T011 [P] [BDD-RED] `Given: 官網 "{日期}" 的場次頁含以下場次：`
+- [x] T012 [P] [BDD-RED] `When: 腳本解析該場次頁`
+- [x] T013 [P] [BDD-RED] `Then: 解析出的場次如下：`
+- [x] T014 [P] [BDD-RED] `Then: 解析出的場次所屬影城如下：`
+- [x] T015 [P] [BDD-RED] `Then: 解析出的場次標記如下：`
+- [x] T016 [P] [BDD-RED] `Then: 解析出的場次散場時間如下：`
+- [x] T017 [P] [BDD-RED] `Then: 解析結果共有 {影片數} 部影片`
+- [x] T018 [P] [BDD-RED] `Then: 影片 "{片名}" 有 {場次數} 個場次`
 #### planner/（介面根） → `tests/steps/planner/shared.steps.ts`
 
-- [ ] T019 [P] [BDD-RED] `Given: 影展場次表如下：`
-- [ ] T020 [P] [BDD-RED] `Given: 觀眾的分層如下：`
-- [ ] T021 [P] [BDD-RED] `Given: 觀眾已設定不可看時段如下：`
-- [ ] T022 [P] [BDD-RED] `Given: 每日上限已設為 {上限} 部`
-- [ ] T023 [P] [BDD-RED] `Given: 觀眾已執行排程並開啟搶票清單`
-- [ ] T024 [P] [BDD-RED] `When: 觀眾執行排程`
-- [ ] T025 [P] [BDD-RED] `Then: 行程中 "{片名}" 排在 "{場次}"`
+- [x] T019 [P] [BDD-RED] `Given: 影展場次表如下：`
+- [x] T020 [P] [BDD-RED] `Given: 觀眾的分層如下：`
+- [x] T021 [P] [BDD-RED] `Given: 觀眾已設定不可看時段如下：`
+- [x] T022 [P] [BDD-RED] `Given: 每日上限已設為 {上限} 部`
+- [x] T023 [P] [BDD-RED] `Given: 觀眾已執行排程並開啟搶票清單`
+- [x] T024 [P] [BDD-RED] `When: 觀眾執行排程`
+- [x] T025 [P] [BDD-RED] `Then: 行程中 "{片名}" 排在 "{場次}"`
 #### planner/可看判定 → `tests/steps/planner/可看判定.steps.ts`
 
-- [ ] T026 [P] [BDD-RED] `When: 觀眾查看場次可看狀態`
-- [ ] T027 [P] [BDD-RED] `When: 觀眾把不可看時段 "{時段}" 一次套用到以下日期：`
-- [ ] T028 [P] [BDD-RED] `Then: 場次可看狀態如下：`
-- [ ] T029 [P] [BDD-RED] `Then: 不可看時段設定如下：`
+- [x] T026 [P] [BDD-RED] `When: 觀眾查看場次可看狀態`
+- [x] T027 [P] [BDD-RED] `When: 觀眾把不可看時段 "{時段}" 一次套用到以下日期：`
+- [x] T028 [P] [BDD-RED] `Then: 場次可看狀態如下：`
+- [x] T029 [P] [BDD-RED] `Then: 不可看時段設定如下：`
 #### planner/轉場相容 → `tests/steps/planner/轉場相容.steps.ts`
 
-- [ ] T030 [P] [BDD-RED] `When: 系統判定以下場次是否相容：`
-- [ ] T031 [P] [BDD-RED] `Then: 場次相容判定如下：`
+- [x] T030 [P] [BDD-RED] `When: 系統判定以下場次是否相容：`
+- [x] T031 [P] [BDD-RED] `Then: 場次相容判定如下：`
 #### planner/最佳行程 → `tests/steps/planner/最佳行程.steps.ts`
 
-- [ ] T032 [P] [BDD-RED] `Given: 影展場次表為 {影片數} 部已分層影片、每部 {場次數} 個場次的壓力資料`
-- [ ] T033 [P] [BDD-RED] `Then: 行程依日期排列如下：`
-- [ ] T034 [P] [BDD-RED] `Then: 行程中 "{片名}" 標示 "{標示}"`
-- [ ] T035 [P] [BDD-RED] `Then: 行程中 "{片名}" 只出現 {次數} 次`
-- [ ] T036 [P] [BDD-RED] `Then: 行程中沒有 "{片名}"`
-- [ ] T037 [P] [BDD-RED] `Then: 行程沒有任何場次`
-- [ ] T038 [P] [BDD-RED] `Then: 行程的排程目標不劣於窮舉所有可行組合`
-- [ ] T039 [P] [BDD-RED] `Then: 排程在 {秒} 秒內完成`
+- [x] T032 [P] [BDD-RED] `Given: 影展場次表為 {影片數} 部已分層影片、每部 {場次數} 個場次的壓力資料`
+- [x] T033 [P] [BDD-RED] `Then: 行程依日期排列如下：`
+- [x] T034 [P] [BDD-RED] `Then: 行程中 "{片名}" 標示 "{標示}"`
+- [x] T035 [P] [BDD-RED] `Then: 行程中 "{片名}" 只出現 {次數} 次`
+- [x] T036 [P] [BDD-RED] `Then: 行程中沒有 "{片名}"`
+- [x] T037 [P] [BDD-RED] `Then: 行程沒有任何場次`
+- [x] T038 [P] [BDD-RED] `Then: 行程的排程目標不劣於窮舉所有可行組合`
+- [x] T039 [P] [BDD-RED] `Then: 排程在 {秒} 秒內完成`
 #### planner/未排入原因 → `tests/steps/planner/未排入原因.steps.ts`
 
-- [ ] T040 [P] [BDD-RED] `Then: 未排入的必看片與原因如下：`
-- [ ] T041 [P] [BDD-RED] `Then: 沒有未排入的必看片`
+- [x] T040 [P] [BDD-RED] `Then: 未排入的必看片與原因如下：`
+- [x] T041 [P] [BDD-RED] `Then: 沒有未排入的必看片`
 #### planner/搶票順序與備案 → `tests/steps/planner/搶票順序與備案.steps.ts`
 
-- [ ] T042 [P] [BDD-RED] `When: 觀眾執行排程並開啟搶票清單`
-- [ ] T043 [P] [BDD-RED] `When: 觀眾把 "{片名}" 手動移到第 {位置} 位`
-- [ ] T044 [P] [BDD-RED] `Then: 搶票清單順序為 "{順序}"`
-- [ ] T045 [P] [BDD-RED] `Then: 搶票清單的排定場次如下：`
-- [ ] T046 [P] [BDD-RED] `Then: 搶票清單的備案場次如下：`
-- [ ] T047 [P] [BDD-RED] `Then: "{片名}" 不在搶票清單`
+- [x] T042 [P] [BDD-RED] `When: 觀眾執行排程並開啟搶票清單`
+- [x] T043 [P] [BDD-RED] `When: 觀眾把 "{片名}" 手動移到第 {位置} 位`
+- [x] T044 [P] [BDD-RED] `Then: 搶票清單順序為 "{順序}"`
+- [x] T045 [P] [BDD-RED] `Then: 搶票清單的排定場次如下：`
+- [x] T046 [P] [BDD-RED] `Then: 搶票清單的備案場次如下：`
+- [x] T047 [P] [BDD-RED] `Then: "{片名}" 不在搶票清單`
 #### planner/搶票切換 → `tests/steps/planner/搶票切換.steps.ts`
 
-- [ ] T048 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為搶到：`
-- [ ] T049 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為沒搶到：`
-- [ ] T050 [P] [BDD-RED] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為搶到`
-- [ ] T051 [P] [BDD-RED] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為沒搶到`
-- [ ] T052 [P] [BDD-RED] `When: 觀眾撤銷 "{片名}" 的搶到標記`
-- [ ] T053 [P] [BDD-RED] `When: 觀眾撤銷 "{片名}" 的沒搶到標記`
-- [ ] T054 [P] [BDD-RED] `When: 觀眾重新排程`
-- [ ] T055 [P] [BDD-RED] `Then: "{片名}" 的搶票狀態是 "{狀態}"`
-- [ ] T056 [P] [BDD-RED] `Then: "{片名}" 立即改顯示 "{場次}"`
-- [ ] T057 [P] [BDD-RED] `Then: "{片名}" 再次顯示 "{場次}"`
-- [ ] T058 [P] [BDD-RED] `Then: "{片名}" 標示為已無可用場次`
-- [ ] T059 [P] [BDD-RED] `Then: 行程中沒有 "{片名}" 的 "{場次}" 場次`
+- [x] T048 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為搶到：`
+- [x] T049 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為沒搶到：`
+- [x] T050 [P] [BDD-RED] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為搶到`
+- [x] T051 [P] [BDD-RED] `When: 觀眾把 "{片名}" 的 "{場次}" 場次標記為沒搶到`
+- [x] T052 [P] [BDD-RED] `When: 觀眾撤銷 "{片名}" 的搶到標記`
+- [x] T053 [P] [BDD-RED] `When: 觀眾撤銷 "{片名}" 的沒搶到標記`
+- [x] T054 [P] [BDD-RED] `When: 觀眾重新排程`
+- [x] T055 [P] [BDD-RED] `Then: "{片名}" 的搶票狀態是 "{狀態}"`
+- [x] T056 [P] [BDD-RED] `Then: "{片名}" 立即改顯示 "{場次}"`
+- [x] T057 [P] [BDD-RED] `Then: "{片名}" 再次顯示 "{場次}"`
+- [x] T058 [P] [BDD-RED] `Then: "{片名}" 標示為已無可用場次`
+- [x] T059 [P] [BDD-RED] `Then: 行程中沒有 "{片名}" 的 "{場次}" 場次`
 #### web/（介面根） → `tests/steps/web/shared.steps.ts`
 
-- [ ] T060 [P] [BDD-RED] `Given: 場次快照包含以下場次：`
-- [ ] T061 [P] [BDD-RED] `Given: 觀眾已標記影片層級如下：`
-- [ ] T062 [P] [BDD-RED] `Given: 觀眾已設定不可看時段如下：`
-- [ ] T063 [P] [BDD-RED] `Given: 觀眾已設定每日上限為 {上限} 部`
-- [ ] T064 [P] [BDD-RED] `Given: 觀眾已排好行程並開啟搶票清單`
-- [ ] T065 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為搶到：`
-- [ ] T066 [P] [BDD-RED] `Then: 畫面顯示錯誤 "{錯誤}"`
-- [ ] T067 [P] [BDD-RED] `Then: 畫面不需左右捲動即可讀完每筆影片、場次與備案`
-- [ ] T068 [P] [BDD-RED] `Then: "{片名}" 顯示熱門標示`
-- [ ] T069 [P] [BDD-RED] `Then: 時段頁顯示不可看時段如下：`
-- [ ] T070 [P] [BDD-RED] `Then: 時段頁顯示每日上限為 "{上限}"`
-- [ ] T071 [P] [BDD-RED] `Then: 搶票清單順序為 "{順序}"`
-- [ ] T072 [P] [BDD-RED] `Then: "{片名}" 顯示為已搶到並移到已完成區`
-- [ ] T073 [P] [BDD-RED] `Then: 行程頁依日期顯示以下場次：`
+- [x] T060 [P] [BDD-RED] `Given: 場次快照包含以下場次：`
+- [x] T061 [P] [BDD-RED] `Given: 觀眾已標記影片層級如下：`
+- [x] T062 [P] [BDD-RED] `Given: 觀眾已設定不可看時段如下：`
+- [x] T063 [P] [BDD-RED] `Given: 觀眾已設定每日上限為 {上限} 部`
+- [x] T064 [P] [BDD-RED] `Given: 觀眾已排好行程並開啟搶票清單`
+- [x] T065 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為搶到：`
+- [x] T066 [P] [BDD-RED] `Then: 畫面顯示錯誤 "{錯誤}"`
+- [x] T067 [P] [BDD-RED] `Then: 畫面不需左右捲動即可讀完每筆影片、場次與備案`
+- [x] T068 [P] [BDD-RED] `Then: "{片名}" 顯示熱門標示`
+- [x] T069 [P] [BDD-RED] `Then: 時段頁顯示不可看時段如下：`
+- [x] T070 [P] [BDD-RED] `Then: 時段頁顯示每日上限為 "{上限}"`
+- [x] T071 [P] [BDD-RED] `Then: 搶票清單順序為 "{順序}"`
+- [x] T072 [P] [BDD-RED] `Then: "{片名}" 顯示為已搶到並移到已完成區`
+- [x] T073 [P] [BDD-RED] `Then: 行程頁依日期顯示以下場次：`
 #### web/選片 → `tests/steps/web/選片.steps.ts`
 
-- [ ] T074 [P] [BDD-RED] `Given: 場次資料無法載入`
-- [ ] T075 [P] [BDD-RED] `When: 觀眾把 "{片名}" 標為 "{層級}"`
-- [ ] T076 [P] [BDD-RED] `When: 觀眾在選片頁展開 "{片名}"`
-- [ ] T077 [P] [BDD-RED] `When: 觀眾查看標記說明`
-- [ ] T078 [P] [BDD-RED] `When: 觀眾開啟工具`
-- [ ] T079 [P] [BDD-RED] `When: 觀眾取消 "{片名}" 的標記`
-- [ ] T080 [P] [BDD-RED] `When: 觀眾把 "{片名}" 標為熱門`
-- [ ] T081 [P] [BDD-RED] `Then: 選片頁顯示 "{片名}" 的場次如下：`
-- [ ] T082 [P] [BDD-RED] `Then: 畫面顯示標記說明如下：`
-- [ ] T083 [P] [BDD-RED] `Then: "{片名}" 的層級顯示為 "{層級}"`
-- [ ] T084 [P] [BDD-RED] `Then: 選片頁頁首計數如下：`
-- [ ] T085 [P] [BDD-RED] `Then: 畫面提供重試按鈕`
+- [x] T074 [P] [BDD-RED] `Given: 場次資料無法載入`
+- [x] T075 [P] [BDD-RED] `When: 觀眾把 "{片名}" 標為 "{層級}"`
+- [x] T076 [P] [BDD-RED] `When: 觀眾在選片頁展開 "{片名}"`
+- [x] T077 [P] [BDD-RED] `When: 觀眾查看標記說明`
+- [x] T078 [P] [BDD-RED] `When: 觀眾開啟工具`
+- [x] T079 [P] [BDD-RED] `When: 觀眾取消 "{片名}" 的標記`
+- [x] T080 [P] [BDD-RED] `When: 觀眾把 "{片名}" 標為熱門`
+- [x] T081 [P] [BDD-RED] `Then: 選片頁顯示 "{片名}" 的場次如下：`
+- [x] T082 [P] [BDD-RED] `Then: 畫面顯示標記說明如下：`
+- [x] T083 [P] [BDD-RED] `Then: "{片名}" 的層級顯示為 "{層級}"`
+- [x] T084 [P] [BDD-RED] `Then: 選片頁頁首計數如下：`
+- [x] T085 [P] [BDD-RED] `Then: 畫面提供重試按鈕`
 #### web/時段 → `tests/steps/web/時段.steps.ts`
 
-- [ ] T086 [P] [BDD-RED] `When: 觀眾在時段頁對 "{日期}" 輸入不可看時段 "{時段}"`
-- [ ] T087 [P] [BDD-RED] `When: 觀眾在時段頁選取以下日期並套用不可看時段 "{時段}"：`
-- [ ] T088 [P] [BDD-RED] `When: 觀眾在時段頁把 "{日期}" 整天設為不可看`
-- [ ] T089 [P] [BDD-RED] `When: 觀眾在時段頁刪除 "{日期}" 的不可看時段`
-- [ ] T090 [P] [BDD-RED] `When: 觀眾在時段頁輸入每日上限 "{上限}"`
-- [ ] T091 [P] [BDD-RED] `When: 觀眾在時段頁清空每日上限`
-- [ ] T092 [P] [BDD-RED] `When: 觀眾開啟選片頁查看各片場次`
-- [ ] T093 [P] [BDD-RED] `Then: 套用按鈕停用`
-- [ ] T094 [P] [BDD-RED] `Then: 時段頁沒有任何不可看時段`
-- [ ] T095 [P] [BDD-RED] `Then: 時段頁每日上限欄位顯示輸入錯誤`
-- [ ] T096 [P] [BDD-RED] `Then: 選片頁的場次可看狀態如下：`
+- [x] T086 [P] [BDD-RED] `When: 觀眾在時段頁對 "{日期}" 輸入不可看時段 "{時段}"`
+- [x] T087 [P] [BDD-RED] `When: 觀眾在時段頁選取以下日期並套用不可看時段 "{時段}"：`
+- [x] T088 [P] [BDD-RED] `When: 觀眾在時段頁把 "{日期}" 整天設為不可看`
+- [x] T089 [P] [BDD-RED] `When: 觀眾在時段頁刪除 "{日期}" 的不可看時段`
+- [x] T090 [P] [BDD-RED] `When: 觀眾在時段頁輸入每日上限 "{上限}"`
+- [x] T091 [P] [BDD-RED] `When: 觀眾在時段頁清空每日上限`
+- [x] T092 [P] [BDD-RED] `When: 觀眾開啟選片頁查看各片場次`
+- [x] T093 [P] [BDD-RED] `Then: 套用按鈕停用`
+- [x] T094 [P] [BDD-RED] `Then: 時段頁沒有任何不可看時段`
+- [x] T095 [P] [BDD-RED] `Then: 時段頁每日上限欄位顯示輸入錯誤`
+- [x] T096 [P] [BDD-RED] `Then: 選片頁的場次可看狀態如下：`
 #### web/行程 → `tests/steps/web/行程.steps.ts`
 
-- [ ] T097 [P] [BDD-RED] `Given: 觀眾已排好行程，之後又把 "{片名}" 標為 "{層級}"`
-- [ ] T098 [P] [BDD-RED] `When: 觀眾按下排行程`
-- [ ] T099 [P] [BDD-RED] `When: 觀眾開啟行程頁`
-- [ ] T100 [P] [BDD-RED] `When: 觀眾按下重新排程`
-- [ ] T101 [P] [BDD-RED] `Then: 行程頁摘要顯示如下：`
-- [ ] T102 [P] [BDD-RED] `Then: 行程頁頂部紅框顯示 "{訊息}"`
-- [ ] T103 [P] [BDD-RED] `Then: 行程頁列出未排入的必看片與原因如下：`
-- [ ] T104 [P] [BDD-RED] `Then: 行程頁在 "{片名}" 標示 "{標示}"`
-- [ ] T105 [P] [BDD-RED] `Then: 行程頁沒有 "{片名}"`
-- [ ] T106 [P] [BDD-RED] `Then: 行程頁顯示提示 "{提示}"`
+- [x] T097 [P] [BDD-RED] `Given: 觀眾已排好行程，之後又把 "{片名}" 標為 "{層級}"`
+- [x] T098 [P] [BDD-RED] `When: 觀眾按下排行程`
+- [x] T099 [P] [BDD-RED] `When: 觀眾開啟行程頁`
+- [x] T100 [P] [BDD-RED] `When: 觀眾按下重新排程`
+- [x] T101 [P] [BDD-RED] `Then: 行程頁摘要顯示如下：`
+- [x] T102 [P] [BDD-RED] `Then: 行程頁頂部紅框顯示 "{訊息}"`
+- [x] T103 [P] [BDD-RED] `Then: 行程頁列出未排入的必看片與原因如下：`
+- [x] T104 [P] [BDD-RED] `Then: 行程頁在 "{片名}" 標示 "{標示}"`
+- [x] T105 [P] [BDD-RED] `Then: 行程頁沒有 "{片名}"`
+- [x] T106 [P] [BDD-RED] `Then: 行程頁顯示提示 "{提示}"`
 #### web/搶票 → `tests/steps/web/搶票.steps.ts`
 
-- [ ] T107 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為沒搶到：`
-- [ ] T108 [P] [BDD-RED] `Given: 觀眾使用手機尺寸的瀏覽器`
-- [ ] T109 [P] [BDD-RED] `When: 觀眾排好行程並開啟搶票清單`
-- [ ] T110 [P] [BDD-RED] `When: 觀眾把 "{片名}" 移到搶票清單第 {位置} 位`
-- [ ] T111 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「搶到」`
-- [ ] T112 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「沒搶到」`
-- [ ] T113 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「撤銷」`
-- [ ] T114 [P] [BDD-RED] `When: 觀眾查看搶票清單頂部摘要`
-- [ ] T115 [P] [BDD-RED] `When: 觀眾按下「依搶到結果重新排程」`
-- [ ] T116 [P] [BDD-RED] `Then: 搶票清單順序與排定場次如下：`
-- [ ] T117 [P] [BDD-RED] `Then: 搶票清單備案場次如下：`
-- [ ] T118 [P] [BDD-RED] `Then: 搶票清單沒有 "{片名}"`
-- [ ] T119 [P] [BDD-RED] `Then: "{片名}" 立即改顯示 "{場次}"`
-- [ ] T120 [P] [BDD-RED] `Then: "{片名}" 再次顯示 "{場次}"`
-- [ ] T121 [P] [BDD-RED] `Then: "{片名}" 該列顯示 "{訊息}"`
-- [ ] T122 [P] [BDD-RED] `Then: 換備案在 {秒} 秒內完成`
-- [ ] T123 [P] [BDD-RED] `Then: 搶票清單頂部顯示 "{摘要}"`
-- [ ] T124 [P] [BDD-RED] `Then: 行程頁中 "{片名}" 排在 "{場次}"`
+- [x] T107 [P] [BDD-RED] `Given: 觀眾已把下列場次標記為沒搶到：`
+- [x] T108 [P] [BDD-RED] `Given: 觀眾使用手機尺寸的瀏覽器`
+- [x] T109 [P] [BDD-RED] `When: 觀眾排好行程並開啟搶票清單`
+- [x] T110 [P] [BDD-RED] `When: 觀眾把 "{片名}" 移到搶票清單第 {位置} 位`
+- [x] T111 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「搶到」`
+- [x] T112 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「沒搶到」`
+- [x] T113 [P] [BDD-RED] `When: 觀眾在搶票清單按下 "{片名}" 的「撤銷」`
+- [x] T114 [P] [BDD-RED] `When: 觀眾查看搶票清單頂部摘要`
+- [x] T115 [P] [BDD-RED] `When: 觀眾按下「依搶到結果重新排程」`
+- [x] T116 [P] [BDD-RED] `Then: 搶票清單順序與排定場次如下：`
+- [x] T117 [P] [BDD-RED] `Then: 搶票清單備案場次如下：`
+- [x] T118 [P] [BDD-RED] `Then: 搶票清單沒有 "{片名}"`
+- [x] T119 [P] [BDD-RED] `Then: "{片名}" 立即改顯示 "{場次}"`
+- [x] T120 [P] [BDD-RED] `Then: "{片名}" 再次顯示 "{場次}"`
+- [x] T121 [P] [BDD-RED] `Then: "{片名}" 該列顯示 "{訊息}"`
+- [x] T122 [P] [BDD-RED] `Then: 換備案在 {秒} 秒內完成`
+- [x] T123 [P] [BDD-RED] `Then: 搶票清單頂部顯示 "{摘要}"`
+- [x] T124 [P] [BDD-RED] `Then: 行程頁中 "{片名}" 排在 "{場次}"`
 #### web/分享與保存 → `tests/steps/web/分享與保存.steps.ts`
 
-- [ ] T125 [P] [BDD-RED] `Given: 觀眾已排好行程`
-- [ ] T126 [P] [BDD-RED] `Given: 觀眾已把搶票清單順序手動調整為 "{順序}"`
-- [ ] T127 [P] [BDD-RED] `Given: 電腦上已產生分享連結`
-- [ ] T128 [P] [BDD-RED] `Given: 手機已用分享連結匯入設定`
-- [ ] T129 [P] [BDD-RED] `Given: 分享連結內容已損毀`
-- [ ] T130 [P] [BDD-RED] `When: 觀眾關閉工具後重新開啟`
-- [ ] T131 [P] [BDD-RED] `When: 觀眾在手機上關閉工具後重新開啟`
-- [ ] T132 [P] [BDD-RED] `When: 觀眾在電腦上開啟分享畫面`
-- [ ] T133 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結`
-- [ ] T134 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結並確認取代`
-- [ ] T135 [P] [BDD-RED] `Then: 選片頁顯示影片層級如下：`
-- [ ] T136 [P] [BDD-RED] `Then: 分享畫面顯示 QR code 與「複製連結」`
-- [ ] T137 [P] [BDD-RED] `Then: 手機畫面顯示確認 "{確認}"`
-- [ ] T138 [P] [BDD-RED] `Then: 手機的搶票清單與電腦完全相同（順序、排定場次、備案場次）`
+- [x] T125 [P] [BDD-RED] `Given: 觀眾已排好行程`
+- [x] T126 [P] [BDD-RED] `Given: 觀眾已把搶票清單順序手動調整為 "{順序}"`
+- [x] T127 [P] [BDD-RED] `Given: 電腦上已產生分享連結`
+- [x] T128 [P] [BDD-RED] `Given: 手機已用分享連結匯入設定`
+- [x] T129 [P] [BDD-RED] `Given: 分享連結內容已損毀`
+- [x] T130 [P] [BDD-RED] `When: 觀眾關閉工具後重新開啟`
+- [x] T131 [P] [BDD-RED] `When: 觀眾在手機上關閉工具後重新開啟`
+- [x] T132 [P] [BDD-RED] `When: 觀眾在電腦上開啟分享畫面`
+- [x] T133 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結`
+- [x] T134 [P] [BDD-RED] `When: 觀眾用手機開啟該分享連結並確認取代`
+- [x] T135 [P] [BDD-RED] `Then: 選片頁顯示影片層級如下：`
+- [x] T136 [P] [BDD-RED] `Then: 分享畫面顯示 QR code 與「複製連結」`
+- [x] T137 [P] [BDD-RED] `Then: 手機畫面顯示確認 "{確認}"`
+- [x] T138 [P] [BDD-RED] `Then: 手機的搶票清單與電腦完全相同（順序、排定場次、備案場次）`
 
-- [ ] T139 subagent review (phase quality gate)
+- [x] T139 subagent review (phase quality gate)
 
 ## Phase 4A: ADD Feature File - scraper/場次解析/官網場次頁解析.feature
 
