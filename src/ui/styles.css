@@ -267,3 +267,5 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 .guestnote{font-size:12px;font-weight:700;color:var(--gold)}
 .theathint{margin:0}
 .tag-theatrical{border-color:var(--gold);color:var(--gold);margin-left:6px}
+.update-banner{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--gold);background:var(--panel-2);border-radius:12px;padding:8px 12px;margin-bottom:12px}
+.update-banner .btn{min-height:36px;padding:0 12px;flex:none}

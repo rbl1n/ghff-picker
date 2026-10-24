@@ -6,6 +6,7 @@ import { TicketsPage } from "./TicketsPage";
 import { SharePage } from "./SharePage";
 import { ImportPage } from "./ImportPage";
 import { DuoBanner } from "./DuoBanner";
+import { UpdateBanner } from "./UpdateBanner";
 import { Onboarding } from "./Onboarding";
 import { markOnboardingSeen, onboardingSeen } from "../state/onboarding";
 import { hadStoredState } from "./store";
@@ -47,6 +48,7 @@ export function App() {
   return (
     <>
       <div className={`app app-${path}`}>
+        <UpdateBanner />
         <header className="topbar">
           <h1>{route?.label ?? "匯入設定"}</h1>
           <div className="row">

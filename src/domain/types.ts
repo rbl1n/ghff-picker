@@ -142,6 +142,8 @@ export interface UserState {
   theatrical_overrides?: Record<string, boolean>;
   /** 保存版次：每次寫入 +1，用來偵測別的分頁已寫入較新的內容（舊資料沒有 = 0）；不進分享連結 */
   revision?: number;
+  /** 寫入這份保存的建置版本編號（時間戳記）；比執行中版本新時，舊版分頁不得寫入。不進分享連結 */
+  written_by_build?: number;
   ticket_marks: TicketMark[];
 }
 

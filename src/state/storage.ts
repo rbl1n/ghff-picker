@@ -1,3 +1,4 @@
+import { BUILD_NUMBER, noteStoredBuild, noteWriteBlocked } from "./build";
 import type { DayAvailability, PartnerData, UserState } from "../domain/types";
 
 /** 寫入一律 3；讀取接受 1（001，個人模式）、2（002）與 3；高於 3 視為版本不符 */
@@ -99,7 +100,7 @@ export function isUserState(value: unknown): value is UserState {
 
 /** 保存／分享前的整理：版本一律 3、不再寫入舊的不可看時段、一律帶有空時段 */
 export function toStored(state: UserState): UserState {
-  const { unavailable_slots: _legacy, ...rest } = state;
+  const { unavailable_slots: _legacy, written_by_build: _wb, ...rest } = state;
   const out: UserState = { ...rest, schema_version: SCHEMA_VERSION, availability: state.availability ?? [] };
   if (state.partner) {
     const { unavailable_slots: _p, ...partner } = state.partner;
@@ -115,20 +116,69 @@ export function loadState(): UserState | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw === null) return null;
     const parsed: unknown = JSON.parse(raw);
-    return isUserState(parsed) ? parsed : null;
+    if (!isUserState(parsed)) return null;
+    noteStoredBuild(parsed.written_by_build);
+    return parsed;
   } catch {
     return null;
   }
 }
 
-export function saveState(state: UserState): void {
+type Obj = Record<string, unknown>;
+const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** 本版本認得的頂層欄位；其餘（較新版本加的）一律從最新保存原樣保留 */
+const USER_KEYS = [
+  "schema_version", "self_name", "partner", "daily_limit", "manual_order", "updated_at", "film_preferences", "unavailable_slots",
+  "availability", "skipped_film_ids", "film_notes", "session_marks", "pinned_choices", "theatrical_overrides", "revision",
+  "written_by_build", "ticket_marks",
+];
+const PARTNER_KEYS = [
+  "display_name", "daily_limit", "film_preferences", "unavailable_slots", "availability", "skipped_film_ids", "session_marks", "pinned_choices",
+];
+
+/** 以最新保存為底，只覆寫本版本認得的欄位；影片層級項目依 film_id 保留未知欄位 */
+function mergeKnown(latest: unknown, next: Obj, keys: string[]): Obj {
+  const out: Obj = isObj(latest) ? { ...latest } : {};
+  for (const k of keys) delete out[k];
+  Object.assign(out, next);
+  const oldPrefs = isObj(latest) && Array.isArray(latest.film_preferences) ? latest.film_preferences : [];
+  if (Array.isArray(next.film_preferences)) {
+    out.film_preferences = next.film_preferences.map((p: unknown) => {
+      const old = isObj(p) ? oldPrefs.find((o) => isObj(o) && o.film_id === p.film_id) : undefined;
+      return isObj(old) && isObj(p) ? { ...old, ...p } : p;
+    });
+  }
+  return out;
+}
+
+/** 寫入保存；回傳是否寫入。保存內容由更新的版本寫入時，過期的分頁不寫入 */
+export function saveState(state: UserState): boolean {
   try {
-    const json = JSON.stringify(toStored(state));
     const prev = window.localStorage.getItem(STORAGE_KEY);
+    let latest: unknown = null;
+    if (prev !== null) {
+      try {
+        latest = JSON.parse(prev);
+      } catch {
+        latest = null;
+      }
+    }
+    if (isObj(latest) && noteStoredBuild(latest.written_by_build)) {
+      noteWriteBlocked();
+      return false;
+    }
+    const stored = toStored(state) as unknown as Obj;
+    const merged = mergeKnown(latest, stored, USER_KEYS);
+    if (isObj(stored.partner)) merged.partner = mergeKnown(isObj(latest) ? latest.partner : null, stored.partner, PARTNER_KEYS);
+    merged.written_by_build = BUILD_NUMBER;
+    const json = JSON.stringify(merged);
     if (prev !== null && prev !== json) window.localStorage.setItem(PREV_KEY, prev);
     window.localStorage.setItem(STORAGE_KEY, json);
+    return true;
   } catch {
     // 儲存空間不可用（隱私模式等）時，本次操作仍在記憶體內有效
+    return true;
   }
 }
 

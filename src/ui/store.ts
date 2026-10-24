@@ -105,7 +105,8 @@ function withPendingRanks(user: UserState): UserState {
 
 function commit(next: UserState, patch: Partial<Snapshot> = {}): void {
   const done = { ...withPendingRanks(next), revision: loadedRev + 1 };
-  saveState(done);
+  // 保存內容由更新的版本寫入：本分頁過期，不寫入也不改記憶體（橫幅會提示重新整理）
+  if (!saveState(done)) return;
   loadedRev = done.revision;
   set({ user: done, ...patch });
 }
