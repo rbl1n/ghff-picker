@@ -1,11 +1,12 @@
 Project "ghff_picker" {
   database_type: "JSON snapshot + browser localStorage"
   Note: '''
-  金馬影展個人選片排程工具的資料邊界。無後端、無資料庫。
+  金馬影展選片排程工具（個人模式與兩人合併模式）的資料邊界。無後端、無資料庫。
   三類資料：
   1. 場次快照（catalog）：抓資料腳本從官網產生的 sessions.json，唯讀、進版控（CL-008）。
   2. 使用者狀態（user_state）：存在瀏覽器 localStorage，可經分享連結帶到另一台裝置（FR-018、FR-022）。
-  3. 衍生結果（derived）：排程引擎依 1 + 2 即時計算，不保存；重開工具時重算。
+  3. 衍生結果（derived）：排程引擎依 1 + 2 即時計算，不保存；重開工具時重算。有同伴時，排程輸入是「自己 + 同伴」推導出的合併結果（merged_*），合併結果本身也是衍生、不保存（002 CL-201、FR-205～FR-208）。
+  另有一種不落地的資料：分享連結內容（share_payload），分「個人」與「合併結果」兩種（002 CL-202、FR-212）。
   時間一律為 Asia/Taipei 牆上時間：date = YYYY-MM-DD，分鐘數 = 自當日 00:00 起算（NFR-005、research 決策 6）。
   '''
 }
@@ -79,13 +80,36 @@ Enum ticket_result {
   missed    // 沒搶到
 }
 
+Enum share_kind {
+  personal   // 個人分享連結：只含發送者自己的設定；接收端可取代、或當作同伴加入（FR-201）
+  merged     // 合併結果連結：含自己、同伴、兩人姓名、手動順序與搶票標記；接收端只能取代並開啟（FR-212、FR-213）
+}
+
 Table user_state {
-  schema_version int [pk, note: '保存格式版本；分享連結與 localStorage 共用']
-  daily_limit int [null, note: 'null = 不設上限（CL-005）']
-  manual_order "film_id[]" [null, note: '使用者手動調整的搶票順序；重新排程前保留（FR-015）']
+  schema_version int [pk, note: '保存格式版本；分享連結與 localStorage 共用。1 = 001 個人狀態（無姓名、無同伴）；2 = 002，新增 self_name 與 partner。讀取時 1 與 2 都接受，1 視為個人模式（self_name、partner 皆為 null）；寫入一律為 2；高於 2 視為版本不符，顯示損毀錯誤訊息、不改任何資料']
+  daily_limit int [null, note: 'null = 不設上限（CL-005）；這是「自己」的上限，同伴的上限在 partner']
+  manual_order "film_id[]" [null, note: '使用者手動調整的搶票順序；重新排程前保留（FR-015）；兩人模式下作用在合併後的搶票清單']
+  self_name varchar [null, note: '自己的顯示名稱；null = 個人模式且從未設定。進入兩人模式時必填（預設「我」，FR-209）；移除同伴時與 partner 一併清除']
   updated_at timestamp
 
-  Note: '單一使用者的全部狀態根（FR-022）。分享連結編碼整個 user_state（FR-018）。'
+  Note: '''
+  單一使用者的全部狀態根（FR-022）。
+  模式由 partner 是否存在決定：沒有 partner = 個人模式（與 001 完全相同，SC-205）；有 partner = 兩人模式。
+  film_preferences、unavailable_slots、daily_limit、ticket_marks 永遠是「自己」的資料；加入同伴 MUST NOT 改動它們（FR-202）。
+  搶票標記與手動順序只屬於自己，不與同伴合併（假設：搶票由一人負責，CL-203）。
+  '''
+}
+
+Table partner {
+  display_name varchar [note: '同伴顯示名稱（預設「同伴」；FR-209）']
+  daily_limit int [null, note: 'null = 同伴不設上限']
+  updated_at timestamp
+
+  Note: '''
+  同伴（002）。整張表最多一列：同一時間最多一位同伴（FR-203）；新增時若已存在，須先確認取代。
+  加入同伴 = 寫入 partner 與其兩張子表；移除同伴 = 刪除這一列、子表全部列與 user_state.self_name，ticket_marks 保留（FR-204、邊界情況）。
+  同伴資料來自同伴的個人分享連結（share_kind = personal）；之後只能靠重新加入同伴連結更新。
+  '''
 }
 
 Table film_preferences {
@@ -115,6 +139,39 @@ Table ticket_marks {
   Note: '搶票標記。got 場次重新排程時保留；missed 場次不再排入（FR-019、FR-021）。撤銷 = 刪除該筆。'
 }
 
+Table partner_film_preferences {
+  film_id varchar [pk]
+  tier tier
+  is_hot boolean
+
+  Note: '同伴的選片偏好，結構同 film_preferences。film_id 不一定存在於此裝置的場次快照：合併時忽略不在快照中的影片（邊界情況），因此不建立到 films 的 Ref。'
+}
+
+Table partner_unavailable_slots {
+  date date
+  start_min int [null, note: 'null 搭配 end_min null = 整天不可看']
+  end_min int [null]
+
+  indexes {
+    (date, start_min, end_min) [pk]
+  }
+
+  Note: '同伴的不可看時段，結構同 unavailable_slots。'
+}
+
+Table share_payload {
+  kind share_kind
+  schema_version int [note: '與 user_state.schema_version 相同；缺少 kind 的 v1 連結一律視為 personal']
+  sender_name varchar [null, note: 'personal 連結：發送者的 self_name（若有）；接收端對話顯示「這是「{名稱}」的選片」，沒有則顯示「這是同伴的選片」。merged 連結不使用，名稱在內容裡']
+  state "user_state（內嵌）" [note: 'personal：只含自己的資料（不含 partner；ticket_marks 與 manual_order 照 001 帶出）；merged：含 self_name、partner（含子表）、手動順序與 ticket_marks']
+
+  Note: '''
+  分享連結內容（網址 hash 壓縮，不落地、不進 localStorage；FR-212、FR-213）。
+  接收端行為：personal → 取代我的設定／當作同伴加入／取消（FR-201）；merged → 取代並開啟／取消（FR-213）。
+  損毀或版本不符：顯示 001 的錯誤訊息，不改變任何資料（邊界情況）。
+  '''
+}
+
 Ref: film_preferences.film_id > films.film_id
 Ref: ticket_marks.session_id > sessions.session_id
 
@@ -126,12 +183,46 @@ Enum unscheduled_reason {
   daily_limit            // 受每日上限限制
 }
 
+Enum merge_side {
+  self      // 只有自己有分層
+  partner   // 只有同伴有分層
+}
+
+Table merged_film_preferences {
+  film_id varchar [pk]
+  tier tier [note: 'max(自己.tier, 同伴.tier)，必看 > 想看 > 有空再看（FR-205）']
+  is_hot boolean [note: '自己.is_hot 或 同伴.is_hot（FR-208）']
+
+  Note: '''
+  兩人合併後的選片偏好（衍生，不保存；FR-205、FR-208）。
+  只有「自己與同伴都有分層、且存在於場次快照」的影片才有列（共同影片）。
+  只有單方分層的影片、或同伴標了但快照沒有的影片，不產生列。
+  沒有同伴時不產生合併結果，排程直接讀 film_preferences。
+  '''
+}
+
+Table merged_constraints {
+  daily_limit int [null, note: 'min(兩人有設定者)；兩人都未設定 = null（FR-207）']
+
+  Note: '''
+  兩人合併後的排程限制（衍生，不保存，單列）。
+  合併不可看時段 = unavailable_slots ∪ partner_unavailable_slots，不另建表，排程時直接取聯集（FR-206）。
+  '''
+}
+
+Table single_side_counts {
+  side merge_side [pk]
+  film_count int [note: '只有該方分層、對方沒有、且存在於場次快照的影片數（FR-210）']
+
+  Note: '行程頁頂部顯示「只有 {自己} 標記：n 部、只有 {同伴} 標記：m 部（不排入）」的來源（衍生，不保存）。'
+}
+
 Table itinerary_entries {
   session_id varchar [pk]
   tier tier
   is_non_ticketed boolean [note: '⊚ 場次，行程中標示「非售票」（FR-014）']
 
-  Note: '最佳行程；每部影片最多一場，依日期與開演排列（FR-008、FR-013）。'
+  Note: '最佳行程；每部影片最多一場，依日期與開演排列（FR-008、FR-013）。兩人模式下輸入為 merged_film_preferences、合併不可看時段與 merged_constraints；tier 為合併層級。'
 }
 
 Table unscheduled_must_films {
@@ -148,8 +239,9 @@ Table ticket_list_items {
   current_session_id varchar [note: '目前要搶的場次：排定場次，或沒搶到後切換的下一個備案']
   backup_session_ids "session_id[]" [note: '備案：★ 優先、再依時間；排程時須與行程其他場次相容（FR-016），搶票中只需與 got 場次相容（FR-020）']
   exhausted boolean [note: '已無可用場次']
+  ticket_quantity int [null, note: '兩人模式 = 2（每列顯示「買 2 張」，FR-211）；個人模式 = null（不顯示張數）']
 
-  Note: '搶票清單；不含 ⊚ 場次（FR-017）。順序規則見 spec「狀態與公式」。'
+  Note: '搶票清單；不含 ⊚ 場次（FR-017）。順序規則見 001 spec「狀態與公式」；兩人模式下順序、備案以合併層級、合併熱門、合併不可看時段與合併每日上限計算。'
 }
 
 Ref: itinerary_entries.session_id > sessions.session_id
