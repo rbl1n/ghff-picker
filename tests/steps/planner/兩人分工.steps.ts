@@ -54,12 +54,23 @@ function oracle(world: ReturnType<typeof getWorld>, catalog: NonNullable<ReturnT
       const involved: ("self" | "partner")[] = e.participant === "together" ? ["self", "partner"] : [e.participant];
       const tiers = involved.map((p) => (p === "self" ? e.tier : e.partner_tier)!).map((t) => TIER_RANK[t]);
       const hot = involved.some((p) => prefOf(p, s.film_id)?.is_hot);
-      const watchable = catalog.sessions.filter((x) => x.film_id === s.film_id && involved.every((p) => availableForSession(x, availOf(p)))).length;
-      return { e, s, involved, tier: Math.min(...tiers), hot, watchable, star: s.marks.includes("guest_attending") };
+      const marksOf = (p: "self" | "partner") => (p === "self" ? state : partner).session_marks ?? {};
+      const onlyOk = (x: Session, p: "self" | "partner") => {
+        const m = marksOf(p);
+        const filmSessions = catalog.sessions.filter((y) => y.film_id === x.film_id);
+        return !filmSessions.some((y) => m[y.session_id] === "only") || m[x.session_id] === "only";
+      };
+      const watchable = catalog.sessions.filter((x) => x.film_id === s.film_id && involved.every((p) => availableForSession(x, availOf(p)) && onlyOk(x, p))).length;
+      // 層內順序：層級較高者的名次；同層取較小
+      const best = Math.min(...tiers);
+      const ranks = involved
+        .filter((p) => TIER_RANK[(p === "self" ? e.tier : e.partner_tier)!] === best)
+        .map((p) => prefOf(p, s.film_id)?.tier_rank ?? Number.MAX_SAFE_INTEGER);
+      return { e, s, involved, tier: best, hot, rank: Math.min(...ranks), watchable, star: s.marks.includes("guest_attending") };
     });
   items.sort(
     (a, b) =>
-      a.tier - b.tier || Number(b.hot) - Number(a.hot) || a.watchable - b.watchable || Number(b.star) - Number(a.star) ||
+      a.tier - b.tier || Number(b.hot) - Number(a.hot) || a.rank - b.rank || a.watchable - b.watchable || Number(b.star) - Number(a.star) ||
       filmIdx(a.s.film_id) - filmIdx(b.s.film_id) ||
       (a.involved.length === 2 ? 0 : a.involved[0] === first ? 1 : 2) - (b.involved.length === 2 ? 0 : b.involved[0] === first ? 1 : 2),
   );

@@ -1,10 +1,9 @@
-import type { Catalog, DuoItineraryEntry, ItineraryParticipant, PartnerData, PersonSide, Session, Tier, TicketListItem, UserState } from "./types";
+import type { Catalog, DuoItineraryEntry, ItineraryParticipant, PartnerData, PersonSide, Session, Tier, TicketListItem, TicketOrderKeys, UserState } from "./types";
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { compareSessionsPreferred, isGuestSession } from "./schedule";
+import { TIER_ORDER as TIER_RANK, compareOrderKeys } from "./order-keys";
 import { groupSessionsByFilm, makeMarkView, type MarkView } from "./session-marks";
-
-const TIER_RANK: Record<Tier, number> = { must: 0, want: 1, maybe: 2 };
 
 /** 兩人分工表的一列（004）：搶票項目 + 負責人 + 張數；order 為該負責人清單內的名次（1 起） */
 export interface DuoTicketRow extends TicketListItem {
@@ -51,7 +50,7 @@ export function compareUnicode(a: string, b: string): number {
 interface PersonView {
   name: string;
   fingerprint: string;
-  prefs: Map<string, { tier: Tier; hot: boolean }>;
+  prefs: Map<string, { tier: Tier; hot: boolean; rank: number | null }>;
   avail: ReturnType<typeof availabilityOf>;
   limit: number | null;
   /** 場次偏好（005） */
@@ -78,7 +77,7 @@ function fingerprintOf(p: {
 /**
  * 兩人搶票分工（004，FR-401～FR-404）。純函式；結果與「誰是本裝置使用者」無關：
  * - 項目：兩人行程（003）中的售票場次，一起看一筆（2 張）、自己看各一筆（1 張）。
- * - 整體順序：層級（一起取較高）→ 熱門（任一人）→ 可看場次少（一起以兩人都可看計）→ ★ → 影片順序 →
+ * - 整體順序：層級（一起取較高）→ 熱門（任一人）→ 層內順序（一起取層級較高者的名次，同層取較小）→ 可看場次少（一起以兩人都可看計）→ ★ → 影片順序 →
  *   （仍同分）一起看先於個人、名字排序前者先、場次編號。
  * - 分配：自己看的給本人；一起看的給目前筆數較少者，同筆數給名字（Unicode 碼點順序）較前者；
  *   名字相同時改比設定指紋（兩人設定的序列化字串），指紋也相同則兩人完全對稱、誰先都一樣。
@@ -97,7 +96,7 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
     return {
       name,
       fingerprint: fingerprintOf({ display: name, daily_limit: src.daily_limit, film_preferences: src.film_preferences, skipped_film_ids: src.skipped_film_ids, avail }),
-      prefs: new Map(src.film_preferences.map((p) => [p.film_id, { tier: p.tier, hot: p.is_hot }])),
+      prefs: new Map(src.film_preferences.map((p) => [p.film_id, { tier: p.tier, hot: p.is_hot, rank: p.tier_rank ?? null }])),
       avail,
       limit: src.daily_limit,
       marks: makeMarkView(src, groupSessionsByFilm(catalog.sessions)),
@@ -126,8 +125,7 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
     involved: PersonSide[];
     tier: Tier;
     hot: boolean;
-    watchable: number;
-    star: boolean;
+    keys: TicketOrderKeys;
   }
   const items: Item[] = [];
   for (const entry of duoEntries) {
@@ -139,17 +137,28 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
     if (tiers.length === 0) continue;
     const tier = tiers.reduce((a, b) => (TIER_RANK[a] <= TIER_RANK[b] ? a : b));
     const hot = involved.some((p) => people[p].prefs.get(session.film_id)?.hot ?? false);
-    const watchable = catalog.sessions.filter((s) => s.film_id === session.film_id && involved.every((p) => isSessionAvailable(s, people[p].avail))).length;
-    items.push({ entry, session, involved, tier, hot, watchable, star: isGuestSession(session) });
+    const watchable = catalog.sessions.filter(
+      (s) => s.film_id === session.film_id && involved.every((p) => isSessionAvailable(s, people[p].avail) && people[p].marks.allowed(s)),
+    ).length;
+    // 層內順序：只有一人用該人的名次；一起看用層級較高者的名次，同層取兩人較小者
+    const tierOfSide = (p: PersonSide) => (p === "self" ? entry.tier : entry.partner_tier);
+    const rankOfSide = (p: PersonSide) => people[p].prefs.get(session.film_id)?.rank ?? null;
+    const top = involved.filter((p) => tierOfSide(p) === tier);
+    const ranks = top.map(rankOfSide).filter((r): r is number => r !== null);
+    const rank = ranks.length > 0 ? Math.min(...ranks) : null;
+    items.push({
+      entry,
+      session,
+      involved,
+      tier,
+      hot,
+      keys: { tier, hot, rank, remaining: watchable, star: isGuestSession(session), film_index: filmOrder.get(session.film_id) ?? 0 },
+    });
   }
   const ownerRank = (it: Item) => (it.involved.length === 2 ? 0 : rankOfPerson[it.involved[0]]);
   items.sort(
     (a, b) =>
-      TIER_RANK[a.tier] - TIER_RANK[b.tier] ||
-      Number(b.hot) - Number(a.hot) ||
-      a.watchable - b.watchable ||
-      Number(b.star) - Number(a.star) ||
-      (filmOrder.get(a.session.film_id) ?? 0) - (filmOrder.get(b.session.film_id) ?? 0) ||
+      compareOrderKeys(a.keys, b.keys) ||
       ownerRank(a) - ownerRank(b) ||
       compareUnicode(a.session.session_id, b.session.session_id),
   );
@@ -231,6 +240,7 @@ export function buildDuoDivision(catalog: Catalog, state: UserState, duoEntries:
       current_session_id: current ? current.session_id : "",
       backup_session_ids: backups.filter((s) => s.session_id !== current?.session_id).map((s) => s.session_id),
       exhausted: !current,
+      order_keys: it.keys,
     };
     if (gotOf[i]) row.got_session_id = gotOf[i]!.session_id;
     return row;

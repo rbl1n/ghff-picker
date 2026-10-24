@@ -68,6 +68,8 @@ GREEN 階段實作 `src/ui/**` 時必須提供下列定位點。唯一來源：`
 | `data-testid=ticket-backup` | 每個備案一項（`<details>` 內），文字格式同 ticket-session；無備案時列內出現文字 `無不衝堂備案` | | web-b-helpers(backupTexts) |
 | button `搶到`／`沒搶到`／`撤銷`（列內，exact） | got 或 dead 時 `搶到`／`沒搶到` 不存在或 disabled；`撤銷` 於 got／已標記列可用 | | 搶票、shared steps |
 | 已搶到列文字含 `已搶到`；dead 列文字含 `已無可用場次` | | | shared、搶票 steps |
+| `data-testid=order-explain` | `<details>` 收合框，summary 文字 `搶票順序怎麼排`；內含 `order-explain-list`（`<ol>`，每個 `<li>` 以 `<b>` 放依據名稱） | 頁面頂部 | 搶票 steps |
+| `data-testid=ticket-why`（列內，僅未處理列） | `<details>`，summary `為什麼`；內含 `ticket-why-facts`（`必看・熱門・層內第 n・剩 m 場・無影人場`）與 `ticket-why-compare`（`與下一筆比：…`，最後一筆沒有） | | 搶票 steps |
 | `data-testid=ticket-drag-handle` | 桌機拖曳把手 | | 搶票 steps |
 | button `上移`／`下移`（列內） | 觸控裝置（maxTouchPoints>0）使用 | | 搶票 steps |
 

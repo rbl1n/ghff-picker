@@ -506,3 +506,33 @@ Then(
     });
   },
 );
+
+// 觀眾展開搶票順序說明
+When("觀眾展開搶票順序說明", async ({ page }) => {
+  const box = page.getByTestId("order-explain");
+  await box.locator("summary").click();
+  await expect(box.getByTestId("order-explain-list")).toBeVisible();
+});
+
+// 搶票順序說明依序列出 "{依據}"
+Then("搶票順序說明依序列出 {string}", async ({ page }, keys: string) => {
+  const items = page.getByTestId("order-explain-list").locator("li b");
+  await expect(items).toHaveText(keys.split("、").map((k) => k.trim()));
+});
+
+// 觀眾展開 "{片名}" 的「為什麼」
+When("觀眾展開 {string} 的「為什麼」", async ({ page }, title: string) => {
+  const why = ticketRowOf(page, title).getByTestId("ticket-why");
+  await why.locator("summary").click();
+  await expect(why.getByTestId("ticket-why-facts")).toBeVisible();
+});
+
+// "{片名}" 的為什麼顯示 "{依據}"
+Then("{string} 的為什麼顯示 {string}", async ({ page }, title: string, facts: string) => {
+  await expect(ticketRowOf(page, title).getByTestId("ticket-why-facts")).toHaveText(facts);
+});
+
+// "{片名}" 的為什麼比較結果為 "{結果}"
+Then("{string} 的為什麼比較結果為 {string}", async ({ page }, title: string, result: string) => {
+  await expect(ticketRowOf(page, title).getByTestId("ticket-why-compare")).toHaveText(result);
+});

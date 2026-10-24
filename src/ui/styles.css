@@ -270,3 +270,11 @@ h3{font-size:14px;color:var(--muted);margin:16px 0 8px;font-weight:600}
 .tag-theatrical{border-color:var(--gold);color:var(--gold);margin-left:6px}
 .update-banner{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--gold);background:var(--panel-2);border-radius:12px;padding:8px 12px;margin-bottom:12px}
 .update-banner .btn{min-height:36px;padding:0 12px;flex:none}
+.howto{margin:0 0 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:0 12px}
+.howto summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+.howto ol{margin:0 0 8px;padding-left:20px;overflow-wrap:anywhere}
+.howto li{margin:4px 0}
+.howto .note{margin:0 0 10px;font-size:13px;opacity:.75}
+.why{margin:6px 0}
+.why summary{min-height:36px;display:flex;align-items:center;cursor:pointer;font-size:14px;opacity:.85}
+.why p{margin:2px 0 6px;font-size:14px;overflow-wrap:anywhere}

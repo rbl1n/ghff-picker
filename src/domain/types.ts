@@ -186,6 +186,21 @@ export interface TicketListItem {
   exhausted: boolean;
   /** 兩人模式：一起 = 2、自己 = 1；個人模式 = null／未設（002、003） */
   ticket_quantity?: number | null;
+  /** 搶票順序的比較依據（供頁面解釋「為什麼排這裡」） */
+  order_keys?: TicketOrderKeys;
+}
+
+/** 搶票順序的比較鍵：層級 → 熱門 → 層內順序 → 剩餘場次少 → ★ → 專刊順序 */
+export interface TicketOrderKeys {
+  tier: Tier;
+  hot: boolean;
+  /** 層內順序（1 起；未排為 null）。一起看取層級較高者的名次，同層取較小者 */
+  rank: number | null;
+  /** 剩餘候選場次數 */
+  remaining: number;
+  star: boolean;
+  /** 專刊（場次表）順序，0 起 */
+  film_index: number;
 }
 
 /** 分享連結種類（002） */

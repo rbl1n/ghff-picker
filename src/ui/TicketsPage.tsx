@@ -3,11 +3,55 @@ import type { Catalog, PersonSide, Session, Tier, TicketListItem, UserState } fr
 import { buildTicketList, clearMark, markSession } from "../domain/tickets";
 import { buildDuoDivision, type DuoTicketRow } from "../domain/division";
 import { CatalogGate } from "./CatalogGate";
+import { decidingKey, type OrderKeyName } from "../domain/order-keys";
 import { CatNo } from "./CatNo";
 import { TIER_LABEL, TIER_TAG_CLASS, dateLabel, formatTime, isGuest } from "./format";
 import { ensureSchedule, runSchedule, updateUser, useStore } from "./store";
 
 type RowState = "pending" | "got" | "dead";
+
+const ORDER_RULES: [string, string][] = [
+  ["層級", "必看先於想看、想看先於有空再看，最重要的片最先搶。"],
+  ["熱門", "熱門＝容易秒殺，同層級先搶。"],
+  ["你的層內順序", "同層、同熱門時，照你在選片頁排的順序，越前面越先。"],
+  ["場次少", "剩下可看的場次越少、沒有備案，越要先搶。"],
+  ["有影人場", "排定場次有 ★ 影人出席，通常較快賣完，先搶。"],
+  ["專刊順序", "以上都一樣時，依專刊（場次表）上的順序。"],
+];
+
+const KEY_LABEL: Record<OrderKeyName, string> = {
+  tier: "層級",
+  hot: "熱門",
+  rank: "層內順序",
+  remaining: "場次少",
+  star: "有影人場",
+  film_index: "專刊順序",
+};
+
+function whyFacts(it: TicketListItem): string | null {
+  const k = it.order_keys;
+  if (!k) return null;
+  return [
+    TIER_LABEL[k.tier],
+    k.hot ? "熱門" : "非熱門",
+    k.rank !== null && k.rank < Number.MAX_SAFE_INTEGER ? `層內第 ${k.rank}` : "層內未排",
+    `剩 ${k.remaining} 場`,
+    k.star ? "有影人場" : "無影人場",
+  ].join("・");
+}
+
+function whyCompare(it: TicketListItem, next: TicketListItem | undefined): string | null {
+  const a = it.order_keys;
+  const b = next?.order_keys;
+  if (!a || !b) return null;
+  const key = decidingKey(a, b);
+  if (key === null) return "與下一筆比：條件全同";
+  if (key === "manual") return "與下一筆比：你手動調整了順序";
+  const show = (x: typeof a) =>
+    key === "tier" ? TIER_LABEL[x.tier] : key === "hot" ? (x.hot ? "熱門" : "非熱門") : key === "rank" ? String(x.rank ?? "未排") : key === "remaining" ? `${x.remaining} 場` : key === "star" ? (x.star ? "有影人場" : "無影人場") : `第 ${x.film_index + 1} 部`;
+  const op = key === "tier" || key === "hot" || key === "star" ? "先於" : "<";
+  return `與下一筆比：${KEY_LABEL[key]} ${show(a)} ${op} ${show(b)}`;
+}
 
 export function TicketsPage() {
   return <CatalogGate>{(catalog) => <TicketsContent catalog={catalog} />}</CatalogGate>;
@@ -97,6 +141,8 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
     const hot = duo ? duo.is_hot : hotOf.get(it.film_id);
     const prev = list[idx - 1];
     const next = list[idx + 1];
+    const why = whyFacts(it);
+    const cmp = whyCompare(it, next);
     return (
       <article
         key={`${tab}:${it.film_id}`}
@@ -200,6 +246,13 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
                 沒搶到
               </button>
             </div>
+            {why && (
+              <details className="why" data-testid="ticket-why">
+                <summary>為什麼</summary>
+                <p data-testid="ticket-why-facts">{why}</p>
+                {cmp && <p data-testid="ticket-why-compare">{cmp}</p>}
+              </details>
+            )}
             <details open={backups.length === 0}>
               <summary>全部備案（{backups.length}）</summary>
               <ul className="bk">
@@ -239,6 +292,17 @@ function TicketsContent({ catalog }: { catalog: Catalog }) {
           </p>
         </div>
       )}
+      <details className="howto" data-testid="order-explain">
+        <summary>搶票順序怎麼排</summary>
+        <ol data-testid="order-explain-list">
+          {ORDER_RULES.map(([k, why]) => (
+            <li key={k}>
+              <b>{k}</b>：{why}
+            </li>
+          ))}
+        </ol>
+        <p className="note">由上往下比，前一項分得出高下就不看後面。</p>
+      </details>
       {(allHandled || user.ticket_marks.length > 0) && (
         <div className="sumbar">
           {allHandled && (

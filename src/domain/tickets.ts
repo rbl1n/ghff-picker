@@ -2,15 +2,14 @@ import type { Catalog, ItineraryEntry, Session, TicketListItem, TicketResult, Us
 import { areSessionsCompatibleEitherOrder, cinemaResolver } from "./compat";
 import { availabilityOf, isSessionAvailable } from "./availability";
 import { compareSessionsPreferred, isGuestSession } from "./schedule";
+import { compareOrderKeys } from "./order-keys";
 import { groupSessionsByFilm, makeMarkView } from "./session-marks";
-
-const TIER_RANK = { must: 0, want: 1, maybe: 2 } as const;
 
 /**
  * 搶票清單。每個售票影片一列：
  * - current_session_id：已搶到的場次；否則排定場次（未被標沒搶到且與已搶到場次相容）；否則切到下一個備案；都沒有則 exhausted。
  * - backup_session_ids：可看、未被標沒搶到、與行程中其他影片及已搶到場次相容、不使當天超過每日上限；影人出席優先再依時間。
- * 順序：手動順序（manual_order，以索引為固定名次，"" 為空位）優先，其餘依層級、熱門、可看場次少、★、影片順序。
+ * 順序：手動順序（manual_order，以索引為固定名次，"" 為空位）優先，其餘依層級、熱門、你的層內順序、可看場次少、★、影片順序。
  */
 export function buildTicketList(
   catalog: Catalog,
@@ -29,6 +28,7 @@ export function buildTicketList(
     .map((m) => sessionById.get(m.session_id))
     .filter((s): s is Session => !!s);
   const hot = new Map(state.film_preferences.map((p) => [p.film_id, p.is_hot]));
+  const rankOf = new Map(state.film_preferences.map((p) => [p.film_id, p.tier_rank ?? null]));
   const myAvail = availabilityOf(state);
   // 005：有「只看」（或已選看優先場）的片，備案只含限定的場次；其餘優先場排在最前
   const marks = makeMarkView(state, groupSessionsByFilm(catalog.sessions));
@@ -65,17 +65,18 @@ export function buildTicketList(
         backup_session_ids: backups.filter((s) => s.session_id !== current?.session_id).map((s) => s.session_id),
         exhausted: !current,
       };
-      return { item, tier: entry.tier, star: isGuestSession(session), watchableCount: watchableMine.length };
+      item.order_keys = {
+        tier: entry.tier,
+        hot: hot.get(filmId) ?? false,
+        rank: rankOf.get(filmId) ?? null,
+        remaining: watchableMine.length,
+        star: isGuestSession(session),
+        film_index: filmOrder.get(filmId) ?? 0,
+      };
+      return { item };
     });
 
-  rows.sort(
-    (a, b) =>
-      TIER_RANK[a.tier] - TIER_RANK[b.tier] ||
-      Number(hot.get(b.item.film_id) ?? false) - Number(hot.get(a.item.film_id) ?? false) ||
-      a.watchableCount - b.watchableCount ||
-      Number(b.star) - Number(a.star) ||
-      (filmOrder.get(a.item.film_id) ?? 0) - (filmOrder.get(b.item.film_id) ?? 0),
-  );
+  rows.sort((a, b) => compareOrderKeys(a.item.order_keys!, b.item.order_keys!));
 
   const ordered = applyManualOrder(rows.map((r) => r.item), state.manual_order);
   return ordered.map((item, i) => ({ ...item, order: i + 1, ...(ticketQuantity !== undefined ? { ticket_quantity: ticketQuantity } : {}) }));
